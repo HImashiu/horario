@@ -1,0 +1,1752 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Armador de Horarios</title>
+  <meta name="description" content="Arma tu horario Uniandes desde el pensum de Ingeniería Mecánica o Física.">
+  <link rel="stylesheet" href="assets/app.css">
+  <link rel="stylesheet" href="assets/fa/css/all.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', system-ui, sans-serif; background: #f4f5f7; color: #101828; }
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #d0d5dd; border-radius: 8px; border: 2px solid #fff; }
+    .hatch { background-image: repeating-linear-gradient(135deg, rgba(152,162,179,.10) 0 1px, transparent 1px 9px); }
+    .nav-item.active { background:#f2f4f7; color:#101828; font-weight:600; }
+    .nav-item.active i { color:#2f4bf0; }
+    .chip-scroll::-webkit-scrollbar { height: 0; }
+    @media print { #sidebar, #topbar { display:none !important; } }
+  </style>
+</head>
+<body class="h-full antialiased">
+<div class="h-full flex">
+
+  <!-- ================= SIDEBAR ================= -->
+  <div id="sidebar-backdrop" class="hidden fixed inset-0 bg-slate-900/30 z-40 md:hidden" onclick="toggleSidebar(false)"></div>
+  <aside id="sidebar" class="fixed md:static inset-y-0 left-0 z-50 w-64 bg-white border-r border-slate-200 flex flex-col -translate-x-full md:translate-x-0 transition-transform duration-200">
+    <div class="h-[72px] px-5 flex items-center gap-3 border-b border-slate-100">
+      <div class="w-9 h-9 rounded-full bg-brand-600 text-white flex items-center justify-center shadow-sm"><i class="fa-solid fa-calendar-check text-sm"></i></div>
+      <div class="min-w-0">
+        <p class="text-sm font-semibold leading-tight">Armador de Horarios</p>
+        <p class="text-xs text-slate-500">Uniandes · v6</p>
+      </div>
+    </div>
+
+    <nav class="px-3 py-4 space-y-0.5 text-sm text-slate-600">
+      <button onclick="goTo('extract','sec-pensum')" data-nav="pensum" class="nav-item w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-50 transition">
+        <i class="fa-solid fa-graduation-cap w-4 text-slate-400"></i> Mi pensum
+      </button>
+      <button onclick="goTo('extract','sec-search')" data-nav="search" class="nav-item w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-50 transition">
+        <i class="fa-solid fa-magnifying-glass w-4 text-slate-400"></i> Buscar cursos
+      </button>
+      <button onclick="goTo('extract','sec-import')" data-nav="import" class="nav-item w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-50 transition">
+        <i class="fa-regular fa-file-code w-4 text-slate-400"></i> Importar JSON
+      </button>
+      <button onclick="goTo('extract','clean-preview-anchor')" data-nav="loaded" class="nav-item w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-50 transition">
+        <i class="fa-solid fa-table-list w-4 text-slate-400"></i> Materias cargadas
+        <span id="badge-courses-count" class="hidden ml-auto min-w-[20px] px-1.5 h-5 rounded-full bg-slate-100 text-slate-600 text-[11px] font-semibold leading-5 text-center">0</span>
+      </button>
+      <button id="tab-btn-manual" onclick="goTo('manual')" data-nav="manual" class="nav-item w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-50 transition">
+        <i class="fa-regular fa-calendar w-4 text-slate-400"></i> Calendario
+        <span id="badge-manual-count" class="hidden ml-auto min-w-[20px] px-1.5 h-5 rounded-full bg-brand-600 text-white text-[11px] font-semibold leading-5 text-center">0</span>
+      </button>
+    </nav>
+
+    <div class="px-5 pt-2 pb-1 flex items-center justify-between">
+      <span class="text-[11px] font-semibold tracking-wider text-slate-400 uppercase">Mis horarios</span>
+      <button onclick="createNewDraft()" class="w-6 h-6 rounded-md hover:bg-slate-100 text-slate-400 hover:text-slate-700" title="Nuevo horario"><i class="fa-solid fa-plus text-[11px]"></i></button>
+    </div>
+    <div id="sidebar-drafts" class="px-3 space-y-0.5 overflow-y-auto flex-1 min-h-0"></div>
+
+    <div class="p-3 border-t border-slate-100 space-y-0.5 text-sm text-slate-600">
+      <button onclick="toggleDraftComparison()" class="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-50"><i class="fa-solid fa-scale-balanced w-4 text-slate-400"></i> Comparar horarios</button>
+      <button onclick="clearAllCourses()" class="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-rose-50 hover:text-rose-600"><i class="fa-regular fa-trash-can w-4 text-slate-400"></i> Vaciar todo</button>
+    </div>
+  </aside>
+
+  <!-- ================= MAIN ================= -->
+  <div class="flex-1 min-w-0 flex flex-col bg-white">
+
+    <!-- Top bar -->
+    <header id="topbar" class="h-[72px] flex-shrink-0 px-4 sm:px-6 flex items-center gap-3 border-b border-slate-100">
+      <button onclick="toggleSidebar(true)" class="md:hidden w-9 h-9 rounded-lg border border-slate-200 text-slate-600"><i class="fa-solid fa-bars"></i></button>
+      <div class="relative flex-1 max-w-md">
+        <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+        <input id="global-search" type="text" placeholder="Buscar materia, NRC o profesor…" onkeydown="if(event.key==='Enter') globalSearch()"
+          class="w-full h-10 pl-9 pr-12 rounded-lg border border-slate-200 bg-white text-sm placeholder:text-slate-400 focus:outline-none focus:ring-4 focus:ring-brand-100 focus:border-brand-500 transition">
+        <kbd class="hidden sm:block absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] text-slate-400 border border-slate-200 rounded px-1.5 py-0.5 font-sans">/</kbd>
+      </div>
+      <div class="hidden lg:block flex-1"></div>
+      <div id="command-metrics" class="hidden lg:flex items-center gap-1.5"></div>
+    </header>
+
+    <main class="flex-1 min-h-0 flex flex-col overflow-hidden">
+
+      <!-- ==================== VIEW 1: CURSOS ==================== -->
+      <section id="tab-extract" class="flex-1 overflow-y-auto">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 py-6 space-y-6">
+
+          <div class="flex flex-wrap items-end justify-between gap-3">
+            <div>
+              <h1 class="text-xl font-semibold">Cursos</h1>
+              <p class="text-sm text-slate-500">Elige tu carrera y semestre, busca cursos o importa el JSON de Banner.</p>
+            </div>
+            <button onclick="goTo('manual')" class="h-10 px-4 rounded-lg bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold shadow-sm flex items-center gap-2">
+              <i class="fa-regular fa-calendar"></i> Ir al calendario
+            </button>
+          </div>
+
+          <!-- Pensum -->
+          <div id="sec-pensum" class="bg-white border border-slate-200 rounded-2xl shadow-card scroll-mt-6">
+            <div class="px-5 py-4 border-b border-slate-100 flex items-center gap-3">
+              <div class="w-9 h-9 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center"><i class="fa-solid fa-graduation-cap"></i></div>
+              <div>
+                <h2 class="text-sm font-semibold">Tu pensum</h2>
+                <p class="text-xs text-slate-500">Sin necesidad de conocer los códigos de las materias.</p>
+              </div>
+            </div>
+            <div class="p-5 space-y-4">
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" id="pensum-major-selector"></div>
+              <div id="pensum-semester-selector" class="hidden"></div>
+              <div id="pensum-course-list" class="hidden"></div>
+            </div>
+          </div>
+
+          <!-- Live search -->
+          <div id="sec-search" class="bg-white border border-slate-200 rounded-2xl shadow-card scroll-mt-6">
+            <div class="px-5 py-4 border-b border-slate-100 flex items-center gap-3">
+              <div class="w-9 h-9 rounded-lg bg-brand-50 text-brand-600 flex items-center justify-center"><i class="fa-solid fa-satellite-dish"></i></div>
+              <div>
+                <h2 class="text-sm font-semibold">Buscar directamente en Uniandes</h2>
+                <p class="text-xs text-slate-500">En vivo desde <code class="text-brand-600">ofertadecursos.uniandes.edu.co</code> — para electivos o materias fuera del pensum.</p>
+              </div>
+            </div>
+            <div class="p-5 space-y-4">
+              <div class="flex flex-col sm:flex-row gap-2">
+                <input type="text" id="uniandes-search-input" placeholder="Código o nombre, ej: ISIS1221" onkeydown="if(event.key==='Enter') buscarCursoUniandes()"
+                  class="flex-1 h-10 px-3 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-4 focus:ring-brand-100 focus:border-brand-500">
+                <input type="text" id="uniandes-term-input" placeholder="Periodo (opcional)" onkeydown="if(event.key==='Enter') buscarCursoUniandes()"
+                  class="sm:w-40 h-10 px-3 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-4 focus:ring-brand-100 focus:border-brand-500">
+                <button id="uniandes-search-btn" onclick="buscarCursoUniandes()" class="h-10 px-5 rounded-lg bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold flex items-center justify-center gap-2">
+                  <i class="fa-solid fa-magnifying-glass"></i> <span>Buscar</span>
+                </button>
+              </div>
+              <div class="flex flex-wrap items-center gap-3 pt-3 border-t border-slate-100 text-sm">
+                <label class="flex items-center gap-2 cursor-pointer select-none text-slate-600">
+                  <input type="checkbox" id="auto-refresh-toggle" onchange="toggleAutoRefresh()" class="accent-brand-600 h-4 w-4">
+                  Actualizar cupos cada
+                </label>
+                <select id="auto-refresh-interval" onchange="restartAutoRefresh()" class="h-8 px-2 rounded-lg border border-slate-200 text-sm bg-white">
+                  <option value="2">2 min</option><option value="5" selected>5 min</option><option value="10">10 min</option><option value="15">15 min</option>
+                </select>
+                <button onclick="refreshAllUniandesCourses(true)" class="h-8 px-3 rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-semibold flex items-center gap-1.5">
+                  <i class="fa-solid fa-rotate"></i> Actualizar ahora
+                </button>
+                <span id="auto-refresh-status" class="text-xs text-slate-500"></span>
+              </div>
+              <p class="text-xs text-slate-400">Si el navegador bloquea la petición (CORS) o no hay conexión, usa la importación de JSON como respaldo.</p>
+            </div>
+          </div>
+
+          <!-- Import JSON -->
+          <div id="sec-import" class="grid grid-cols-1 lg:grid-cols-3 gap-4 scroll-mt-6">
+            <div class="bg-white border border-slate-200 rounded-2xl shadow-card p-5 space-y-4">
+              <h2 class="text-sm font-semibold flex items-center gap-2"><i class="fa-regular fa-circle-question text-brand-600"></i> ¿Cómo extraer los datos?</h2>
+              <ol class="text-sm text-slate-600 space-y-2 list-decimal list-inside leading-relaxed">
+                <li>Abre la búsqueda de cursos en Banner.</li>
+                <li>Presiona <kbd class="px-1.5 rounded border border-slate-200 bg-slate-50 text-xs">F12</kbd> → pestaña <b>Network</b>.</li>
+                <li>Filtra <b>Fetch/XHR</b> y busca <code class="text-brand-600 text-xs">searchResults</code>.</li>
+                <li>Clic derecho → <b>Copiar respuesta</b>.</li>
+                <li>Pégala aquí o arrastra el <code class="text-brand-600 text-xs">.json</code>.</li>
+              </ol>
+              <div id="drop-zone" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleFileDrop(event)"
+                   class="border-2 border-dashed border-slate-200 rounded-xl p-4 text-center space-y-2 transition">
+                <i class="fa-solid fa-cloud-arrow-up text-2xl text-slate-300"></i>
+                <p class="text-xs text-slate-500">Arrastra tu archivo JSON aquí</p>
+                <label class="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg border border-slate-200 hover:bg-slate-50 text-xs font-semibold text-slate-700 cursor-pointer">
+                  <i class="fa-regular fa-folder-open"></i> Seleccionar archivo
+                  <input type="file" accept=".json,application/json" onchange="handleFileUpload(event)" class="hidden">
+                </label>
+              </div>
+              <button onclick="loadSampleData()" class="w-full h-9 rounded-lg bg-brand-50 hover:bg-brand-100 text-brand-700 text-xs font-semibold flex items-center justify-center gap-1.5">
+                <i class="fa-solid fa-wand-magic-sparkles"></i> Probar con datos demo
+              </button>
+            </div>
+            <div class="lg:col-span-2 bg-white border border-slate-200 rounded-2xl shadow-card p-5 flex flex-col gap-3">
+              <div class="flex items-center justify-between">
+                <h2 class="text-sm font-semibold flex items-center gap-2"><i class="fa-solid fa-code text-brand-600"></i> Pegar JSON de Banner</h2>
+                <button onclick="clearInput()" class="text-xs text-slate-500 hover:text-rose-600 flex items-center gap-1"><i class="fa-regular fa-trash-can"></i> Limpiar</button>
+              </div>
+              <textarea id="raw-json-input" placeholder="Pega aquí la respuesta JSON obtenida de Banner…"
+                class="w-full flex-1 min-h-[200px] rounded-xl border border-slate-200 bg-slate-50/60 p-3 font-mono text-xs focus:outline-none focus:ring-4 focus:ring-brand-100 focus:border-brand-500 resize-y"></textarea>
+              <div class="flex flex-wrap items-center justify-between gap-2">
+                <p class="text-xs text-slate-500">Los datos se <b>acumulan</b> y se guardan en este navegador.</p>
+                <button onclick="processRawJSON()" class="h-10 px-5 rounded-lg bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold flex items-center gap-2">
+                  <i class="fa-solid fa-gears"></i> Extraer y limpiar
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div id="clean-preview-anchor" class="scroll-mt-6"></div>
+          <!-- Loaded courses -->
+          <div id="clean-preview-container" class="hidden bg-white border border-slate-200 rounded-2xl shadow-card">
+            <div class="px-5 py-4 border-b border-slate-100 flex flex-wrap items-center justify-between gap-3">
+              <div class="flex items-center gap-6">
+                <div><p class="text-xs text-slate-500">Materias únicas</p><p id="stat-courses-count" class="text-xl font-semibold">0</p></div>
+                <div><p class="text-xs text-slate-500">Secciones</p><p id="stat-sections-count" class="text-xl font-semibold">0</p></div>
+              </div>
+              <div class="flex flex-wrap items-center gap-2">
+                <div class="p-0.5 rounded-lg bg-slate-100 flex text-xs font-semibold">
+                  <button id="view-mode-table" onclick="switchPreviewMode('table')" class="px-3 h-8 rounded-md"><i class="fa-solid fa-table mr-1"></i> Tabla</button>
+                  <button id="view-mode-json" onclick="switchPreviewMode('json')" class="px-3 h-8 rounded-md"><i class="fa-solid fa-code mr-1"></i> JSON</button>
+                </div>
+                <button onclick="copyCleanJSON()" class="h-9 px-3 rounded-lg border border-slate-200 hover:bg-slate-50 text-xs font-semibold"><i class="fa-regular fa-copy mr-1"></i> Copiar</button>
+                <button onclick="exportCleanJSON()" class="h-9 px-3 rounded-lg border border-slate-200 hover:bg-slate-50 text-xs font-semibold"><i class="fa-solid fa-download mr-1"></i> .json</button>
+                <button onclick="clearAllCourses()" class="h-9 px-3 rounded-lg border border-rose-200 text-rose-600 hover:bg-rose-50 text-xs font-semibold"><i class="fa-regular fa-trash-can mr-1"></i> Vaciar</button>
+              </div>
+            </div>
+            <div id="clean-table-view" class="p-5 space-y-3">
+              <div class="flex flex-wrap items-center justify-between gap-3">
+                <div class="relative w-full sm:w-72">
+                  <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                  <input type="text" id="table-search" oninput="filterExtractedTable()" placeholder="Filtrar por código, NRC o profesor…"
+                    class="w-full h-9 pl-8 pr-3 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-4 focus:ring-brand-100 focus:border-brand-500">
+                </div>
+                <div class="flex items-center gap-3 text-xs text-slate-500">
+                  <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-emerald-500"></span>Con cupos</span>
+                  <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-amber-500"></span>&lt;20%</span>
+                  <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-rose-500"></span>Lleno</span>
+                </div>
+              </div>
+              <div class="overflow-x-auto rounded-xl border border-slate-200">
+                <table class="w-full text-left text-sm min-w-[860px]">
+                  <thead class="bg-slate-50 text-xs text-slate-500">
+                    <tr><th class="px-3 py-2.5 font-medium">NRC</th><th class="px-3 py-2.5 font-medium">Código</th><th class="px-3 py-2.5 font-medium">Materia</th><th class="px-3 py-2.5 font-medium">Sec</th><th class="px-3 py-2.5 font-medium">Tipo</th><th class="px-3 py-2.5 font-medium">Cr.</th><th class="px-3 py-2.5 font-medium">Profesor</th><th class="px-3 py-2.5 font-medium">Horario y salón</th><th class="px-3 py-2.5 font-medium">Cupos</th></tr>
+                  </thead>
+                  <tbody id="extracted-table-body" class="divide-y divide-slate-100"></tbody>
+                </table>
+              </div>
+            </div>
+            <pre id="clean-json-preview" class="hidden m-5 p-4 rounded-xl bg-slate-50 border border-slate-200 font-mono text-xs text-slate-700 max-h-[450px] overflow-auto"></pre>
+          </div>
+
+          <div id="extract-empty-cta" class="border border-dashed border-slate-300 rounded-2xl p-10 flex flex-col items-center gap-2 text-center">
+            <div class="w-12 h-12 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center"><i class="fa-solid fa-database"></i></div>
+            <p class="text-sm font-semibold text-slate-700">Aún no hay secciones cargadas</p>
+            <p class="text-sm text-slate-500 max-w-xs">Agrega materias desde tu pensum, el buscador, o pega el JSON de Banner.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==================== VIEW 2: CALENDARIO ==================== -->
+      <section id="tab-manual" class="hidden flex-1 min-h-0 flex flex-col overflow-hidden">
+
+        <!-- Title row -->
+        <div class="flex-shrink-0 px-4 sm:px-6 pt-5 pb-4 flex flex-wrap items-center gap-2">
+          <h1 class="text-xl font-semibold mr-auto">Calendario</h1>
+          <button id="btn-undo" onclick="undoAction()" title="Deshacer (Ctrl+Z)" class="h-9 w-9 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed"><i class="fa-solid fa-rotate-left text-xs"></i></button>
+          <button id="btn-redo" onclick="redoAction()" title="Rehacer (Ctrl+Shift+Z)" class="h-9 w-9 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed"><i class="fa-solid fa-rotate-right text-xs"></i></button>
+          <span class="relative popover-anchor">
+            <button onclick="toggleRulesPopover()" class="h-9 px-3 rounded-lg border border-slate-200 text-sm text-slate-700 hover:bg-slate-50 flex items-center gap-2"><i class="fa-solid fa-sliders text-xs text-slate-500"></i><span class="hidden sm:inline">Restricciones</span></button>
+            <div id="rules-popover" class="popover-panel hidden absolute right-0 mt-2 w-72 bg-white border border-slate-200 rounded-xl shadow-pop p-4 z-50 space-y-3 text-sm">
+              <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Restricciones</p>
+              <label class="flex items-center gap-2.5 cursor-pointer"><input type="checkbox" id="rule-monday-free" checked onchange="saveState(); renderManualMetrics();" class="accent-brand-600 h-4 w-4"> Lunes libre</label>
+              <label class="flex items-center gap-2.5 cursor-pointer"><input type="checkbox" id="rule-tuesday-late" checked onchange="saveState(); renderManualMetrics();" class="accent-brand-600 h-4 w-4"> Martes después de 9:30 AM</label>
+              <label class="flex items-center gap-2.5 cursor-pointer"><input type="checkbox" id="rule-no-early" checked onchange="saveState(); renderManualMetrics();" class="accent-brand-600 h-4 w-4"> Sin clases antes de
+                <select id="rule-no-early-hour" onchange="saveState(); renderManualMetrics();" class="h-7 px-1.5 rounded-md border border-slate-200 bg-white text-sm">
+                  <option value="7">7 AM</option><option value="8" selected>8 AM</option><option value="9">9 AM</option><option value="10">10 AM</option>
+                </select></label>
+              <label class="flex items-center gap-2.5 cursor-pointer"><input type="checkbox" id="rule-no-late" checked onchange="saveState(); renderManualMetrics();" class="accent-brand-600 h-4 w-4"> Terminar antes de
+                <select id="rule-no-late-hour" onchange="saveState(); renderManualMetrics();" class="h-7 px-1.5 rounded-md border border-slate-200 bg-white text-sm">
+                  <option value="13">1 PM</option><option value="14" selected>2 PM</option><option value="15">3 PM</option><option value="16">4 PM</option><option value="17">5 PM</option><option value="18">6 PM</option>
+                </select></label>
+              <div class="pt-3 border-t border-slate-100 flex items-center gap-2">
+                <label for="credit-target">Meta de créditos</label>
+                <input type="number" id="credit-target" value="18" min="1" max="30" onchange="saveState(); renderManualMetrics();" class="w-16 h-7 px-2 rounded-md border border-slate-200 text-sm">
+              </div>
+            </div>
+          </span>
+          <button onclick="toggleDetailsDrawer()" class="h-9 px-3 rounded-lg border border-slate-200 text-sm text-slate-700 hover:bg-slate-50 flex items-center gap-2"><i class="fa-solid fa-list text-xs text-slate-500"></i><span class="hidden sm:inline">Detalles</span></button>
+          <span class="relative popover-anchor">
+            <button onclick="toggleExportPopover()" class="h-9 px-3 rounded-lg border border-slate-200 text-sm text-slate-700 hover:bg-slate-50 flex items-center gap-2"><i class="fa-solid fa-arrow-up-from-bracket text-xs text-slate-500"></i><span class="hidden sm:inline">Exportar</span></button>
+            <div id="export-popover" class="popover-panel hidden absolute right-0 mt-2 w-48 bg-white border border-slate-200 rounded-xl shadow-pop p-1.5 z-50 text-sm">
+              <button onclick="copyManualSummary()" class="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-50"><i class="fa-regular fa-copy w-4 mr-2 text-slate-400"></i>Copiar resumen</button>
+              <button onclick="exportManualText()" class="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-50"><i class="fa-regular fa-file-lines w-4 mr-2 text-slate-400"></i>Descargar .txt</button>
+              <button onclick="printSchedule()" class="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-50"><i class="fa-solid fa-print w-4 mr-2 text-slate-400"></i>Imprimir</button>
+            </div>
+          </span>
+          <button onclick="createNewDraft()" class="h-9 px-4 rounded-lg bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold flex items-center gap-2 shadow-sm"><i class="fa-solid fa-plus text-xs"></i> Nuevo horario</button>
+        </div>
+
+        <!-- Draft nav row -->
+        <div class="flex-shrink-0 mx-4 sm:mx-6 py-2.5 border-y border-slate-200 flex flex-wrap items-center gap-2">
+          <div class="flex items-center gap-2 min-w-0">
+            <button onclick="cycleDraft(-1)" class="w-8 h-8 rounded-full border border-slate-200 hover:bg-slate-50 text-slate-600 flex-shrink-0" title="Horario anterior"><i class="fa-solid fa-chevron-left text-[10px]"></i></button>
+            <span id="current-draft-name" class="text-base font-semibold truncate max-w-[200px]">Horario 1</span>
+            <button onclick="cycleDraft(1)" class="w-8 h-8 rounded-full border border-slate-200 hover:bg-slate-50 text-slate-600 flex-shrink-0" title="Horario siguiente"><i class="fa-solid fa-chevron-right text-[10px]"></i></button>
+          </div>
+          <div id="draft-tabs" class="chip-scroll flex items-center gap-1 overflow-x-auto min-w-0 flex-1"></div>
+          <div id="command-metrics-inline" class="flex lg:hidden items-center gap-1.5 w-full sm:w-auto overflow-x-auto"></div>
+        </div>
+
+        <!-- Body -->
+        <div class="flex-1 min-h-0 flex flex-col md:flex-row gap-3 md:gap-0 px-4 sm:px-6 py-4 overflow-hidden">
+
+          <!-- Picker rail -->
+          <aside id="picker-rail" class="w-full md:w-[264px] max-h-[40vh] md:max-h-none flex-shrink-0 md:mr-4 flex flex-col min-h-0 rounded-xl border border-slate-200 bg-white">
+            <button id="picker-rail-expand-btn" onclick="toggleRailCollapse()" class="hidden h-10 w-full text-slate-500 hover:text-slate-900" title="Mostrar materias"><i class="fa-solid fa-angles-right text-xs"></i></button>
+            <div id="picker-rail-content" class="flex flex-col flex-1 min-h-0">
+              <div class="p-2.5 border-b border-slate-100 space-y-2">
+                <div class="flex items-center gap-1.5">
+                  <div class="relative flex-1 min-w-0">
+                    <i class="fa-solid fa-magnifying-glass absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-[11px]"></i>
+                    <input type="text" id="manual-search" oninput="renderManualBuilder()" placeholder="Buscar materia…"
+                      class="w-full h-9 pl-8 pr-2 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-4 focus:ring-brand-100 focus:border-brand-500">
+                  </div>
+                  <span class="relative popover-anchor">
+                    <button onclick="toggleFilterPopover()" class="h-9 px-2.5 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 text-sm" title="Filtros"><i class="fa-solid fa-filter text-xs"></i></button>
+                    <div id="filter-popover" class="popover-panel hidden absolute left-0 mt-2 w-60 bg-white border border-slate-200 rounded-xl shadow-pop p-3 z-50 space-y-2 text-sm">
+                      <select id="filter-modalidad" onchange="saveState(); renderManualBuilder();" class="w-full h-9 px-2 rounded-lg border border-slate-200 bg-white"><option value="">Modalidad: Todas</option></select>
+                      <select id="filter-profesor" onchange="saveState(); renderManualBuilder();" class="w-full h-9 px-2 rounded-lg border border-slate-200 bg-white"><option value="">Profesor: Todos</option></select>
+                      <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" id="filter-cupos" onchange="saveState(); renderManualBuilder();" class="accent-brand-600 h-4 w-4"> Solo con cupos</label>
+                    </div>
+                  </span>
+                  <button onclick="toggleRailCollapse()" class="h-9 px-2.5 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50" title="Ocultar panel"><i class="fa-solid fa-angles-left text-xs"></i></button>
+                </div>
+                <div class="flex items-center justify-between text-[11px] text-slate-500">
+                  <span id="manual-courses-count">0 materias</span>
+                  <span>Clic o arrastra al calendario</span>
+                </div>
+              </div>
+              <div id="manual-section-picker" class="flex-1 overflow-y-auto p-2.5 space-y-2"></div>
+            </div>
+          </aside>
+
+          <!-- Calendar -->
+          <div class="flex-1 min-w-0 min-h-[50vh] md:min-h-0 flex flex-col gap-2">
+            <div id="calendar-trash-zone" class="hidden flex-shrink-0 border-2 border-dashed border-rose-300 bg-rose-50 rounded-xl py-2 text-center text-rose-600 text-sm font-semibold" ondragover="handleTrashDragOver(event)" ondrop="handleTrashDrop(event)">
+              <i class="fa-regular fa-trash-can mr-1.5"></i> Suelta aquí para quitar del horario
+            </div>
+            <div class="flex-1 min-h-0 overflow-auto rounded-xl border border-slate-200 bg-white">
+              <div id="manual-calendar-grid" class="min-w-[720px]"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+</div>
+
+<!-- Details drawer -->
+<div id="details-drawer" class="fixed bottom-0 left-0 right-0 md:left-64 bg-white border-t border-slate-200 shadow-pop z-40 max-h-[55vh] overflow-y-auto transition-transform duration-300 translate-y-full">
+  <div class="sticky top-0 bg-white/95 backdrop-blur border-b border-slate-100 px-5 py-3 flex items-center justify-between">
+    <h3 class="text-sm font-semibold">Detalle de materias seleccionadas</h3>
+    <button onclick="toggleDetailsDrawer()" class="w-8 h-8 rounded-lg hover:bg-slate-100 text-slate-500"><i class="fa-solid fa-chevron-down text-xs"></i></button>
+  </div>
+  <div id="manual-detail-cards" class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 p-5"></div>
+</div>
+
+<!-- Comparison modal -->
+<div id="draft-comparison-modal" class="hidden fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4" onclick="if(event.target===this) toggleDraftComparison()">
+  <div class="bg-white rounded-2xl shadow-pop p-5 max-w-xl w-full max-h-[75vh] overflow-auto">
+    <div class="flex items-center justify-between mb-3">
+      <h3 class="text-base font-semibold">Comparación de horarios</h3>
+      <button onclick="toggleDraftComparison()" class="w-8 h-8 rounded-lg hover:bg-slate-100 text-slate-500"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div id="draft-comparison-content" class="overflow-x-auto"></div>
+  </div>
+</div>
+
+<div id="toast-container" class="fixed bottom-4 right-4 z-[60] flex flex-col gap-2 pointer-events-none"></div>
+
+<script>
+  const STORAGE_KEY = 'bannerScheduleBuilderState_v1';
+
+  // ─── Helpers ──────────────────────────────────────────────────
+  function esc(v) {
+    return String(v ?? '').replace(/[&<>"']/g, ch => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[ch]));
+  }
+  // for values placed inside onclick='...' single-quoted JS strings
+  function jsq(v) { return esc(String(v ?? '').replace(/\\/g, '\\\\').replace(/'/g, "\\'")); }
+
+  // Pastel palette inspired by the reference calendar
+  const courseColors = [
+    { card: 'bg-emerald-50 border-emerald-200', title: 'text-emerald-900', sub: 'text-emerald-700', badge: 'bg-emerald-100 text-emerald-700', icon: 'fa-chart-simple', dot: 'bg-emerald-500' },
+    { card: 'bg-violet-50 border-violet-200',   title: 'text-violet-900',  sub: 'text-violet-700',  badge: 'bg-violet-100 text-violet-700',   icon: 'fa-star', dot: 'bg-violet-500' },
+    { card: 'bg-sky-50 border-sky-200',         title: 'text-sky-900',     sub: 'text-sky-700',     badge: 'bg-sky-100 text-sky-700',         icon: 'fa-flask', dot: 'bg-sky-500' },
+    { card: 'bg-amber-50 border-amber-200',     title: 'text-amber-900',   sub: 'text-amber-700',   badge: 'bg-amber-100 text-amber-700',     icon: 'fa-user-group', dot: 'bg-amber-500' },
+    { card: 'bg-blue-50 border-blue-200',       title: 'text-blue-900',    sub: 'text-blue-700',    badge: 'bg-blue-100 text-blue-700',       icon: 'fa-gears', dot: 'bg-blue-500' },
+    { card: 'bg-rose-50 border-rose-200',       title: 'text-rose-900',    sub: 'text-rose-700',    badge: 'bg-rose-100 text-rose-700',       icon: 'fa-atom', dot: 'bg-rose-500' },
+    { card: 'bg-teal-50 border-teal-200',       title: 'text-teal-900',    sub: 'text-teal-700',    badge: 'bg-teal-100 text-teal-700',       icon: 'fa-square-root-variable', dot: 'bg-teal-500' },
+    { card: 'bg-orange-50 border-orange-200',   title: 'text-orange-900',  sub: 'text-orange-700',  badge: 'bg-orange-100 text-orange-700',   icon: 'fa-book', dot: 'bg-orange-500' },
+  ];
+  const courseColorMap = {};
+  let colorCounter = 0;
+  function getCourseColor(code) {
+    if (courseColorMap[code] === undefined) { courseColorMap[code] = colorCounter % courseColors.length; colorCounter++; }
+    return courseColors[courseColorMap[code]];
+  }
+
+  let cleanedCourses = [];
+  let manualSelectedSections = [];
+  let hoveredManualSectionId = null;
+  let currentPreviewMode = 'table';
+  let expandedSubjects = {};
+  let activeSlotPopup = null;
+  let railCollapsed = false;
+  let drafts = [];
+  let currentDraftId = null;
+  let draggingSectionId = null;
+  let draggingPlacedSectionId = null;
+  let undoStacks = {};
+  let redoStacks = {};
+  const UNDO_LIMIT = 30;
+
+  const isMagistral = s => (s.schedule_type || '').toLowerCase().includes('magistral');
+  const isComplementaria = s => { const t = (s.schedule_type || '').toLowerCase(); return t.includes('complementaria') || t.includes('laboratorio'); };
+
+  function makeDraft(name) {
+    return { id: 'draft-' + Date.now() + '-' + Math.floor(Math.random() * 1000), name: name || 'Horario 1', sectionIds: [] };
+  }
+
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.canvas-dropdown-container')) document.querySelectorAll('.canvas-dropdown').forEach(el => el.classList.add('hidden'));
+    if (activeSlotPopup && !e.target.closest('#' + activeSlotPopup.id)) closeSlotPopup();
+    if (!e.target.closest('.popover-anchor')) document.querySelectorAll('.popover-panel').forEach(el => el.classList.add('hidden'));
+  });
+
+  // ─── Utilities ────────────────────────────────────────────────
+  function timeToMinutes(t) {
+    if (!t) return 0;
+    const [h, m] = String(t).split(':');
+    return parseInt(h, 10) * 60 + parseInt(m || '0', 10);
+  }
+  function fmtTime(t) { // "13:30" -> "1:30 PM"
+    const min = timeToMinutes(t); const h = Math.floor(min / 60), m = min % 60;
+    const h12 = h % 12 === 0 ? 12 : h % 12;
+    return `${h12}:${String(m).padStart(2, '0')} ${h < 12 ? 'AM' : 'PM'}`;
+  }
+  function fmtHour(h) { return `${h % 12 === 0 ? 12 : h % 12}:00 ${h < 12 ? 'AM' : 'PM'}`; }
+
+  function hasTimeConflict(secA, secB) {
+    for (const schA of secA.schedules) for (const schB of secB.schedules) {
+      if (schA.days.some(d => schB.days.includes(d))) {
+        const sA = timeToMinutes(schA.start_time), eA = timeToMinutes(schA.end_time);
+        const sB = timeToMinutes(schB.start_time), eB = timeToMinutes(schB.end_time);
+        if (Math.max(sA, sB) < Math.min(eA, eB)) return true;
+      }
+    }
+    return false;
+  }
+
+  function seatTone(available, capacity) {
+    if (available === 'N/A' || capacity === 'N/A') return 'slate';
+    if (Number(available) === 0) return 'rose';
+    if (Number(available) / Number(capacity) < 0.2) return 'amber';
+    return 'emerald';
+  }
+  function getSeatColor(available, capacity) {
+    return { slate: 'text-slate-500', rose: 'text-rose-600 font-semibold', amber: 'text-amber-600', emerald: 'text-emerald-600' }[seatTone(available, capacity)];
+  }
+
+  function computeWeeklyHours(sections) {
+    let min = 0;
+    sections.forEach(s => s.schedules.forEach(sch => {
+      min += (timeToMinutes(sch.end_time) - timeToMinutes(sch.start_time)) * Math.max(1, sch.days.length);
+    }));
+    return (min / 60).toFixed(1);
+  }
+
+  function computeTotalCredits(sections) {
+    let total = 0, hasUnknown = false;
+    // count each course code once (magistral + complementaria share credits)
+    const seen = new Set();
+    sections.forEach(s => {
+      if (seen.has(s.code)) return; seen.add(s.code);
+      const c = parseFloat(s.credits);
+      if (isNaN(c)) hasUnknown = true; else total += c;
+    });
+    return { total, hasUnknown };
+  }
+
+  function getRules() {
+    return {
+      mondayFree:  document.getElementById('rule-monday-free')?.checked ?? true,
+      noEarly:     document.getElementById('rule-no-early')?.checked ?? true,
+      noLate:      document.getElementById('rule-no-late')?.checked ?? true,
+      tuesdayLate: document.getElementById('rule-tuesday-late')?.checked ?? true,
+      earlyHour:   parseInt(document.getElementById('rule-no-early-hour')?.value || '8', 10),
+      lateHour:    parseInt(document.getElementById('rule-no-late-hour')?.value || '14', 10),
+    };
+  }
+
+  function evaluateScheduleRules(sections) {
+    const rules = getRules();
+    let score = 10;
+    const flags = [];
+    let hasMonday = false, hasEarly = false, hasLate = false, tuesdayBefore930 = false;
+    sections.forEach(sec => sec.schedules.forEach(sch => {
+      if (sch.days.includes('Lunes')) hasMonday = true;
+      const s = timeToMinutes(sch.start_time), e = timeToMinutes(sch.end_time);
+      if (s < rules.earlyHour * 60) hasEarly = true;
+      if (e > rules.lateHour * 60) hasLate = true;
+      if (sch.days.includes('Martes') && s < 9.5 * 60) tuesdayBefore930 = true;
+    }));
+    if (rules.mondayFree && hasMonday) { score -= 3; flags.push('⚠️ Tiene clase los lunes'); }
+    else if (sections.length && !hasMonday) flags.push('✨ Lunes completamente libre');
+    if (rules.noEarly && hasEarly) { score -= 2; flags.push(`⚠️ Clase antes de las ${fmtHour(rules.earlyHour)}`); }
+    if (rules.noLate && hasLate)   { score -= 2; flags.push(`⚠️ Clase después de las ${fmtHour(rules.lateHour)}`); }
+    if (rules.tuesdayLate && tuesdayBefore930) { score -= 1; flags.push('⚠️ Martes inicia antes de 9:30 AM'); }
+    const { total, hasUnknown } = computeTotalCredits(sections);
+    const target = parseFloat(document.getElementById('credit-target')?.value || '18');
+    if (sections.length) {
+      if (total > target) flags.push(`⚠️ Excede meta de créditos (${total}/${target})`);
+      else if (total > 0) flags.push(`✓ Dentro de meta de créditos (${total}/${target})`);
+    }
+    if (hasUnknown) flags.push('ℹ️ Algunas materias no reportan créditos');
+    return { score: Math.max(1, score), flags, totalCredits: total };
+  }
+
+  // ─── Persistence ──────────────────────────────────────────────
+  const RULE_IDS = ['rule-monday-free','rule-tuesday-late','rule-no-early','rule-no-early-hour','rule-no-late','rule-no-late-hour','credit-target','auto-refresh-toggle','auto-refresh-interval'];
+  function getRuleControlsRaw() {
+    const out = {};
+    RULE_IDS.forEach(id => { const el = document.getElementById(id); if (el) out[id] = el.type === 'checkbox' ? el.checked : el.value; });
+    return out;
+  }
+  function applyRuleControlsRaw(raw) {
+    if (!raw) return;
+    Object.keys(raw).forEach(id => { const el = document.getElementById(id); if (!el) return; if (el.type === 'checkbox') el.checked = raw[id]; else el.value = raw[id]; });
+  }
+  function saveState() {
+    try {
+      syncCurrentDraft();
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({
+        cleanedCourses, drafts, currentDraftId, rules: getRuleControlsRaw(),
+        filters: {
+          modalidad: document.getElementById('filter-modalidad')?.value || '',
+          profesor: document.getElementById('filter-profesor')?.value || '',
+          cupos: document.getElementById('filter-cupos')?.checked || false
+        }
+      }));
+    } catch (e) { console.warn('No se pudo guardar el estado', e); }
+  }
+  function loadState() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) { drafts = [makeDraft('Horario 1')]; currentDraftId = drafts[0].id; return false; }
+      const state = JSON.parse(raw);
+      cleanedCourses = Array.isArray(state.cleanedCourses) ? state.cleanedCourses : [];
+      drafts = (state.drafts && state.drafts.length) ? state.drafts : [makeDraft('Horario 1')];
+      currentDraftId = state.currentDraftId && drafts.some(d => d.id === state.currentDraftId) ? state.currentDraftId : drafts[0].id;
+      manualSelectedSections = resolveDraftSections(currentDraftId);
+      applyRuleControlsRaw(state.rules);
+      if (state.filters) {
+        const fm = document.getElementById('filter-modalidad'); if (fm && state.filters.modalidad) fm.dataset.pending = state.filters.modalidad;
+        const fp = document.getElementById('filter-profesor'); if (fp && state.filters.profesor) fp.dataset.pending = state.filters.profesor;
+        const fc = document.getElementById('filter-cupos'); if (fc) fc.checked = !!state.filters.cupos;
+      }
+      return cleanedCourses.length > 0;
+    } catch (e) { console.warn('Error cargando estado guardado', e); drafts = [makeDraft('Horario 1')]; currentDraftId = drafts[0].id; return false; }
+  }
+  function resolveDraftSections(draftId) {
+    const draft = drafts.find(d => d.id === draftId);
+    if (!draft) return [];
+    return draft.sectionIds.map(id => cleanedCourses.find(c => c.id === id)).filter(Boolean);
+  }
+  function syncCurrentDraft() {
+    const draft = drafts.find(d => d.id === currentDraftId);
+    if (draft) draft.sectionIds = manualSelectedSections.map(s => s.id);
+  }
+
+  // ─── Undo / Redo ───────────────────────────────────────────────
+  function snapshotIds() { return manualSelectedSections.map(s => s.id); }
+  function pushUndo() {
+    if (!undoStacks[currentDraftId]) undoStacks[currentDraftId] = [];
+    undoStacks[currentDraftId].push(snapshotIds());
+    if (undoStacks[currentDraftId].length > UNDO_LIMIT) undoStacks[currentDraftId].shift();
+    redoStacks[currentDraftId] = [];
+  }
+  function undoAction() {
+    const stack = undoStacks[currentDraftId];
+    if (!stack || !stack.length) { showToast('Nada que deshacer.', 'info'); return; }
+    const prevIds = stack.pop();
+    (redoStacks[currentDraftId] ||= []).push(snapshotIds());
+    manualSelectedSections = prevIds.map(id => cleanedCourses.find(c => c.id === id)).filter(Boolean);
+    saveState(); renderManualBuilder(); showToast('Acción deshecha.', 'info');
+  }
+  function redoAction() {
+    const stack = redoStacks[currentDraftId];
+    if (!stack || !stack.length) { showToast('Nada que rehacer.', 'info'); return; }
+    const nextIds = stack.pop();
+    (undoStacks[currentDraftId] ||= []).push(snapshotIds());
+    manualSelectedSections = nextIds.map(id => cleanedCourses.find(c => c.id === id)).filter(Boolean);
+    saveState(); renderManualBuilder(); showToast('Acción rehecha.', 'info');
+  }
+  function updateUndoRedoButtons() {
+    const u = document.getElementById('btn-undo'), r = document.getElementById('btn-redo');
+    if (u) u.disabled = !(undoStacks[currentDraftId] && undoStacks[currentDraftId].length);
+    if (r) r.disabled = !(redoStacks[currentDraftId] && redoStacks[currentDraftId].length);
+  }
+  document.addEventListener('keydown', (e) => {
+    const tag = (e.target.tagName || '').toLowerCase();
+    if (tag === 'input' || tag === 'textarea' || tag === 'select') return;
+    if (e.key === '/') { e.preventDefault(); document.getElementById('global-search')?.focus(); return; }
+    if (e.key === 'Escape') { closeSlotPopup(); document.querySelectorAll('.popover-panel').forEach(el => el.classList.add('hidden')); }
+    if (document.getElementById('tab-manual').classList.contains('hidden')) return;
+    const key = e.key.toLowerCase();
+    if ((e.ctrlKey || e.metaKey) && !e.shiftKey && key === 'z') { e.preventDefault(); undoAction(); }
+    else if ((e.ctrlKey || e.metaKey) && ((e.shiftKey && key === 'z') || key === 'y')) { e.preventDefault(); redoAction(); }
+  });
+
+  // ─── Live fetch: Uniandes public course API ────────────────────
+  const UNIANDES_API = 'https://ofertadecursos.uniandes.edu.co/api/courses';
+  const UNIANDES_DAY_MAP = { l: 'Lunes', m: 'Martes', i: 'Miércoles', j: 'Jueves', v: 'Viernes', s: 'Sábado', d: 'Domingo' };
+  function fmtMilitaryTime(t) {
+    if (t === null || t === undefined || t === '') return '';
+    const s = String(t).padStart(4, '0');
+    return `${s.slice(0, 2)}:${s.slice(2, 4)}`;
+  }
+  // Magistral = 4-char course number; anything else (e.g. "1221C") is complementaria under the base code.
+  // id keyed on nrc so it stays stable across refreshes.
+  function mapUniandesSeccion(item) {
+    const courseRaw = String(item.course || '');
+    const magistral = courseRaw.length === 4;
+    const baseCourse = magistral ? courseRaw : courseRaw.replace(/[A-Za-z]+$/, '');
+    const code = `${item.class || ''}${baseCourse}`;
+    const nrc = String(item.nrc);
+    let instructors = (item.instructors || []).map(p => p && p.name).filter(Boolean);
+    if (!instructors.length) instructors = ['Por asignar'];
+    const schedules = [];
+    (item.schedules || []).forEach(sch => {
+      const days = [];
+      Object.keys(UNIANDES_DAY_MAP).forEach(k => { if (sch[k]) days.push(UNIANDES_DAY_MAP[k]); });
+      const start = fmtMilitaryTime(sch.time_ini), end = fmtMilitaryTime(sch.time_fin);
+      if (days.length && start && end) schedules.push({ days, start_time: start, end_time: end, location: sch.classroom || 'TBA' });
+    });
+    return {
+      id: `uniandes-${nrc}`, nrc, code, title: item.title || 'Sin título', section: String(item.section),
+      schedule_type: magistral ? 'Magistral' : 'Complementaria',
+      instructional_method: 'Presencial', campus: item.campus || 'Campus Principal',
+      seats_available: (typeof item.maxenrol === 'number' && typeof item.enrolled === 'number') ? Math.max(0, item.maxenrol - item.enrolled) : 'N/A',
+      capacity: item.maxenrol ?? 'N/A', credits: item.credits ?? 'N/A',
+      instructors, schedules, enabled: true
+    };
+  }
+  // Merge by NRC keeping the original id so drafts/undo history keep pointing at it.
+  function ingestSections(mapped) {
+    let added = 0, updated = 0;
+    mapped.forEach(item => {
+      const idx = cleanedCourses.findIndex(c => c.nrc === item.nrc);
+      if (idx >= 0) { item.id = cleanedCourses[idx].id; item.enabled = cleanedCourses[idx].enabled; cleanedCourses[idx] = item; updated++; }
+      else { cleanedCourses.push(item); added++; }
+    });
+    manualSelectedSections = manualSelectedSections.map(s => cleanedCourses.find(c => c.id === s.id) || s);
+    return { added, updated };
+  }
+  async function performUniandesSearch(query, term, btnEl) {
+    if (!query) return { added: 0, updated: 0, empty: true };
+    const url = `${UNIANDES_API}?term=${encodeURIComponent(term || '')}&ptrm=&prefix=&attr=&nameInput=${encodeURIComponent(query.replace(/\s+/g, '_'))}`;
+    let originalHtml = null;
+    if (btnEl) { originalHtml = btnEl.innerHTML; btnEl.disabled = true; btnEl.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i>`; }
+    try {
+      const response = await fetch(url);
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const data = await response.json();
+      if (!Array.isArray(data) || !data.length) return { added: 0, updated: 0, empty: true };
+      return ingestSections(data.map(mapUniandesSeccion));
+    } finally {
+      if (btnEl && originalHtml !== null) { btnEl.disabled = false; btnEl.innerHTML = originalHtml; }
+    }
+  }
+  function afterDataChange() { renderCleanPreview(); renderManualBuilder(); saveState(); }
+  async function buscarCursoUniandes() {
+    const query = (document.getElementById('uniandes-search-input')?.value || '').trim();
+    if (!query) { showToast('Escribe un código o nombre de curso para buscar.', 'warning'); return; }
+    const term = (document.getElementById('uniandes-term-input')?.value || '').trim();
+    try {
+      const result = await performUniandesSearch(query, term, document.getElementById('uniandes-search-btn'));
+      if (result.empty) { showToast(`Sin resultados para "${query}".`, 'warning'); return; }
+      showToast(`${result.added} secciones agregadas${result.updated ? `, ${result.updated} actualizadas` : ''} (total ${cleanedCourses.length}).`, 'success');
+      afterDataChange(); renderPensumCourseList();
+    } catch (err) {
+      console.error('Error buscando en Uniandes:', err);
+      showToast('No se pudo conectar con Uniandes (posible bloqueo CORS o sin conexión). Usa la importación de JSON.', 'error');
+    }
+  }
+
+  // ─── Pensum (IMEC / Física) ───────────────────────────────────
+  // Plan sugerido. IMEC suma 134 créditos y Física 128 (pensum de 128 créditos).
+  const PENSUM_DATA = {
+    imec: {
+      label: 'Ingeniería Mecánica', short: 'IMEC', icon: 'fa-gears', tone: 'blue',
+      semesters: [
+        { semester: 'I', total_credits: 15, courses: [
+          { code: 'IMEC 1505', name: 'Diseño gráfico en Ingeniería', credits: 3 },
+          { code: 'IMEC 1000', name: 'Introducción a la Ingeniería Mecánica', credits: 3 },
+          { code: 'MATE 1201', name: 'Precálculo', credits: 3, note: 'Según examen de clasificación puede ser MATE 1203' },
+          { code: 'CCOM 1100', name: 'Pensar, comunicar y colaborar', credits: 3 },
+          { code: 'N/A', name: 'CBU 1', credits: 3 },
+        ]},
+        { semester: 'II', total_credits: 15, courses: [
+          { code: 'IMEC 1543', name: 'Estática', credits: 3 },
+          { code: 'ISIS 1221', name: 'Introducción a la Programación', credits: 3 },
+          { code: 'MATE 1203', name: 'Cálculo Diferencial', credits: 3 },
+          { code: 'QUIM 1103', name: 'Química', credits: 3 },
+          { code: 'N/A', name: 'CBU 2', credits: 3 },
+        ]},
+        { semester: 'III', total_credits: 17, courses: [
+          { code: 'N/A', name: 'Taller Electivo 1', credits: 2 },
+          { code: 'IMEC 2522', name: 'Mecánica de Materiales', credits: 3 },
+          { code: 'MATE 1214', name: 'Cálculo Integral', credits: 3 },
+          { code: 'MATE 1105', name: 'Álgebra Lineal 1', credits: 3 },
+          { code: 'FISI 1518', name: 'Física 1', credits: 3 },
+          { code: 'N/A', name: 'CBU 3', credits: 3 },
+        ]},
+        { semester: 'IV', total_credits: 18, courses: [
+          { code: 'IMEC 2700', name: 'P2 Proyecto Intermedio', credits: 3 },
+          { code: 'IMEC 1410', name: 'Ciencia de Materiales', credits: 3 },
+          { code: 'IMEC 1201', name: 'Termofluidos 1', credits: 3 },
+          { code: 'MATE 1207', name: 'Cálculo Vectorial', credits: 3 },
+          { code: 'FISI 1528', name: 'Física 2', credits: 3 },
+          { code: 'N/A', name: 'CBU 4', credits: 3 },
+        ]},
+        { semester: 'V', total_credits: 17, courses: [
+          { code: 'N/A', name: 'Taller Electivo 2', credits: 2 },
+          { code: 'IELE 1002', name: 'Fundamentos de Circuitos', credits: 3 },
+          { code: 'IMEC 2202', name: 'Termofluidos 2', credits: 3 },
+          { code: 'IMEC 2540', name: 'Dinámica de Sistemas Mecánicos', credits: 3 },
+          { code: 'MATE 2301', name: 'Ecuaciones Diferenciales', credits: 3 },
+          { code: 'DERE 1300', name: 'Constitución y Democracia', credits: 3 },
+        ]},
+        { semester: 'VI', total_credits: 18, courses: [
+          { code: 'IMEC 3709', name: 'P3 Proyecto 3', credits: 3 },
+          { code: 'IELE 2300', name: 'Análisis de Sistemas de Control', credits: 3 },
+          { code: 'IIND 2106', name: 'Probabilidad y Estadística 1', credits: 3 },
+          { code: 'IIND 2401', name: 'Análisis de Decisión de Inversión', credits: 3 },
+          { code: 'N/A', name: 'CP Electivo en Ingeniería Mecánica 1', credits: 3 },
+          { code: 'N/A', name: 'CP Obligatorio 1er semestre', credits: 3 },
+        ]},
+        { semester: 'VII', total_credits: 16, courses: [
+          { code: 'IMEC 3700', name: 'Seminario de Grado', credits: 1 },
+          { code: 'N/A', name: 'Electiva en Fundamentos de Ingeniería', credits: 3 },
+          { code: 'N/A', name: 'Electiva Matemáticas, IMEC o Ciencias', credits: 3 },
+          { code: 'N/A', name: 'CP Electivo en Ingeniería Mecánica 2', credits: 3 },
+          { code: 'N/A', name: 'CP Electivo en Ingeniería Mecánica 3', credits: 3 },
+          { code: 'N/A', name: 'CP Obligatorio 2do semestre', credits: 3 },
+        ]},
+        { semester: 'VIII', total_credits: 18, courses: [
+          { code: 'IMEC 3714', name: 'Proyecto de desarrollo profesional IMEC', credits: 3 },
+          { code: 'IMEC 3710', name: 'P4 Proyecto 4', credits: 3 },
+          { code: 'N/A', name: 'Electiva en Ciencias o Matemáticas', credits: 3 },
+          { code: 'N/A', name: 'CP Electivo en Ingeniería Mecánica 4', credits: 3 },
+          { code: 'N/A', name: 'CLE Créditos de Libre Elección', credits: 3 },
+          { code: 'N/A', name: 'CBU 5', credits: 3 },
+        ]},
+      ]
+    },
+    fisica: {
+      label: 'Física', short: 'FISI', icon: 'fa-atom', tone: 'violet',
+      semesters: [
+        { semester: '1', total_credits: 16, courses: [
+          { code: 'ISIS 1221', name: 'Introducción a la Programación', credits: 3 },
+          { code: 'MATE 1203', name: 'Cálculo Diferencial', credits: 3 },
+          { code: 'FISI 1502', name: 'Introducción a la Física', credits: 3 },
+          { code: 'ESCR 1101', name: 'Escritura Universitaria 1', credits: 2 },
+          { code: 'DERE 1300', name: 'Constitución y Democracia', credits: 3 },
+          { code: 'N/A', name: 'CBU 1', credits: 2 },
+        ]},
+        { semester: '2', total_credits: 16, courses: [
+          { code: 'MATE 1105', name: 'Álgebra Lineal 1', credits: 3 },
+          { code: 'MATE 1214', name: 'Cálculo Integral y Ecuaciones Diferenciales', credits: 3 },
+          { code: 'FISI 1518', name: 'Física 1', credits: 3 },
+          { code: 'QUIM 1103', name: 'Química General y Laboratorio', credits: 3 },
+          { code: 'ESCR 1102', name: 'Escritura Universitaria 2', credits: 2 },
+          { code: 'FCIE 1010', name: 'Introducción a Ciencias', credits: 2 },
+        ]},
+        { semester: '3', total_credits: 16, courses: [
+          { code: 'FISI 2526', name: 'Métodos Computacionales 1', credits: 3 },
+          { code: 'MATE 1207', name: 'Cálculo Vectorial', credits: 3 },
+          { code: 'FISI 1528', name: 'Física 2', credits: 3 },
+          { code: 'N/A', name: 'Electivo en Ciencias Básico', credits: 3 },
+          { code: 'N/A', name: 'CBU 2', credits: 2 },
+          { code: 'N/A', name: 'CBU 3', credits: 2 },
+        ]},
+        { semester: '4', total_credits: 16, courses: [
+          { code: 'MATE 2301', name: 'Ecuaciones Diferenciales', credits: 3 },
+          { code: 'FISI 1538', name: 'Ondas y Fluidos', credits: 3 },
+          { code: 'FISI 1548', name: 'Física Moderna', credits: 3 },
+          { code: 'FISI 1549', name: 'Laboratorio de Física Moderna', credits: 3 },
+          { code: 'N/A', name: 'Curso de Libre Elección', credits: 2 },
+          { code: 'N/A', name: 'CBU 4', credits: 2 },
+        ]},
+        { semester: '5', total_credits: 16, courses: [
+          { code: 'FISI 2528', name: 'Métodos Computacionales 2', credits: 2 },
+          { code: 'FISI 2507', name: 'Métodos Matemáticos', credits: 3 },
+          { code: 'FISI 2605', name: 'Mecánica', credits: 3 },
+          { code: 'FISI 2540', name: 'Termodinámica', credits: 3 },
+          { code: 'FISI 2560', name: 'Electrónica para Ciencias', credits: 3 },
+          { code: 'N/A', name: 'CBU 5', credits: 2 },
+        ]},
+        { semester: '6', total_credits: 15, courses: [
+          { code: 'FISI 2632', name: 'Electromagnetismo 1', credits: 3 },
+          { code: 'FISI 3515', name: 'Mecánica Cuántica 1', credits: 3 },
+          { code: 'FISI 3540', name: 'Física Estadística', credits: 3 },
+          { code: 'FISI 2551', name: 'Laboratorio Intermedio', credits: 3 },
+          { code: 'N/A', name: 'Electivo en Ciencias Avanzado', credits: 3 },
+        ]},
+        { semester: '7', total_credits: 16, courses: [
+          { code: 'FISI 3632', name: 'Electromagnetismo 2', credits: 3 },
+          { code: 'FISI 3520', name: 'Mecánica Cuántica 2', credits: 3 },
+          { code: 'FISI 3980', name: 'Proyecto Teórico Computacional', credits: 3 },
+          { code: 'FISI 3985', name: 'Proyecto Experimental', credits: 3 },
+          { code: 'N/A', name: 'Electivo de exploración en Física', credits: 2 },
+          { code: 'N/A', name: 'Electivo de exploración en Física', credits: 2 },
+        ]},
+        { semester: '8', total_credits: 17, courses: [
+          { code: 'N/A', name: 'Electivo de Integración', credits: 3 },
+          { code: 'FISI 3999', name: 'Proyecto Final', credits: 3 },
+          { code: 'N/A', name: 'Electivo de exploración en Física', credits: 3 },
+          { code: 'N/A', name: 'Curso de Libre Elección', credits: 2 },
+          { code: 'N/A', name: 'Curso de Libre Elección', credits: 2 },
+          { code: 'N/A', name: 'CBU 6', credits: 2 },
+          { code: 'N/A', name: 'CBU 7', credits: 2 },
+        ]},
+      ]
+    }
+  };
+
+  let selectedPensumMajor = null;
+  let selectedPensumSemesterIndex = null;
+
+  function renderPensumMajorSelector() {
+    const container = document.getElementById('pensum-major-selector');
+    if (!container) return;
+    container.innerHTML = Object.keys(PENSUM_DATA).map(key => {
+      const m = PENSUM_DATA[key];
+      const active = key === selectedPensumMajor;
+      const total = m.semesters.reduce((a, s) => a + s.total_credits, 0);
+      const toneIcon = m.tone === 'violet' ? 'bg-violet-50 text-violet-600' : 'bg-blue-50 text-blue-600';
+      return `
+        <button onclick="selectPensumMajor('${key}')" class="text-left p-4 rounded-xl border transition flex items-center gap-3 ${active ? 'border-brand-500 ring-4 ring-brand-100 bg-white' : 'border-slate-200 hover:border-slate-300 bg-white'}">
+          <div class="w-11 h-11 rounded-xl ${toneIcon} flex items-center justify-center text-lg"><i class="fa-solid ${m.icon}"></i></div>
+          <div class="min-w-0 flex-1">
+            <p class="text-sm font-semibold">${m.label}</p>
+            <p class="text-xs text-slate-500">${m.semesters.length} semestres · ${total} créditos</p>
+          </div>
+          <i class="fa-solid ${active ? 'fa-circle-check text-brand-600' : 'fa-chevron-right text-slate-300'}"></i>
+        </button>`;
+    }).join('');
+  }
+  function selectPensumMajor(key) {
+    selectedPensumMajor = key;
+    selectedPensumSemesterIndex = 0;
+    renderPensumMajorSelector(); renderPensumSemesterSelector(); renderPensumCourseList();
+  }
+  function renderPensumSemesterSelector() {
+    const container = document.getElementById('pensum-semester-selector');
+    if (!container || !selectedPensumMajor) return;
+    container.classList.remove('hidden');
+    container.innerHTML = `<div class="chip-scroll flex gap-1 p-1 rounded-xl bg-slate-100 overflow-x-auto">` +
+      PENSUM_DATA[selectedPensumMajor].semesters.map((sem, idx) => {
+        const active = idx === selectedPensumSemesterIndex;
+        return `<button onclick="selectPensumSemester(${idx})" class="flex-1 min-w-[64px] h-9 px-3 rounded-lg text-xs font-semibold whitespace-nowrap transition ${active ? 'bg-white text-slate-900 shadow-card' : 'text-slate-500 hover:text-slate-800'}">Sem ${sem.semester}</button>`;
+      }).join('') + `</div>`;
+  }
+  function selectPensumSemester(idx) { selectedPensumSemesterIndex = idx; renderPensumSemesterSelector(); renderPensumCourseList(); }
+
+  function renderPensumCourseList() {
+    const container = document.getElementById('pensum-course-list');
+    if (!container || selectedPensumMajor === null || selectedPensumSemesterIndex === null) return;
+    const semester = PENSUM_DATA[selectedPensumMajor].semesters[selectedPensumSemesterIndex];
+    container.classList.remove('hidden');
+    const existingCodes = new Set(cleanedCourses.map(c => String(c.code).replace(/\s+/g, '')));
+    const rows = semester.courses.map(c => {
+      const elective = !c.code || c.code === 'N/A';
+      const added = !elective && existingCodes.has(c.code.replace(/\s+/g, ''));
+      return `
+        <div class="flex items-center gap-3 p-3 rounded-xl border ${added ? 'border-emerald-200 bg-emerald-50/50' : 'border-slate-200 bg-white'}">
+          <div class="w-9 h-9 rounded-lg flex-shrink-0 flex items-center justify-center text-xs ${elective ? 'bg-slate-100 text-slate-400' : (added ? 'bg-emerald-100 text-emerald-700' : 'bg-brand-50 text-brand-600')}">
+            <i class="fa-solid ${elective ? 'fa-shuffle' : (added ? 'fa-check' : 'fa-book-open')}"></i>
+          </div>
+          <div class="min-w-0 flex-1">
+            <p class="text-sm font-medium truncate">${esc(c.name)}</p>
+            <p class="text-xs text-slate-500">${elective ? 'Electivo · sin código fijo' : esc(c.code)} · ${c.credits} cr${c.note ? ` · <span class="text-amber-600">${esc(c.note)}</span>` : ''}</p>
+          </div>
+          <button onclick="addCourseFromPensum('${jsq(c.code)}', '${jsq(c.name)}', this)"
+            class="h-8 px-3 rounded-lg text-xs font-semibold flex-shrink-0 flex items-center gap-1.5 transition ${added ? 'text-emerald-700 hover:bg-emerald-100' : (elective ? 'border border-slate-200 text-slate-600 hover:bg-slate-50' : 'bg-brand-600 hover:bg-brand-700 text-white')}"
+            title="${elective ? 'Buscar manualmente' : (added ? 'Ya agregado — clic para actualizar cupos' : 'Agregar secciones')}">
+            <i class="fa-solid ${added ? 'fa-rotate' : (elective ? 'fa-magnifying-glass' : 'fa-plus')}"></i>
+            <span class="hidden sm:inline">${added ? 'Actualizar' : (elective ? 'Buscar' : 'Agregar')}</span>
+          </button>
+        </div>`;
+    }).join('');
+    container.innerHTML = `
+      <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+        <p class="text-sm text-slate-600"><b>Semestre ${semester.semester}</b> · ${semester.total_credits} créditos · ${semester.courses.length} materias</p>
+        <button onclick="addSemesterFromPensum('${selectedPensumMajor}', ${selectedPensumSemesterIndex}, this)" class="h-9 px-3 rounded-lg border border-brand-200 bg-brand-50 hover:bg-brand-100 text-brand-700 text-xs font-semibold flex items-center gap-1.5">
+          <i class="fa-solid fa-layer-group"></i> Agregar todo el semestre
+        </button>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-2">${rows}</div>`;
+  }
+
+  async function addCourseFromPensum(code, name, btnEl) {
+    if (!code || code === 'N/A') {
+      const input = document.getElementById('uniandes-search-input');
+      if (input) { input.value = name; input.scrollIntoView({ behavior: 'smooth', block: 'center' }); input.focus(); }
+      showToast('Curso electivo sin código fijo — usa el buscador.', 'info');
+      return;
+    }
+    const sanitized = code.replace(/\s+/g, '').split('/')[0];
+    try {
+      const result = await performUniandesSearch(sanitized, '', btnEl);
+      if (result.empty) { showToast(`Sin resultados para ${code}.`, 'warning'); return; }
+      showToast(`${name}: ${result.added} secciones agregadas${result.updated ? `, ${result.updated} actualizadas` : ''}.`, 'success');
+      afterDataChange(); renderPensumCourseList();
+    } catch (err) {
+      console.error('Error buscando curso del pensum:', err);
+      showToast(`No se pudo consultar ${code} (CORS o sin conexión). Usa la importación de JSON.`, 'error');
+    }
+  }
+
+  async function addSemesterFromPensum(majorKey, semesterIndex, btnEl) {
+    const semester = PENSUM_DATA[majorKey]?.semesters?.[semesterIndex];
+    if (!semester) return;
+    const valid = semester.courses.filter(c => c.code && c.code !== 'N/A');
+    if (!valid.length) { showToast('No hay cursos con código fijo en este semestre.', 'info'); return; }
+    const originalHtml = btnEl.innerHTML;
+    btnEl.disabled = true;
+    let totalAdded = 0, totalUpdated = 0, errors = 0;
+    for (let i = 0; i < valid.length; i++) {
+      btnEl.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> ${i + 1}/${valid.length}`;
+      try {
+        const r = await performUniandesSearch(valid[i].code.replace(/\s+/g, '').split('/')[0], '');
+        totalAdded += r.added; totalUpdated += r.updated;
+      } catch (err) { errors++; }
+      await new Promise(r => setTimeout(r, 350));
+    }
+    btnEl.disabled = false; btnEl.innerHTML = originalHtml;
+    if (errors === valid.length) showToast('No se pudo conectar con Uniandes (CORS o sin conexión). Usa la importación de JSON.', 'error');
+    else showToast(`Semestre agregado: ${totalAdded} nuevas, ${totalUpdated} actualizadas${errors ? `, ${errors} con error` : ''}.`, errors ? 'warning' : 'success');
+    afterDataChange(); renderPensumCourseList();
+  }
+
+  // ─── Auto-refresh ─────────────────────────────────────────────
+  let autoRefreshIntervalId = null;
+  let refreshInFlight = false;
+  function toggleAutoRefresh() { if (document.getElementById('auto-refresh-toggle')?.checked) startAutoRefresh(); else stopAutoRefresh(); saveState(); }
+  function restartAutoRefresh() { if (document.getElementById('auto-refresh-toggle')?.checked) startAutoRefresh(); saveState(); }
+  function startAutoRefresh() {
+    stopAutoRefresh();
+    const minutes = parseFloat(document.getElementById('auto-refresh-interval')?.value || '5');
+    autoRefreshIntervalId = setInterval(() => refreshAllUniandesCourses(false), minutes * 60 * 1000);
+    updateAutoRefreshStatus(`Activado — próxima en ${minutes} min`);
+  }
+  function stopAutoRefresh() { if (autoRefreshIntervalId) { clearInterval(autoRefreshIntervalId); autoRefreshIntervalId = null; } updateAutoRefreshStatus(''); }
+  function updateAutoRefreshStatus(msg) { const el = document.getElementById('auto-refresh-status'); if (el) el.textContent = msg; }
+  async function refreshAllUniandesCourses(manual) {
+    if (!cleanedCourses.length) { if (manual) showToast('No hay materias cargadas para actualizar.', 'info'); return; }
+    if (refreshInFlight) { if (manual) showToast('Ya hay una actualización en curso.', 'info'); return; }
+    refreshInFlight = true;
+    const uniqueCodes = [...new Set(cleanedCourses.map(c => c.code).filter(Boolean))];
+    let errors = 0;
+    try {
+      for (const code of uniqueCodes) {
+        try { await performUniandesSearch(code, ''); } catch (err) { errors++; }
+        await new Promise(r => setTimeout(r, 300));
+      }
+    } finally { refreshInFlight = false; }
+    afterDataChange();
+    const now = new Date();
+    const minutes = parseFloat(document.getElementById('auto-refresh-interval')?.value || '5');
+    const enabled = document.getElementById('auto-refresh-toggle')?.checked;
+    updateAutoRefreshStatus(`Última: ${now.toLocaleTimeString('es-CO')}${enabled ? ` · próxima en ${minutes} min` : ''}${errors ? ` (${errors} con error)` : ''}`);
+    if (manual) showToast(errors === uniqueCodes.length ? 'No se pudo conectar con Uniandes.' : `Cupos actualizados (${uniqueCodes.length} materias).`, errors === uniqueCodes.length ? 'error' : 'success');
+  }
+
+  // ─── File / JSON extraction ───────────────────────────────────
+  function handleDragOver(e)  { e.preventDefault(); e.stopPropagation(); document.getElementById('drop-zone').classList.add('border-brand-500','bg-brand-50'); }
+  function handleDragLeave(e) { e.preventDefault(); e.stopPropagation(); document.getElementById('drop-zone').classList.remove('border-brand-500','bg-brand-50'); }
+  function handleFileDrop(e)  { handleDragLeave(e); const f = e.dataTransfer?.files?.[0]; if (f) readFile(f); }
+  function handleFileUpload(e) { const f = e.target.files?.[0]; if (f) readFile(f); e.target.value = ''; }
+  function readFile(file) {
+    if (!file.name.toLowerCase().endsWith('.json')) { showToast('Selecciona un archivo .json', 'warning'); return; }
+    const r = new FileReader();
+    r.onload = evt => { document.getElementById('raw-json-input').value = evt.target.result; processRawJSON(); };
+    r.onerror = () => showToast('Error al leer el archivo JSON', 'error');
+    r.readAsText(file);
+  }
+  function clearInput() { document.getElementById('raw-json-input').value = ''; }
+
+  function loadSampleData() {
+    const mt = (days, b, e, bld, room) => ({ meetingTime: Object.assign({ beginTime: b, endTime: e, building: bld, room }, Object.fromEntries(days.map(d => [d, true]))) });
+    const sec = (nrc, subj, num, title, seq, type, seats, max, cr, prof, meets, method) => ({ nrc, subject: subj, courseNumber: num, courseTitle: title, sequenceNumber: seq, scheduleTypeDescription: type, instructionalMethodDescription: method || 'Presencial', campusDescription: 'Campus Principal', seatsAvailable: seats, maximumEnrollment: max, creditHourLow: cr, faculty: [{ displayName: prof }], meetingsFaculty: meets });
+    const sample = [
+      sec('51452','IMEC','1543','Estática','1','Magistral',15,30,3,'Juan Casas Rodríguez',[mt(['tuesday','thursday'],'1100','1220','ML','201')]),
+      sec('51451','IMEC','1543','Estática','2','Magistral',8,30,3,'Daniel Serrano Ruiz',[mt(['tuesday','thursday'],'1400','1520','ML','202')]),
+      sec('80985','ISIS','1221','Introducción a la Programación','1','Magistral',5,25,3,'Juan Oyuela Matiz',[mt(['monday','wednesday'],'0630','0750','W','101')]),
+      sec('41893','ISIS','1221','Introducción a la Programación','10','Magistral',12,25,3,'Fernando Calvo Silva',[mt(['tuesday','friday'],'0800','0920','W','102')],'Virtual'),
+      sec('78305','ISIS','1221','Introducción a la Programación','11','Magistral',20,25,3,'Por asignar',[mt(['wednesday','friday'],'0930','1050','W','103')]),
+      sec('90123','MATE','1203','Cálculo Diferencial','3','Magistral',0,40,3,'Claudia Ríos Martínez',[mt(['monday','wednesday','friday'],'0900','1020','SD','301')]),
+      sec('90124','MATE','1203','Cálculo Diferencial','4','Magistral',11,40,3,'Andrés Gómez Pardo',[mt(['tuesday','thursday'],'0930','1050','SD','302')]),
+      sec('60210','QUIM','1103','Química','1','Magistral',18,35,3,'Laura Méndez',[mt(['wednesday','friday'],'1100','1220','Q','305')]),
+      sec('70311','FISI','1518','Física 1','2','Magistral',22,45,3,'Carlos Ávila',[mt(['monday','wednesday'],'1230','1350','O','105')]),
+    ];
+    document.getElementById('raw-json-input').value = JSON.stringify(sample, null, 2);
+    processRawJSON();
+  }
+
+  function processRawJSON() {
+    const inputVal = document.getElementById('raw-json-input').value.trim();
+    if (!inputVal) { showToast('Pega un JSON o carga un archivo primero.', 'warning'); return; }
+    let parsed;
+    try { parsed = JSON.parse(inputVal); } catch (e) { showToast('Error de sintaxis JSON. Revisa el texto.', 'error'); return; }
+    const rawList = Array.isArray(parsed) ? parsed : (parsed && typeof parsed === 'object' ? (parsed.data || parsed.courses || [parsed]) : []);
+    if (!Array.isArray(rawList) || !rawList.length) { showToast('No se encontraron registros en el JSON.', 'warning'); return; }
+
+    const extracted = [];
+    rawList.forEach((item, index) => {
+      try {
+        if (!item || typeof item !== 'object') return;
+        if (item.nrc && item.code && Array.isArray(item.schedules)) { // already-clean format (re-import of our export)
+          extracted.push({ ...item, nrc: String(item.nrc), id: item.id || `sec-${item.nrc}`, enabled: item.enabled ?? true, credits: item.credits ?? 'N/A', instructors: item.instructors?.length ? item.instructors : ['Por asignar'], schedule_type: item.schedule_type || 'Magistral', section: String(item.section ?? '1') });
+          return;
+        }
+        if (item.course !== undefined && item.class !== undefined && item.nrc) { extracted.push(mapUniandesSeccion(item)); return; } // ofertadecursos format
+        const code = (item.subject || '') + (item.courseNumber || '') || item.code || item.subjectCourse || 'CURSO';
+        const nrc = String(item.courseReferenceNumber || item.nrc || index);
+        let instructors = [];
+        if (Array.isArray(item.faculty)) instructors = item.faculty.map(f => f.displayName || f.fullName || f.name).filter(Boolean);
+        else if (Array.isArray(item.instructors)) instructors = item.instructors;
+        if (!instructors.length) instructors = ['Por asignar'];
+        const schedules = [];
+        (item.meetingsFaculty || item.meetings || []).forEach(m => {
+          const t = m.meetingTime || m;
+          const days = [['monday','Lunes'],['tuesday','Martes'],['wednesday','Miércoles'],['thursday','Jueves'],['friday','Viernes'],['saturday','Sábado'],['sunday','Domingo']].filter(([k]) => t[k]).map(([, v]) => v);
+          let start = t.beginTime || t.startTime || '', end = t.endTime || '';
+          if (start && !String(start).includes(':')) start = fmtMilitaryTime(start);
+          if (end && !String(end).includes(':')) end = fmtMilitaryTime(end);
+          const building = t.building || t.buildingDescription || '', room = t.room || t.roomNumber || '';
+          if (days.length && start && end) schedules.push({ days, start_time: start, end_time: end, location: (building || room) ? `${building} ${room}`.trim() : 'TBA' });
+        });
+        extracted.push({
+          id: `sec-${nrc}`, nrc, code, title: item.courseTitle || item.title || 'Sin título',
+          section: String(item.sequenceNumber || item.section || '1'),
+          schedule_type: item.scheduleTypeDescription || item.scheduleType || 'Magistral',
+          instructional_method: item.instructionalMethodDescription || item.instructionalMethod || 'Presencial',
+          campus: item.campusDescription || item.campus || 'Campus Principal',
+          seats_available: item.seatsAvailable ?? item.openSeats ?? 'N/A',
+          capacity: item.maximumEnrollment ?? item.capacity ?? 'N/A',
+          credits: item.creditHourLow ?? item.creditHours ?? item.credits ?? 'N/A',
+          instructors, schedules, enabled: true
+        });
+      } catch (err) { console.error('Error procesando sección:', err); }
+    });
+    if (!extracted.length) { showToast('No se reconoció ninguna sección en el JSON.', 'warning'); return; }
+    const { added, updated } = ingestSections(extracted);
+    showToast(`${added} secciones nuevas${updated ? `, ${updated} actualizadas` : ''} (total ${cleanedCourses.length}).`, 'success');
+    document.getElementById('raw-json-input').value = '';
+    afterDataChange(); renderPensumCourseList();
+  }
+
+  // ─── Loaded courses preview ───────────────────────────────────
+  function switchPreviewMode(mode) {
+    currentPreviewMode = mode;
+    document.getElementById('clean-table-view').classList.toggle('hidden', mode !== 'table');
+    document.getElementById('clean-json-preview').classList.toggle('hidden', mode !== 'json');
+    const on = 'px-3 h-8 rounded-md bg-white shadow-card text-slate-900', off = 'px-3 h-8 rounded-md text-slate-500 hover:text-slate-800';
+    document.getElementById('view-mode-table').className = mode === 'table' ? on : off;
+    document.getElementById('view-mode-json').className = mode === 'json' ? on : off;
+  }
+  function renderCleanPreview() {
+    const container = document.getElementById('clean-preview-container');
+    const cta = document.getElementById('extract-empty-cta');
+    const badge = document.getElementById('badge-courses-count');
+    if (!cleanedCourses.length) { container.classList.add('hidden'); cta.classList.remove('hidden'); badge.classList.add('hidden'); return; }
+    container.classList.remove('hidden'); cta.classList.add('hidden');
+    document.getElementById('stat-courses-count').textContent = new Set(cleanedCourses.map(c => c.code)).size;
+    document.getElementById('stat-sections-count').textContent = cleanedCourses.length;
+    badge.textContent = cleanedCourses.length; badge.classList.remove('hidden');
+    document.getElementById('clean-json-preview').textContent = JSON.stringify(cleanedCourses, null, 2);
+    filterExtractedTable();
+  }
+  function filterExtractedTable() {
+    const tbody = document.getElementById('extracted-table-body');
+    if (!tbody) return;
+    const q = (document.getElementById('table-search')?.value || '').toLowerCase().trim();
+    const filtered = cleanedCourses.filter(c => String(c.code).toLowerCase().includes(q) || String(c.nrc).toLowerCase().includes(q) || String(c.title).toLowerCase().includes(q) || c.instructors.some(i => String(i).toLowerCase().includes(q)));
+    if (!filtered.length) { tbody.innerHTML = `<tr><td colspan="9" class="p-6 text-center text-slate-500">No se encontraron secciones.</td></tr>`; return; }
+    tbody.innerHTML = filtered.map(c => {
+      const color = getCourseColor(c.code);
+      const timeText = c.schedules.map(s => `${s.days.map(d => d.slice(0, 2)).join(' ')} · ${s.start_time}–${s.end_time} <span class="text-slate-400">(${esc(s.location)})</span>`).join('<br>') || '<span class="text-slate-400">Sin horario</span>';
+      return `<tr class="hover:bg-slate-50">
+        <td class="px-3 py-2.5 font-mono text-xs text-slate-500">${esc(c.nrc)}</td>
+        <td class="px-3 py-2.5"><span class="px-2 py-0.5 rounded-md text-xs font-semibold ${color.badge}">${esc(c.code)}</span></td>
+        <td class="px-3 py-2.5 font-medium">${esc(c.title)}</td>
+        <td class="px-3 py-2.5">${esc(c.section)}</td>
+        <td class="px-3 py-2.5"><span class="px-2 py-0.5 rounded-md text-xs bg-slate-100 text-slate-600">${esc(c.schedule_type)}</span></td>
+        <td class="px-3 py-2.5">${esc(c.credits ?? 'N/A')}</td>
+        <td class="px-3 py-2.5 text-slate-600">${esc(c.instructors.join(', '))}</td>
+        <td class="px-3 py-2.5 text-xs leading-relaxed">${timeText}</td>
+        <td class="px-3 py-2.5 font-mono text-xs ${getSeatColor(c.seats_available, c.capacity)}">${esc(c.seats_available)} / ${esc(c.capacity)}</td>
+      </tr>`;
+    }).join('');
+  }
+  function clearAllCourses() {
+    if (!cleanedCourses.length && drafts.every(d => !d.sectionIds.length)) { showToast('No hay nada que borrar.', 'info'); return; }
+    if (!confirm('¿Borrar todas las materias cargadas y todos los horarios? Esta acción no se puede deshacer.')) return;
+    cleanedCourses = []; manualSelectedSections = [];
+    drafts = [makeDraft('Horario 1')]; currentDraftId = drafts[0].id;
+    undoStacks = {}; redoStacks = {};
+    afterDataChange(); renderPensumCourseList();
+    showToast('Se borraron todas las materias y horarios.', 'info');
+  }
+  function copyText(text, okMsg) {
+    const fallback = () => { const ta = document.createElement('textarea'); ta.value = text; document.body.appendChild(ta); ta.select(); try { document.execCommand('copy'); showToast(okMsg, 'success'); } catch (e) { showToast('No se pudo copiar.', 'error'); } ta.remove(); };
+    if (navigator.clipboard?.writeText) navigator.clipboard.writeText(text).then(() => showToast(okMsg, 'success'), fallback); else fallback();
+  }
+  function downloadText(text, filename, type) {
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([text], { type }));
+    a.download = filename; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  }
+  function copyCleanJSON() { copyText(JSON.stringify(cleanedCourses, null, 2), 'JSON copiado al portapapeles.'); }
+  function exportCleanJSON() { downloadText(JSON.stringify(cleanedCourses, null, 2), 'clean_courses.json', 'application/json'); }
+
+  // ─── Navigation / layout toggles ──────────────────────────────
+  function toggleSidebar(open) {
+    document.getElementById('sidebar').classList.toggle('-translate-x-full', !open);
+    document.getElementById('sidebar-backdrop').classList.toggle('hidden', !open);
+  }
+  function setActiveNav(key) { document.querySelectorAll('.nav-item').forEach(el => el.classList.toggle('active', el.dataset.nav === key)); }
+  function goTo(tabId, anchorId) {
+    switchTab(tabId);
+    if (window.innerWidth < 768) toggleSidebar(false);
+    const navKey = tabId === 'manual' ? 'manual' : ({ 'sec-pensum': 'pensum', 'sec-search': 'search', 'sec-import': 'import', 'clean-preview-anchor': 'loaded' }[anchorId] || 'pensum');
+    setActiveNav(navKey);
+    if (anchorId) setTimeout(() => document.getElementById(anchorId)?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 30);
+  }
+  function switchTab(tabId) {
+    document.getElementById('tab-extract').classList.toggle('hidden', tabId !== 'extract');
+    document.getElementById('tab-manual').classList.toggle('hidden', tabId !== 'manual');
+    if (tabId === 'manual') renderManualBuilder();
+  }
+  function globalSearch() {
+    const q = document.getElementById('global-search').value.trim();
+    goTo('manual');
+    if (railCollapsed) toggleRailCollapse();
+    const ms = document.getElementById('manual-search'); ms.value = q; renderManualBuilder();
+  }
+  function toggleRailCollapse() {
+    railCollapsed = !railCollapsed;
+    const rail = document.getElementById('picker-rail');
+    rail.classList.toggle('md:w-[264px]', !railCollapsed); rail.classList.toggle('md:w-11', railCollapsed);
+    document.getElementById('picker-rail-content').classList.toggle('hidden', railCollapsed);
+    document.getElementById('picker-rail-expand-btn').classList.toggle('hidden', !railCollapsed);
+  }
+  function closeAllPopovers(exceptId) { document.querySelectorAll('.popover-panel').forEach(el => { if (el.id !== exceptId) el.classList.add('hidden'); }); }
+  function togglePopover(id) { closeAllPopovers(id); document.getElementById(id)?.classList.toggle('hidden'); }
+  function toggleRulesPopover() { togglePopover('rules-popover'); }
+  function toggleFilterPopover() { togglePopover('filter-popover'); }
+  function toggleExportPopover() { togglePopover('export-popover'); }
+  function toggleFlagsPopover(id) {
+    const panel = document.getElementById(id);
+    if (!panel) return;
+    panel.innerHTML = (window._lastFlags || []).map(f => `<div class="text-xs leading-snug ${f.startsWith('⚠️') ? 'text-amber-700' : 'text-emerald-700'}">${esc(f)}</div>`).join('') || '<div class="text-xs text-slate-500">Sin avisos.</div>';
+    togglePopover(id);
+  }
+  function toggleDetailsDrawer() { document.getElementById('details-drawer')?.classList.toggle('translate-y-full'); }
+
+  // ─── Drafts ───────────────────────────────────────────────────
+  function renderDraftTabs() {
+    const tabs = document.getElementById('draft-tabs');
+    const side = document.getElementById('sidebar-drafts');
+    const current = drafts.find(d => d.id === currentDraftId);
+    const nameEl = document.getElementById('current-draft-name');
+    if (nameEl) { nameEl.textContent = current?.name || 'Horario'; nameEl.title = current?.name || ''; }
+    if (tabs) tabs.innerHTML = drafts.map(d => {
+      const active = d.id === currentDraftId;
+      const n = resolveDraftSections(d.id).length;
+      return `<div class="group flex items-center gap-1 h-8 pl-3 pr-1 rounded-lg text-xs font-medium cursor-pointer whitespace-nowrap transition ${active ? 'bg-brand-50 text-brand-700' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800'}" onclick="switchDraft('${jsq(d.id)}')" title="${esc(d.name)}">
+        <span class="max-w-[120px] truncate">${esc(d.name)}</span>
+        <span class="text-[10px] px-1.5 rounded-full ${active ? 'bg-brand-100' : 'bg-slate-100'}">${n}</span>
+        <span class="flex items-center opacity-0 group-hover:opacity-100 transition">
+          <button onclick="event.stopPropagation(); duplicateDraft('${jsq(d.id)}')" title="Duplicar" class="w-6 h-6 rounded hover:bg-white/80"><i class="fa-regular fa-clone text-[10px]"></i></button>
+          <button onclick="event.stopPropagation(); renameDraft('${jsq(d.id)}')" title="Renombrar" class="w-6 h-6 rounded hover:bg-white/80"><i class="fa-solid fa-pen text-[10px]"></i></button>
+          ${drafts.length > 1 ? `<button onclick="event.stopPropagation(); deleteDraft('${jsq(d.id)}')" title="Eliminar" class="w-6 h-6 rounded hover:bg-rose-50 hover:text-rose-600"><i class="fa-solid fa-xmark text-[10px]"></i></button>` : ''}
+        </span>
+      </div>`;
+    }).join('');
+    if (side) side.innerHTML = drafts.map((d, i) => {
+      const active = d.id === currentDraftId;
+      const dot = courseColors[i % courseColors.length].dot;
+      return `<button onclick="switchDraft('${jsq(d.id)}'); goTo('manual')" class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition ${active ? 'bg-slate-50 text-slate-900 font-medium' : 'text-slate-600 hover:bg-slate-50'}">
+        <span class="w-6 h-6 rounded-full bg-slate-100 flex items-center justify-center"><span class="w-2.5 h-2.5 rounded-full ${dot}"></span></span>
+        <span class="truncate flex-1 text-left">${esc(d.name)}</span>
+        <span class="text-xs text-slate-400">${resolveDraftSections(d.id).length}</span>
+      </button>`;
+    }).join('');
+  }
+  function switchDraft(id) {
+    if (id === currentDraftId) return;
+    syncCurrentDraft();
+    currentDraftId = id;
+    manualSelectedSections = resolveDraftSections(id);
+    saveState(); renderManualBuilder();
+  }
+  function cycleDraft(dir) {
+    if (drafts.length < 2) return;
+    const idx = drafts.findIndex(d => d.id === currentDraftId);
+    switchDraft(drafts[(idx + dir + drafts.length) % drafts.length].id);
+  }
+  function createNewDraft() {
+    syncCurrentDraft();
+    const name = prompt('Nombre del nuevo horario:', `Horario ${drafts.length + 1}`);
+    if (name === null) return;
+    const draft = makeDraft(name.trim() || `Horario ${drafts.length + 1}`);
+    drafts.push(draft); currentDraftId = draft.id; manualSelectedSections = [];
+    saveState(); goTo('manual');
+    showToast(`"${draft.name}" creado`, 'success');
+  }
+  function duplicateDraft(id) {
+    syncCurrentDraft();
+    const source = drafts.find(d => d.id === id);
+    if (!source) return;
+    const copy = { ...makeDraft(`${source.name} (copia)`), sectionIds: [...source.sectionIds] };
+    drafts.push(copy); currentDraftId = copy.id; manualSelectedSections = resolveDraftSections(copy.id);
+    saveState(); renderManualBuilder();
+    showToast(`"${copy.name}" creado`, 'success');
+  }
+  function renameDraft(id) {
+    const draft = drafts.find(d => d.id === id);
+    if (!draft) return;
+    const name = prompt('Nuevo nombre:', draft.name);
+    if (name === null || !name.trim()) return;
+    draft.name = name.trim(); saveState(); renderDraftTabs();
+  }
+  function deleteDraft(id) {
+    if (drafts.length <= 1) return;
+    const draft = drafts.find(d => d.id === id);
+    if (!confirm(`¿Eliminar "${draft.name}"? Esta acción no se puede deshacer.`)) return;
+    drafts = drafts.filter(d => d.id !== id);
+    delete undoStacks[id]; delete redoStacks[id];
+    if (currentDraftId === id) { currentDraftId = drafts[0].id; manualSelectedSections = resolveDraftSections(currentDraftId); }
+    saveState(); renderManualBuilder(); showToast('Horario eliminado.', 'info');
+  }
+  function toggleDraftComparison() {
+    const modal = document.getElementById('draft-comparison-modal');
+    modal.classList.toggle('hidden');
+    if (!modal.classList.contains('hidden')) renderDraftComparison();
+  }
+  function renderDraftComparison() {
+    const content = document.getElementById('draft-comparison-content');
+    if (!content) return;
+    syncCurrentDraft();
+    const rows = drafts.map(d => {
+      const sections = resolveDraftSections(d.id);
+      const { score } = evaluateScheduleRules(sections);
+      const { total } = computeTotalCredits(sections);
+      const active = d.id === currentDraftId;
+      return `<tr class="${active ? 'bg-brand-50' : 'hover:bg-slate-50'} cursor-pointer" onclick="switchDraft('${jsq(d.id)}'); toggleDraftComparison(); goTo('manual');">
+        <td class="px-3 py-2.5 font-medium">${active ? '<i class="fa-solid fa-check mr-1.5 text-brand-600"></i>' : ''}${esc(d.name)}</td>
+        <td class="px-3 py-2.5">${new Set(sections.map(s => s.code)).size}</td>
+        <td class="px-3 py-2.5">${total || '—'}</td>
+        <td class="px-3 py-2.5">${computeWeeklyHours(sections)} h</td>
+        <td class="px-3 py-2.5 font-semibold ${sections.length ? 'text-brand-700' : 'text-slate-400'}">${sections.length ? score + '/10' : '—'}</td>
+      </tr>`;
+    }).join('');
+    content.innerHTML = `<table class="w-full text-left text-sm min-w-[440px]">
+      <thead class="text-xs text-slate-500 border-b border-slate-200"><tr><th class="px-3 py-2 font-medium">Horario</th><th class="px-3 py-2 font-medium">Materias</th><th class="px-3 py-2 font-medium">Créditos</th><th class="px-3 py-2 font-medium">Horas/sem</th><th class="px-3 py-2 font-medium">Score</th></tr></thead>
+      <tbody class="divide-y divide-slate-100">${rows}</tbody></table>`;
+  }
+
+  // ─── Manual builder ───────────────────────────────────────────
+  function toggleSubjectAccordion(code) { expandedSubjects[code] = expandedSubjects[code] === false; renderManualBuilder(); }
+  function toggleCanvasDropdown(id) {
+    document.querySelectorAll('.canvas-dropdown').forEach(el => { if (el.id !== id) el.classList.add('hidden'); });
+    document.getElementById(id)?.classList.toggle('hidden');
+  }
+  function populateFilterDropdowns() {
+    const modSel = document.getElementById('filter-modalidad'), profSel = document.getElementById('filter-profesor');
+    if (!modSel || !profSel) return;
+    const currentMod = modSel.dataset.pending || modSel.value, currentProf = profSel.dataset.pending || profSel.value;
+    delete modSel.dataset.pending; delete profSel.dataset.pending;
+    const modalidades = [...new Set(cleanedCourses.map(c => c.instructional_method).filter(Boolean))].sort();
+    const profesores = [...new Set(cleanedCourses.flatMap(c => c.instructors).filter(Boolean))].sort();
+    modSel.innerHTML = `<option value="">Modalidad: Todas</option>` + modalidades.map(m => `<option value="${esc(m)}">${esc(m)}</option>`).join('');
+    profSel.innerHTML = `<option value="">Profesor: Todos</option>` + profesores.map(p => `<option value="${esc(p)}">${esc(p)}</option>`).join('');
+    if (modalidades.includes(currentMod)) modSel.value = currentMod;
+    if (profesores.includes(currentProf)) profSel.value = currentProf;
+  }
+
+  function checkPairing(sec, selected) {
+    if (isComplementaria(sec)) {
+      const mag = selected.find(s => s.code === sec.code && isMagistral(s));
+      if (mag && !sec.section.startsWith(mag.section)) return `Requiere magistral ${mag.section}`;
+    } else if (isMagistral(sec)) {
+      const comp = selected.find(s => s.code === sec.code && isComplementaria(s));
+      if (comp && !comp.section.startsWith(sec.section)) return `Incompatible con compl. ${comp.section}`;
+    }
+    return null;
+  }
+
+  function renderManualBuilder() {
+    renderDraftTabs();
+    if (!document.getElementById('draft-comparison-modal').classList.contains('hidden')) renderDraftComparison();
+    const picker = document.getElementById('manual-section-picker');
+    if (!picker) return;
+    populateFilterDropdowns();
+    const q = (document.getElementById('manual-search')?.value || '').toLowerCase().trim();
+    const modFilter = document.getElementById('filter-modalidad')?.value || '';
+    const profFilter = document.getElementById('filter-profesor')?.value || '';
+    const cuposOnly = document.getElementById('filter-cupos')?.checked || false;
+
+    const grouped = {};
+    cleanedCourses.forEach(c => { (grouped[c.code] ||= []).push(c); });
+    const codes = Object.keys(grouped);
+    document.getElementById('manual-courses-count').textContent = `${codes.length} materia${codes.length === 1 ? '' : 's'}`;
+
+    if (!codes.length) {
+      picker.innerHTML = `<div class="flex flex-col items-center gap-2 py-10 px-3 text-center">
+        <div class="w-11 h-11 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center"><i class="fa-solid fa-box-open"></i></div>
+        <p class="text-sm text-slate-500">Sin materias cargadas.</p>
+        <button onclick="goTo('extract','sec-pensum')" class="mt-1 h-8 px-3 rounded-lg bg-brand-600 hover:bg-brand-700 text-white text-xs font-semibold">Agregar desde el pensum</button>
+      </div>`;
+    } else {
+      let html = '';
+      codes.forEach(code => {
+        const sections = grouped[code].filter(s => {
+          if (q && !(String(s.code).toLowerCase().includes(q) || String(s.title).toLowerCase().includes(q) || String(s.nrc).includes(q) || s.instructors.some(i => String(i).toLowerCase().includes(q)))) return false;
+          if (modFilter && s.instructional_method !== modFilter) return false;
+          if (profFilter && !s.instructors.includes(profFilter)) return false;
+          if (cuposOnly && !(s.seats_available === 'N/A' || Number(s.seats_available) > 0)) return false;
+          return true;
+        });
+        if (!sections.length) return;
+        const color = getCourseColor(code);
+        const expanded = expandedSubjects[code] !== false;
+        const selectedCount = sections.filter(s => manualSelectedSections.some(m => m.id === s.id)).length;
+        html += `<div class="rounded-xl border border-slate-200 overflow-hidden">
+          <button class="w-full px-2.5 py-2 flex items-center gap-2 hover:bg-slate-50 text-left" onclick="toggleSubjectAccordion('${jsq(code)}')">
+            <span class="w-1.5 h-6 rounded-full ${color.dot} flex-shrink-0"></span>
+            <span class="min-w-0 flex-1">
+              <span class="block text-xs font-semibold truncate">${esc(sections[0].title)}</span>
+              <span class="block text-[11px] text-slate-500">${esc(code)} · ${sections.length} secc.${selectedCount ? ` · <b class="text-brand-600">${selectedCount} en horario</b>` : ''}</span>
+            </span>
+            <i class="fa-solid fa-chevron-${expanded ? 'up' : 'down'} text-slate-400 text-[10px]"></i>
+          </button>
+          <div class="${expanded ? '' : 'hidden'} p-1.5 space-y-1.5 border-t border-slate-100 bg-slate-50/50">`;
+        sections.forEach(sec => {
+          const selected = manualSelectedSections.some(s => s.id === sec.id);
+          let conflictWith = null, ruleError = null;
+          if (!selected) {
+            conflictWith = manualSelectedSections.find(a => a.id !== sec.id && hasTimeConflict(a, sec)) || null;
+            ruleError = checkPairing(sec, manualSelectedSections);
+          }
+          const timeText = sec.schedules.map(s => `${s.days.map(d => d.slice(0, 2)).join('')} ${s.start_time}–${s.end_time}`).join(' · ') || 'Sin horario';
+          const state = selected ? 'border-brand-500 bg-brand-50 ring-2 ring-brand-100'
+            : (conflictWith || ruleError) ? 'border-rose-200 bg-rose-50/60 hover:border-rose-300'
+            : 'border-slate-200 bg-white hover:border-slate-300 hover:shadow-card';
+          html += `<div ${!selected ? `draggable="true" ondragstart="handleCardDragStart(event, '${jsq(sec.id)}')" ondragend="handleCardDragEnd(event)"` : ''}
+              onmouseenter="hoverManualSection('${jsq(sec.id)}')" onmouseleave="unhoverManualSection()" onclick="toggleManualSection('${jsq(sec.id)}')"
+              class="p-2 rounded-lg border transition flex items-start gap-2 ${state} ${selected ? 'cursor-pointer' : 'cursor-grab active:cursor-grabbing'}">
+            <div class="min-w-0 flex-1 space-y-0.5">
+              <div class="flex items-center justify-between gap-1">
+                <span class="text-xs font-semibold ${selected ? 'text-brand-700' : ''}">Sec ${esc(sec.section)} <span class="font-normal text-[10px] text-slate-400">NRC ${esc(sec.nrc)}</span></span>
+                <span class="text-[10px] font-mono ${getSeatColor(sec.seats_available, sec.capacity)}">${esc(sec.seats_available)}/${esc(sec.capacity)}</span>
+              </div>
+              <p class="text-[11px] text-slate-600 truncate">${esc(timeText)}</p>
+              <p class="text-[11px] text-slate-400 truncate">${esc(sec.instructors[0])}${sec.schedule_type !== 'Magistral' ? ` · ${esc(sec.schedule_type)}` : ''}</p>
+              ${conflictWith ? `<p class="text-[11px] text-rose-600 truncate"><i class="fa-solid fa-triangle-exclamation mr-1"></i>Choca con ${esc(conflictWith.code)} S${esc(conflictWith.section)}</p>` : ''}
+              ${ruleError ? `<p class="text-[11px] text-rose-600 truncate"><i class="fa-solid fa-link-slash mr-1"></i>${esc(ruleError)}</p>` : ''}
+            </div>
+            <span class="w-5 h-5 rounded-md flex-shrink-0 flex items-center justify-center text-[10px] ${selected ? 'bg-brand-600 text-white' : 'bg-slate-100 text-slate-500'}"><i class="fa-solid ${selected ? 'fa-check' : 'fa-plus'}"></i></span>
+          </div>`;
+        });
+        html += `</div></div>`;
+      });
+      picker.innerHTML = html || `<div class="flex flex-col items-center gap-2 py-10 text-slate-500 text-sm"><i class="fa-solid fa-filter-circle-xmark text-xl text-slate-300"></i>Ningún resultado con estos filtros.</div>`;
+    }
+    renderManualGrid(); renderManualMetrics(); renderManualDetailCards();
+  }
+
+  function toggleManualSection(secId) {
+    closeSlotPopup();
+    const section = cleanedCourses.find(c => c.id === secId);
+    if (!section) return;
+    const idx = manualSelectedSections.findIndex(s => s.id === secId);
+    if (idx >= 0) {
+      pushUndo();
+      manualSelectedSections.splice(idx, 1);
+      showToast(`${section.code} Sec ${section.section} removida`, 'info');
+    } else {
+      const pairErr = checkPairing(section, manualSelectedSections);
+      if (pairErr) { showToast(`${section.code} Sec ${section.section}: ${pairErr}.`, 'error'); return; }
+      pushUndo();
+      manualSelectedSections = manualSelectedSections.filter(s => !(s.code === section.code && s.schedule_type === section.schedule_type));
+      const conflict = manualSelectedSections.find(s => hasTimeConflict(s, section));
+      if (conflict) showToast(`Traslape con ${conflict.code} Sec ${conflict.section}`, 'warning');
+      manualSelectedSections.push(section);
+      showToast(`${section.code} Sec ${section.section} agregada`, 'success');
+    }
+    hoveredManualSectionId = null;
+    saveState(); renderManualBuilder();
+  }
+
+  function swapManualSection(oldId, newId) {
+    if (oldId === newId) return;
+    const newSec = cleanedCourses.find(c => c.id === newId);
+    if (!newSec) return;
+    const conflict = manualSelectedSections.find(s => s.id !== oldId && hasTimeConflict(s, newSec));
+    if (conflict) { showToast(`Choque con ${conflict.code} Sec ${conflict.section}`, 'error'); return; }
+    const pairErr = checkPairing(newSec, manualSelectedSections.filter(s => s.id !== oldId));
+    if (pairErr) { showToast(pairErr, 'error'); return; }
+    pushUndo();
+    manualSelectedSections = manualSelectedSections.filter(s => s.id !== oldId);
+    manualSelectedSections.push(newSec);
+    showToast(`Cambiado a sección ${newSec.section}`, 'success');
+    saveState(); renderManualBuilder();
+  }
+
+  function hoverManualSection(secId) { if (hoveredManualSectionId === secId) return; hoveredManualSectionId = secId; renderManualGrid(); }
+  function unhoverManualSection() { if (hoveredManualSectionId === null) return; hoveredManualSectionId = null; renderManualGrid(); }
+
+  function renderManualGrid() {
+    const container = document.getElementById('manual-calendar-grid');
+    if (!container) return;
+    const items = manualSelectedSections.map(sec => ({ section: sec, color: getCourseColor(sec.code), isGhost: false }));
+    let conflictingIds = [];
+    const hovered = hoveredManualSectionId ? cleanedCourses.find(c => c.id === hoveredManualSectionId) : null;
+    if (hovered && !manualSelectedSections.some(s => s.id === hovered.id)) {
+      conflictingIds = manualSelectedSections.filter(s => hasTimeConflict(s, hovered)).map(s => s.id);
+      items.push({ section: hovered, isGhost: true, hasConflict: conflictingIds.length > 0 });
+    }
+    container.innerHTML = generateCalendarGrid(items, conflictingIds);
+  }
+
+  function renderManualDetailCards() {
+    const container = document.getElementById('manual-detail-cards');
+    if (!container) return;
+    if (!manualSelectedSections.length) { container.innerHTML = `<div class="col-span-full text-center text-slate-500 text-sm py-6">No hay materias seleccionadas.</div>`; return; }
+    container.innerHTML = manualSelectedSections.map(sec => {
+      const color = getCourseColor(sec.code);
+      return `<div class="rounded-xl border border-slate-200 p-4 space-y-2 text-sm">
+        <div class="flex items-center justify-between gap-2">
+          <span class="px-2 py-0.5 rounded-md text-xs font-semibold ${color.badge}">${esc(sec.code)}</span>
+          <span class="text-xs text-slate-500">NRC ${esc(sec.nrc)} · Sec ${esc(sec.section)}</span>
+        </div>
+        <p class="font-semibold leading-tight">${esc(sec.title)}</p>
+        <p class="text-xs text-slate-500"><i class="fa-regular fa-user mr-1"></i>${esc(sec.instructors.join(', '))}</p>
+        <div class="flex items-center gap-3 text-xs">
+          <span class="${getSeatColor(sec.seats_available, sec.capacity)}"><i class="fa-solid fa-chair mr-1"></i>${esc(sec.seats_available)}/${esc(sec.capacity)}</span>
+          ${sec.credits !== 'N/A' ? `<span class="text-slate-500"><i class="fa-solid fa-graduation-cap mr-1"></i>${esc(sec.credits)} créditos</span>` : ''}
+        </div>
+        <div class="text-xs text-slate-600 space-y-0.5">${sec.schedules.map(s => `<div>${s.days.join(', ')}: ${fmtTime(s.start_time)} – ${fmtTime(s.end_time)} · ${esc(s.location)}</div>`).join('')}</div>
+        <button onclick="toggleManualSection('${jsq(sec.id)}')" class="w-full h-8 rounded-lg border border-rose-200 text-rose-600 hover:bg-rose-50 text-xs font-semibold"><i class="fa-regular fa-trash-can mr-1"></i> Quitar</button>
+      </div>`;
+    }).join('');
+  }
+
+  function renderManualMetrics() {
+    const badge = document.getElementById('badge-manual-count');
+    if (badge) { badge.textContent = manualSelectedSections.length; badge.classList.toggle('hidden', !manualSelectedSections.length); }
+    const targets = [['command-metrics', 'flags-popover-top'], ['command-metrics-inline', 'flags-popover-inline']];
+    if (!manualSelectedSections.length) {
+      window._lastFlags = [];
+      targets.forEach(([id]) => { const el = document.getElementById(id); if (el) el.innerHTML = `<span class="text-xs text-slate-400">Sin materias en el horario</span>`; });
+      updateUndoRedoButtons();
+      return;
+    }
+    let conflicts = 0;
+    for (let i = 0; i < manualSelectedSections.length; i++)
+      for (let j = i + 1; j < manualSelectedSections.length; j++)
+        if (hasTimeConflict(manualSelectedSections[i], manualSelectedSections[j])) conflicts++;
+    const { score, flags, totalCredits } = evaluateScheduleRules(manualSelectedSections);
+    const hours = computeWeeklyHours(manualSelectedSections);
+    const warn = flags.filter(f => f.startsWith('⚠️'));
+    window._lastFlags = flags;
+    const pill = 'h-8 px-2.5 rounded-full text-xs font-semibold flex items-center gap-1.5 whitespace-nowrap';
+    targets.forEach(([id, popId]) => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.innerHTML = `
+        <span class="${pill} ${conflicts ? 'bg-rose-50 text-rose-700' : 'bg-emerald-50 text-emerald-700'}" title="${conflicts ? conflicts + ' choque(s)' : 'Sin traslapes'}"><i class="fa-solid ${conflicts ? 'fa-triangle-exclamation' : 'fa-check'}"></i>${conflicts ? conflicts + ' choque' + (conflicts > 1 ? 's' : '') : 'Sin choques'}</span>
+        <span class="${pill} bg-brand-50 text-brand-700" title="Score según tus restricciones"><i class="fa-solid fa-star"></i>${score}/10</span>
+        <span class="${pill} bg-slate-100 text-slate-700" title="Horas por semana"><i class="fa-regular fa-clock"></i>${hours} h</span>
+        <span class="${pill} bg-slate-100 text-slate-700" title="Créditos"><i class="fa-solid fa-graduation-cap"></i>${totalCredits || 0} cr</span>
+        ${warn.length ? `<span class="relative popover-anchor">
+          <button onclick="toggleFlagsPopover('${popId}')" class="${pill} bg-amber-50 text-amber-700" title="Ver avisos"><i class="fa-solid fa-flag"></i>${warn.length}</button>
+          <div id="${popId}" class="popover-panel hidden absolute right-0 mt-2 w-64 bg-white border border-slate-200 rounded-xl shadow-pop p-3 z-50 space-y-1.5"></div>
+        </span>` : ''}`;
+    });
+    updateUndoRedoButtons();
+  }
+
+  function buildSummaryText(header) {
+    let text = header;
+    manualSelectedSections.forEach(s => {
+      text += `• ${s.code} - ${s.title} (Sec ${s.section}, NRC ${s.nrc}, ${s.schedule_type})\n`;
+      text += `  ${s.instructional_method} | Cupos: ${s.seats_available}/${s.capacity} | Créditos: ${s.credits ?? 'N/A'}\n`;
+      s.schedules.forEach(sch => text += `  ${sch.days.join(', ')}: ${sch.start_time}–${sch.end_time} [${sch.location}]\n`);
+      text += `  Profesor: ${s.instructors.join(', ')}\n\n`;
+    });
+    return text;
+  }
+  function exportManualText() {
+    if (!manualSelectedSections.length) { showToast('No hay materias en el horario.', 'warning'); return; }
+    const { score, flags, totalCredits } = evaluateScheduleRules(manualSelectedSections);
+    const name = drafts.find(d => d.id === currentDraftId)?.name || 'Horario';
+    let text = buildSummaryText(`${name.toUpperCase()} — Score: ${score}/10 | ${computeWeeklyHours(manualSelectedSections)} h/sem | ${totalCredits} créditos\n${'='.repeat(50)}\n\n`);
+    if (flags.length) text += `Notas:\n${flags.map(f => `  ${f}`).join('\n')}\n`;
+    downloadText(text, 'horario.txt', 'text/plain;charset=utf-8');
+    showToast('Exportado como horario.txt', 'success');
+  }
+  function copyManualSummary() {
+    if (!manualSelectedSections.length) { showToast('No hay materias en el horario.', 'warning'); return; }
+    copyText(buildSummaryText('🗓️ HORARIO:\n\n'), 'Resumen copiado al portapapeles.');
+  }
+
+  function printSchedule() {
+    if (!manualSelectedSections.length) { showToast('No hay materias para imprimir.', 'warning'); return; }
+    const days = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+    const dayMap = Object.fromEntries(days.map(d => [d, []]));
+    manualSelectedSections.forEach(sec => sec.schedules.forEach(sch => sch.days.forEach(d => {
+      if (dayMap[d]) dayMap[d].push({ code: sec.code, section: sec.section, time: `${sch.start_time}–${sch.end_time}`, location: sch.location, start: sch.start_time });
+    })));
+    days.forEach(d => dayMap[d].sort((a, b) => a.start.localeCompare(b.start)));
+    const { total } = computeTotalCredits(manualSelectedSections);
+    const draftName = drafts.find(d => d.id === currentDraftId)?.name || 'Horario';
+    const rowsHtml = manualSelectedSections.map(s => `<tr><td>${esc(s.code)}</td><td>${esc(s.title)}</td><td>${esc(s.section)}</td><td>${esc(s.nrc)}</td>
+      <td>${s.schedules.map(sc => `${sc.days.map(d => d.slice(0, 2)).join('')} ${sc.start_time}-${sc.end_time}`).join('<br>')}</td>
+      <td>${s.schedules.map(sc => esc(sc.location)).join('<br>')}</td><td>${esc(s.instructors.join(', '))}</td><td>${esc(s.credits ?? 'N/A')}</td></tr>`).join('');
+    const daysHtml = days.map(d => `<div class="day"><div class="dt">${d}</div>${dayMap[d].length ? dayMap[d].map(e => `<div class="en">${e.time} — ${esc(e.code)} Sec ${esc(e.section)} (${esc(e.location)})</div>`).join('') : '<div class="en mu">Sin clases</div>'}</div>`).join('');
+    const html = `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>${esc(draftName)}</title><style>
+      body{font-family:Inter,Arial,sans-serif;padding:28px;color:#101828}h1{font-size:20px;margin:0 0 4px}.meta{font-size:12px;color:#667085;margin-bottom:20px}
+      table{width:100%;border-collapse:collapse;margin-bottom:26px}th,td{border:1px solid #eaecf0;padding:6px 8px;font-size:11px;text-align:left;vertical-align:top}th{background:#f9fafb}
+      .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.day{break-inside:avoid}.dt{font-weight:600;font-size:12.5px;border-bottom:2px solid #2f4bf0;margin-bottom:5px;padding-bottom:3px}.en{font-size:11px;padding:2px 0}.mu{color:#98a2b3}
+      @media print{body{padding:12mm}}</style></head><body>
+      <h1>${esc(draftName)}</h1><div class="meta">${new Set(manualSelectedSections.map(s => s.code)).size} materias · ${total > 0 ? total + ' créditos · ' : ''}${computeWeeklyHours(manualSelectedSections)} h/semana · ${new Date().toLocaleDateString('es-CO')}</div>
+      <table><thead><tr><th>Código</th><th>Materia</th><th>Sec</th><th>NRC</th><th>Horario</th><th>Salón</th><th>Profesor</th><th>Créd.</th></tr></thead><tbody>${rowsHtml}</tbody></table>
+      <div class="grid">${daysHtml}</div></body></html>`;
+    const win = window.open('', '_blank');
+    if (!win) { showToast('El navegador bloqueó la ventana de impresión. Habilita pop-ups.', 'warning'); return; }
+    win.document.write(html); win.document.close(); win.focus();
+    setTimeout(() => win.print(), 350);
+  }
+
+  // ─── Click-to-suggest empty slots ─────────────────────────────
+  const CAL = { startHour: 6, endHour: 21, px: 64 };
+  function closeSlotPopup() { if (activeSlotPopup) { activeSlotPopup.remove(); activeSlotPopup = null; } }
+  function handleDayColumnClick(e, day) {
+    if (e.target.closest('.canvas-dropdown-container')) return;
+    closeSlotPopup();
+    const rect = e.currentTarget.getBoundingClientRect();
+    const y = e.clientY - rect.top;
+    const clickedMin = CAL.startHour * 60 + (y / CAL.px) * 60;
+    const candidates = cleanedCourses
+      .filter(sec => !manualSelectedSections.some(s => s.id === sec.id))
+      .filter(sec => sec.schedules.some(sch => sch.days.includes(day)))
+      .filter(sec => !manualSelectedSections.some(s => hasTimeConflict(s, sec)))
+      .filter(sec => !checkPairing(sec, manualSelectedSections))
+      .map(sec => { const sch = sec.schedules.find(s => s.days.includes(day)); return { sec, sch, dist: Math.abs(timeToMinutes(sch.start_time) - clickedMin) }; })
+      .sort((a, b) => a.dist - b.dist).slice(0, 6);
+    const popup = document.createElement('div');
+    popup.id = 'slot-popup-' + Date.now();
+    popup.className = 'canvas-dropdown-container absolute z-[70] bg-white border border-slate-200 rounded-xl shadow-pop p-1.5 w-60 text-sm';
+    popup.style.top = Math.max(0, Math.min(y - 4, rect.height - 260)) + 'px';
+    popup.style.left = '4px';
+    popup.innerHTML = candidates.length
+      ? `<div class="text-[11px] font-semibold text-slate-500 px-2 py-1.5">Caben en este espacio · ${day}</div>` + candidates.map(c => `
+        <button onclick="toggleManualSection('${jsq(c.sec.id)}')" class="w-full text-left px-2 py-1.5 rounded-lg hover:bg-slate-50 flex items-center gap-2">
+          <span class="w-1.5 h-7 rounded-full ${getCourseColor(c.sec.code).dot}"></span>
+          <span class="min-w-0 flex-1"><span class="block text-xs font-semibold truncate">${esc(c.sec.title)}</span><span class="block text-[11px] text-slate-500">${esc(c.sec.code)} S${esc(c.sec.section)} · ${fmtTime(c.sch.start_time)}</span></span>
+          <i class="fa-solid fa-plus text-[10px] text-slate-400"></i>
+        </button>`).join('')
+      : `<div class="text-slate-500 text-center text-xs py-4 px-2">Sin materias disponibles para este espacio.</div>`;
+    e.currentTarget.appendChild(popup);
+    activeSlotPopup = popup;
+    e.stopPropagation();
+  }
+
+  // ─── Drag & drop ──────────────────────────────────────────────
+  function handleCardDragStart(e, secId) {
+    if (!cleanedCourses.some(c => c.id === secId)) return;
+    draggingSectionId = secId;
+    e.dataTransfer.effectAllowed = 'copy';
+    try { e.dataTransfer.setData('text/plain', secId); } catch (err) {}
+    renderManualGrid();
+  }
+  function handleCardDragEnd() { draggingSectionId = null; renderManualGrid(); }
+  function handleDayColumnDragOver(e) { if (!draggingSectionId) return; e.preventDefault(); e.dataTransfer.dropEffect = 'copy'; }
+  function handleDayColumnDrop(e, day) {
+    e.preventDefault();
+    const secId = draggingSectionId; draggingSectionId = null;
+    const sec = secId && cleanedCourses.find(c => c.id === secId);
+    if (!sec) { renderManualGrid(); return; }
+    if (!sec.schedules.some(sch => sch.days.includes(day))) { showToast(`${sec.code} no tiene clase los ${day.toLowerCase()}.`, 'warning'); renderManualGrid(); return; }
+    const conflict = manualSelectedSections.find(s => hasTimeConflict(s, sec) && !(s.code === sec.code && s.schedule_type === sec.schedule_type));
+    if (conflict) { showToast(`No se puede soltar: choca con ${conflict.code} Sec ${conflict.section}.`, 'error'); renderManualGrid(); return; }
+    const pairErr = checkPairing(sec, manualSelectedSections);
+    if (pairErr) { showToast(pairErr, 'error'); renderManualGrid(); return; }
+    pushUndo();
+    manualSelectedSections = manualSelectedSections.filter(s => !(s.code === sec.code && s.schedule_type === sec.schedule_type));
+    manualSelectedSections.push(sec);
+    saveState(); showToast(`${sec.code} Sec ${sec.section} agregada`, 'success');
+    renderManualBuilder();
+  }
+  function handlePlacedDragStart(e, secId) {
+    draggingPlacedSectionId = secId;
+    e.dataTransfer.effectAllowed = 'move';
+    try { e.dataTransfer.setData('text/plain', secId); } catch (err) {}
+    document.getElementById('calendar-trash-zone')?.classList.remove('hidden');
+  }
+  function handlePlacedDragEnd() { draggingPlacedSectionId = null; document.getElementById('calendar-trash-zone')?.classList.add('hidden'); }
+  function handleTrashDragOver(e) { e.preventDefault(); }
+  function handleTrashDrop(e) {
+    e.preventDefault();
+    const secId = draggingPlacedSectionId; draggingPlacedSectionId = null;
+    document.getElementById('calendar-trash-zone')?.classList.add('hidden');
+    if (!secId) return;
+    const sec = cleanedCourses.find(c => c.id === secId);
+    pushUndo();
+    manualSelectedSections = manualSelectedSections.filter(s => s.id !== secId);
+    saveState(); showToast(`${sec ? sec.code : 'Sección'} removida`, 'info');
+    renderManualBuilder();
+  }
+
+  // ─── Calendar grid ────────────────────────────────────────────
+  function generateCalendarGrid(items, conflictingIds = []) {
+    const days = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+    const short = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+    const { startHour, endHour, px } = CAL;
+    const totalH = (endHour - startHour + 1) * px;
+    const now = new Date();
+    const todayIdx = now.getDay() - 1; // 0 = Lunes
+    const nowTop = (now.getHours() * 60 + now.getMinutes() - startHour * 60) * (px / 60);
+    const showNow = nowTop > 0 && nowTop < totalH && todayIdx >= 0 && todayIdx < 6;
+    const dragSec = draggingSectionId ? cleanedCourses.find(c => c.id === draggingSectionId) : null;
+    const countByDay = days.map(d => manualSelectedSections.reduce((n, s) => n + s.schedules.filter(sc => sc.days.includes(d)).length, 0));
+
+    // Sticky header
+    let html = `<div class="sticky top-0 z-[55] flex bg-white border-b border-slate-200">
+      <div class="w-16 flex-shrink-0 border-r border-slate-100"></div>
+      <div class="flex-1 grid grid-cols-6">` +
+      days.map((d, i) => {
+        const today = i === todayIdx;
+        return `<div class="py-2.5 text-center border-r border-slate-100 last:border-r-0 ${today ? 'border-b-2 border-b-brand-600 -mb-px' : ''} ${i === 5 ? 'bg-slate-50/60' : ''}">
+          <div class="mx-auto w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${today ? 'bg-brand-600 text-white' : 'text-slate-500'}">${countByDay[i] || '·'}</div>
+          <div class="text-sm ${today ? 'font-semibold text-slate-900' : 'text-slate-500'}">${short[i]}</div>
+        </div>`;
+      }).join('') + `</div></div>`;
+
+    html += `<div class="flex relative" style="height:${totalH}px;">`;
+    html += `<div class="w-16 flex-shrink-0 border-r border-slate-100 relative">`;
+    for (let h = startHour; h <= endHour; h++) {
+      html += `<div class="absolute right-2 text-[11px] text-slate-400 -translate-y-1/2 whitespace-nowrap" style="top:${(h - startHour) * px + (h === startHour ? 8 : 0)}px">${fmtHour(h).replace(':00', '')}</div>`;
+    }
+    html += `</div><div class="flex-1 relative">`;
+    html += `<div class="absolute inset-0 pointer-events-none">`;
+    for (let h = startHour; h <= endHour; h++) html += `<div class="border-t border-slate-100" style="height:${px}px"></div>`;
+    html += `</div>`;
+
+    html += `<div class="absolute inset-0 grid grid-cols-6">`;
+    days.forEach((day, di) => {
+      html += `<div class="relative h-full border-r border-slate-100 last:border-r-0 cursor-pointer ${di === 5 ? 'hatch' : ''}"
+        onclick="handleDayColumnClick(event, '${day}')" ondragover="handleDayColumnDragOver(event)" ondrop="handleDayColumnDrop(event, '${day}')">`;
+
+      if (showNow && di === todayIdx) {
+        html += `<div class="absolute left-0 right-0 z-[45] pointer-events-none flex items-center" style="top:${nowTop}px">
+          <span class="w-3 h-3 rounded-full bg-brand-600 -ml-1.5 ring-2 ring-white"></span><span class="flex-1 h-0.5 bg-brand-600"></span></div>`;
+      }
+      if (dragSec) dragSec.schedules.forEach(slot => {
+        if (!slot.days.includes(day)) return;
+        const s = timeToMinutes(slot.start_time), e = timeToMinutes(slot.end_time);
+        const bad = manualSelectedSections.some(x => hasTimeConflict(x, dragSec) && !(x.code === dragSec.code && x.schedule_type === dragSec.schedule_type));
+        html += `<div class="absolute inset-x-1 rounded-xl border-2 border-dashed ${bad ? 'border-rose-400 bg-rose-50' : 'border-emerald-400 bg-emerald-50'} z-10 pointer-events-none" style="top:${(s - startHour * 60) * px / 60}px;height:${(e - s) * px / 60}px"></div>`;
+      });
+
+      items.forEach(itm => itm.section.schedules.forEach(slot => {
+        if (!slot.days.includes(day)) return;
+        const s = timeToMinutes(slot.start_time), e = timeToMinutes(slot.end_time);
+        const top = (s - startHour * 60) * px / 60 + 2, height = Math.max(22, (e - s) * px / 60 - 4);
+        const compact = height < 56;
+        if (itm.isGhost) {
+          html += `<div class="absolute inset-x-1 p-2 rounded-xl border-2 border-dashed ${itm.hasConflict ? 'border-rose-400 bg-rose-50/90 text-rose-700' : 'border-brand-500 bg-brand-50/90 text-brand-700'} text-[11px] z-30 overflow-hidden pointer-events-none" style="top:${top}px;height:${height}px">
+            <div class="font-semibold truncate">${esc(itm.section.code)} S${esc(itm.section.section)}</div>
+            <div class="opacity-80">${fmtTime(slot.start_time)} – ${fmtTime(slot.end_time)}</div>
+            ${itm.hasConflict ? '<div class="font-semibold mt-0.5"><i class="fa-solid fa-triangle-exclamation mr-1"></i>Conflicto</div>' : ''}
+          </div>`;
+          return;
+        }
+        const c = itm.color;
+        const ddId = `dd-${itm.section.id}-${day}-${slot.start_time.replace(':', '')}`.replace(/[^\w-]/g, '_');
+        const highlighted = conflictingIds.includes(itm.section.id);
+        const alts = cleanedCourses.filter(x => x.code === itm.section.code && x.schedule_type === itm.section.schedule_type);
+        let dd = `<div id="${ddId}" class="canvas-dropdown hidden absolute ${top > totalH - 260 ? 'bottom-full mb-1' : 'top-full mt-1'} left-0 w-56 bg-white border border-slate-200 rounded-xl shadow-pop z-[60] overflow-hidden text-left cursor-default" onclick="event.stopPropagation()">
+          <div class="px-3 py-2 border-b border-slate-100 text-xs font-semibold text-slate-700">Cambiar sección</div>
+          <div class="max-h-44 overflow-y-auto p-1 space-y-0.5">`;
+        alts.forEach(alt => {
+          const curr = alt.id === itm.section.id;
+          const clash = manualSelectedSections.some(s => s.id !== itm.section.id && hasTimeConflict(s, alt));
+          dd += `<button onclick="swapManualSection('${jsq(itm.section.id)}','${jsq(alt.id)}')" ${clash && !curr ? 'disabled' : ''}
+            class="w-full text-left px-2.5 py-1.5 rounded-lg text-xs flex items-center justify-between gap-2 ${curr ? 'bg-brand-50 text-brand-700' : 'hover:bg-slate-50 text-slate-700'} ${clash && !curr ? 'opacity-40 cursor-not-allowed' : ''}">
+            <span class="min-w-0"><b>Sec ${esc(alt.section)}</b> <span class="text-slate-400">${esc((alt.instructors[0] || '').split(' ').slice(0, 2).join(' '))}</span></span>
+            ${curr ? '<i class="fa-solid fa-check text-brand-600"></i>' : (clash ? '<i class="fa-solid fa-ban text-rose-500"></i>' : '')}
+          </button>`;
+        });
+        dd += `</div><div class="p-1 border-t border-slate-100">
+            <button onclick="toggleManualSection('${jsq(itm.section.id)}')" class="w-full px-2.5 py-1.5 rounded-lg text-xs text-rose-600 hover:bg-rose-50 text-left"><i class="fa-regular fa-trash-can mr-1.5"></i>Quitar del horario</button>
+          </div></div>`;
+        html += `<div class="absolute inset-x-1 canvas-dropdown-container z-40 hover:z-50" draggable="true"
+            ondragstart="handlePlacedDragStart(event, '${jsq(itm.section.id)}')" ondragend="handlePlacedDragEnd(event)" style="top:${top}px;height:${height}px">
+          <div onclick="toggleCanvasDropdown('${ddId}')" title="${esc(itm.section.title)} · clic para cambiar sección"
+            class="w-full h-full ${compact ? 'px-2 py-1' : 'p-2.5'} rounded-xl border ${c.card} ${highlighted ? 'ring-2 ring-rose-500' : ''} hover:shadow-card transition cursor-pointer overflow-hidden flex flex-col">
+            ${compact ? '' : `<i class="fa-solid ${c.icon} ${c.sub} text-xs mb-1"></i>`}
+            <div class="text-xs font-semibold ${c.title} leading-tight ${compact ? 'truncate' : 'line-clamp-2'}">${esc(itm.section.title)}</div>
+            <div class="text-[11px] ${c.sub} leading-tight mt-0.5 truncate">${fmtTime(slot.start_time)} – ${fmtTime(slot.end_time)}</div>
+            ${height >= 90 ? `<div class="mt-auto flex items-center justify-between text-[11px] ${c.sub}"><span class="truncate"><i class="fa-solid fa-location-dot mr-1"></i>${esc(slot.location)}</span><span class="px-1.5 rounded ${c.badge} font-semibold flex-shrink-0">S${esc(itm.section.section)}</span></div>` : ''}
+          </div>
+          ${dd}
+        </div>`;
+      }));
+      html += `</div>`;
+    });
+    html += `</div></div></div>`;
+    return html;
+  }
+
+  // ─── Toast ────────────────────────────────────────────────────
+  function showToast(msg, type = 'info') {
+    const container = document.getElementById('toast-container');
+    const tone = { success: 'text-emerald-600', error: 'text-rose-600', warning: 'text-amber-600', info: 'text-brand-600' }[type];
+    const icon = { success: 'fa-circle-check', error: 'fa-circle-xmark', warning: 'fa-triangle-exclamation', info: 'fa-circle-info' }[type];
+    const toast = document.createElement('div');
+    toast.className = 'pointer-events-auto max-w-sm bg-white border border-slate-200 shadow-pop rounded-xl px-4 py-3 text-sm flex items-start gap-2.5 transition-all duration-300 translate-y-2 opacity-0';
+    toast.innerHTML = `<i class="fa-solid ${icon} ${tone} mt-0.5"></i><span>${esc(msg)}</span>`;
+    container.appendChild(toast);
+    setTimeout(() => toast.classList.remove('translate-y-2', 'opacity-0'), 10);
+    setTimeout(() => { toast.classList.add('opacity-0', 'translate-y-2'); setTimeout(() => toast.remove(), 300); }, 3500);
+  }
+
+  // ─── Init ─────────────────────────────────────────────────────
+  (function init() {
+    const restored = loadState();
+    switchPreviewMode('table');
+    renderPensumMajorSelector();
+    renderCleanPreview();
+    renderManualBuilder();
+    setActiveNav('pensum');
+    if (document.getElementById('auto-refresh-toggle')?.checked) startAutoRefresh();
+    if (restored) showToast(`Se restauraron ${cleanedCourses.length} secciones de tu sesión anterior.`, 'info');
+    setInterval(() => { if (!document.getElementById('tab-manual').classList.contains('hidden') && !draggingSectionId) renderManualGrid(); }, 60 * 1000);
+  })();
+</script>
+</body>
+</html>
