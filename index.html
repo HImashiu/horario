@@ -649,8 +649,15 @@
     manualSelectedSections = manualSelectedSections.map(s => cleanedCourses.find(c => c.id === s.id) || s);
     return { added, updated };
   }
+  const LARGE_RESULT = 150;
+  // "imec 1543", "IMEC-1543" -> "IMEC1543"; anything else is left as typed
+  function normalizeQuery(q) {
+    const m = String(q).trim().match(/^([A-Za-z]{4})\s*-?\s*(\d{4}[A-Za-z]?)$/);
+    return m ? (m[1] + m[2]).toUpperCase() : String(q).trim();
+  }
   async function performUniandesSearch(query, term, btnEl) {
     if (!query) return { added: 0, updated: 0, empty: true };
+    query = normalizeQuery(query);
     const url = `${UNIANDES_API}?term=${encodeURIComponent(term || '')}&ptrm=&prefix=&attr=&nameInput=${encodeURIComponent(query.replace(/\s+/g, '_'))}`;
     let originalHtml = null;
     if (btnEl) { originalHtml = btnEl.innerHTML; btnEl.disabled = true; btnEl.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i>`; }
@@ -659,6 +666,7 @@
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const data = await response.json();
       if (!Array.isArray(data) || !data.length) return { added: 0, updated: 0, empty: true };
+      if (data.length > LARGE_RESULT && !confirm(`"${query}" trajo ${data.length} secciones. ¿Cargarlas todas? (Puedes afinar la búsqueda con un código, ej. IMEC1543)`)) return { added: 0, updated: 0, cancelled: true };
       return ingestSections(data.map(mapUniandesSeccion));
     } finally {
       if (btnEl && originalHtml !== null) { btnEl.disabled = false; btnEl.innerHTML = originalHtml; }
@@ -671,7 +679,8 @@
     const term = (document.getElementById('uniandes-term-input')?.value || '').trim();
     try {
       const result = await performUniandesSearch(query, term, document.getElementById('uniandes-search-btn'));
-      if (result.empty) { showToast(`Sin resultados para "${query}".`, 'warning'); return; }
+      if (result.cancelled) return;
+      if (result.empty) { showToast(`Sin resultados para "${query}". Prueba con el código (ej. IMEC1543) o una palabra del nombre.`, 'warning'); return; }
       showToast(`${result.added} secciones agregadas${result.updated ? `, ${result.updated} actualizadas` : ''} (total ${cleanedCourses.length}).`, 'success');
       afterDataChange(); renderPensumCourseList();
     } catch (err) {
@@ -858,7 +867,7 @@
         return `<button onclick="selectPensumSemester(${idx})" class="flex-1 min-w-[64px] h-9 px-3 rounded-lg text-xs font-semibold whitespace-nowrap transition ${active ? 'bg-white text-slate-900 shadow-card' : 'text-slate-500 hover:text-slate-800'}">Sem ${sem.semester}</button>`;
       }).join('') + `</div>`;
   }
-  function selectPensumSemester(idx) { selectedPensumSemesterIndex = idx; renderPensumSemesterSelector(); renderPensumCourseList(); }
+  function selectPensumSemester(idx) { selectedPensumSemesterIndex = idx; openElectiveKey = null; renderPensumSemesterSelector(); renderPensumCourseList(); }
 
   function renderPensumCourseList() {
     const container = document.getElementById('pensum-course-list');
@@ -866,11 +875,15 @@
     const semester = PENSUM_DATA[selectedPensumMajor].semesters[selectedPensumSemesterIndex];
     container.classList.remove('hidden');
     const existingCodes = new Set(cleanedCourses.map(c => String(c.code).replace(/\s+/g, '')));
-    const rows = semester.courses.map(c => {
+    const rows = semester.courses.map((c, ci) => {
       const elective = !c.code || c.code === 'N/A';
       const added = !elective && existingCodes.has(c.code.replace(/\s+/g, ''));
+      const key = `${selectedPensumMajor}-${selectedPensumSemesterIndex}-${ci}`;
+      const open = elective && openElectiveKey === key;
+      const guide = open ? electiveGuide(c.name) : null;
       return `
-        <div class="flex items-center gap-3 p-3 rounded-xl border ${added ? 'border-emerald-200 bg-emerald-50/50' : 'border-slate-200 bg-white'}">
+        <div class="rounded-xl border ${added ? 'border-emerald-200 bg-emerald-50/50' : (open ? 'border-brand-200 bg-brand-50/40 md:col-span-2' : 'border-slate-200 bg-white')}">
+        <div class="flex items-center gap-3 p-3">
           <div class="w-9 h-9 rounded-lg flex-shrink-0 flex items-center justify-center text-xs ${elective ? 'bg-slate-100 text-slate-400' : (added ? 'bg-emerald-100 text-emerald-700' : 'bg-brand-50 text-brand-600')}">
             <i class="fa-solid ${elective ? 'fa-shuffle' : (added ? 'fa-check' : 'fa-book-open')}"></i>
           </div>
@@ -878,12 +891,20 @@
             <p class="text-sm font-medium truncate">${esc(c.name)}</p>
             <p class="text-xs text-slate-500">${elective ? 'Electivo · sin código fijo' : esc(c.code)} · ${c.credits} cr${c.note ? ` · <span class="text-amber-600">${esc(c.note)}</span>` : ''}</p>
           </div>
-          <button onclick="addCourseFromPensum('${jsq(c.code)}', '${jsq(c.name)}', this)"
+          <button onclick="${elective ? `toggleElectiveGuide('${key}')` : `addCourseFromPensum('${jsq(c.code)}', '${jsq(c.name)}', this)`}"
             class="h-8 px-3 rounded-lg text-xs font-semibold flex-shrink-0 flex items-center gap-1.5 transition ${added ? 'text-emerald-700 hover:bg-emerald-100' : (elective ? 'border border-slate-200 text-slate-600 hover:bg-slate-50' : 'bg-brand-600 hover:bg-brand-700 text-white')}"
-            title="${elective ? 'Buscar manualmente' : (added ? 'Ya agregado — clic para actualizar cupos' : 'Agregar secciones')}">
-            <i class="fa-solid ${added ? 'fa-rotate' : (elective ? 'fa-magnifying-glass' : 'fa-plus')}"></i>
-            <span class="hidden sm:inline">${added ? 'Actualizar' : (elective ? 'Buscar' : 'Agregar')}</span>
+            title="${elective ? 'Ver opciones para este electivo' : (added ? 'Ya agregado — clic para actualizar cupos' : 'Agregar secciones')}">
+            <i class="fa-solid ${added ? 'fa-rotate' : (elective ? (open ? 'fa-chevron-up' : 'fa-magnifying-glass') : 'fa-plus')}"></i>
+            <span class="hidden sm:inline">${added ? 'Actualizar' : (elective ? (open ? 'Cerrar' : 'Opciones') : 'Agregar')}</span>
           </button>
+        </div>
+        ${guide ? `<div class="px-3 pb-3 -mt-1 space-y-2">
+          <p class="text-xs text-slate-600">${esc(guide.hint)}</p>
+          <div class="flex flex-wrap items-center gap-1.5">
+            ${guide.queries.map(q => `<button onclick="searchElective('${jsq(q.q)}', this)" class="h-8 px-3 rounded-full bg-white border border-slate-200 hover:border-brand-500 hover:text-brand-700 text-xs font-medium flex items-center gap-1.5"><i class="fa-solid fa-magnifying-glass text-[10px] text-slate-400"></i>${esc(q.label)}</button>`).join('')}
+            <a href="https://ofertadecursos.uniandes.edu.co/" target="_blank" rel="noopener" class="h-8 px-3 rounded-full text-xs font-medium text-brand-700 hover:bg-brand-50 flex items-center gap-1.5">Ver oferta completa <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i></a>
+          </div>
+        </div>` : ''}
         </div>`;
     }).join('');
     container.innerHTML = `
@@ -896,16 +917,43 @@
       <div class="grid grid-cols-1 md:grid-cols-2 gap-2">${rows}</div>`;
   }
 
-  async function addCourseFromPensum(code, name, btnEl) {
-    if (!code || code === 'N/A') {
-      const input = document.getElementById('uniandes-search-input');
-      if (input) { input.value = name; input.scrollIntoView({ behavior: 'smooth', block: 'center' }); input.focus(); }
-      showToast('Curso electivo sin código fijo — usa el buscador.', 'info');
-      return;
+  // Electives have no fixed code: map each kind to searches that hit real course titles/codes.
+  let openElectiveKey = null;
+  function electiveGuide(name) {
+    const n = name.toLowerCase();
+    const subj = (...codes) => codes.map(c => ({ label: c, q: c }));
+    if (n.includes('taller electivo')) return { hint: 'Talleres prácticos de 2 créditos. Busca los cursos cuyo nombre empieza por "Taller" y elige uno de Ingeniería Mecánica.', queries: [{ label: 'Talleres', q: 'Taller' }] };
+    if (/^cbu/.test(n)) return { hint: 'Ciclo Básico Uniandino: cursos de formación general de cualquier facultad. Busca por tema y verifica en Banner que la sección tenga atributo CBU.', queries: ['Arte', 'Historia', 'Filosofía', 'Literatura', 'Música', 'Ciencia política'].map(t => ({ label: t, q: t })) };
+    if (n.includes('libre elección') || n.startsWith('cle')) return { hint: 'Puede ser cualquier curso de la universidad. Escribe su código o nombre en el buscador de abajo.', queries: [] };
+    if (n.includes('fundamentos de ingeniería')) return { hint: 'Cursos de fundamentos de otras ingenierías. Busca por departamento:', queries: subj('IIND', 'IELE', 'ISIS', 'IBIO') };
+    if (n.includes('matemáticas, imec o ciencias')) return { hint: 'Puede ser de Matemáticas, Ingeniería Mecánica o Ciencias:', queries: subj('MATE', 'IMEC', 'FISI', 'QUIM') };
+    if (n.includes('ciencias') || n.includes('matemáticas')) return { hint: 'Electivo de Ciencias o Matemáticas. Busca por departamento:', queries: subj('MATE', 'FISI', 'QUIM', 'BIOL') };
+    if (n.includes('mecánica') || n.includes('cp obligatorio')) return { hint: 'Curso del ciclo profesional de Ingeniería Mecánica. Busca los cursos IMEC y elige uno de tu énfasis:', queries: subj('IMEC') };
+    if (n.includes('física') || n.includes('integración')) return { hint: 'Electivo del Departamento de Física:', queries: subj('FISI') };
+    return { hint: 'Busca por nombre o código:', queries: [{ label: name, q: name }] };
+  }
+  function toggleElectiveGuide(key) { openElectiveKey = openElectiveKey === key ? null : key; renderPensumCourseList(); }
+  async function searchElective(q, btnEl) {
+    const input = document.getElementById('uniandes-search-input');
+    if (input) input.value = q;
+    try {
+      const result = await performUniandesSearch(q, (document.getElementById('uniandes-term-input')?.value || '').trim(), btnEl);
+      if (result.cancelled) return;
+      if (result.empty) { showToast(`Sin resultados para "${q}".`, 'warning'); return; }
+      showToast(`"${q}": ${result.added} secciones agregadas${result.updated ? `, ${result.updated} actualizadas` : ''}. Elige la tuya en el calendario.`, 'success');
+      afterDataChange(); renderPensumCourseList();
+    } catch (err) {
+      console.error('Error buscando electivo:', err);
+      showToast('No se pudo conectar con Uniandes (posible bloqueo CORS o sin conexión). Usa la importación de JSON.', 'error');
     }
+  }
+
+  async function addCourseFromPensum(code, name, btnEl) {
+    if (!code || code === 'N/A') { return; }
     const sanitized = code.replace(/\s+/g, '').split('/')[0];
     try {
       const result = await performUniandesSearch(sanitized, '', btnEl);
+      if (result.cancelled) return;
       if (result.empty) { showToast(`Sin resultados para ${code}.`, 'warning'); return; }
       showToast(`${name}: ${result.added} secciones agregadas${result.updated ? `, ${result.updated} actualizadas` : ''}.`, 'success');
       afterDataChange(); renderPensumCourseList();
