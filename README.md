@@ -9,10 +9,13 @@ Proyecto estudiantil: no es un sitio oficial de la Universidad de los Andes.
    - En **«Ya aprobé»** marca lo que aprobaste: sus prerrequisitos se marcan solos y lo bloqueado se ve con candado.
    - En **«Próximo semestre»** toca las materias que vas a ver: sus correquisitos se agregan solos y sus secciones se buscan en `ofertadecursos.uniandes.edu.co`.
    - «Sugerir mi semestre» propone materias hasta tu meta de créditos.
+   - **«Te graduarías en…»** abre tu plan semestre a semestre con los créditos que quieras por semestre. Muestra qué materias marcan el ritmo y qué requisitos debes cumplir antes (por ejemplo, el de lectura en inglés).
+   - En Ingeniería Civil, elige tu énfasis para ver solo sus electivas.
 2. **Horario**: «Mis materias» muestra el estado de cada una (Completa, Falta complementaria, Sin elegir, Choque…).
    - Abre una materia para elegir su combinación magistral + complementaria.
    - O usa **Generar horarios** y elige en la galería de opciones sin choques.
    - En **Preferencias** van tus días libres, tu rango de horas y tus horas ocupadas.
+   - Si una sección está llena, toca la campana: te avisamos cuando se abra un cupo. La página revisa cada pocos minutos mientras está abierta; no hay servidor.
 3. **Amigos**: comparte tu horario con un link (o como imagen) y guarda el de tus amigos. Desde ahí puedes:
    - Ver sus horarios superpuestos en el tuyo.
    - Encontrar huecos y clases en común.
@@ -20,6 +23,7 @@ Proyecto estudiantil: no es un sitio oficial de la Universidad de los Andes.
 
    No hay cuentas ni servidor: el horario viaja dentro del link y todo queda en tu navegador.
 4. **Exportar**: compara tus horarios y copia los NRC para inscribirte.
+   - **«Agregar al calendario»** descarga un archivo .ics para Google Calendar, Outlook o el celular: una clase semanal entre el primer y el último día de clases, sin festivos de Colombia ni la semana de receso.
 
 Si la búsqueda falla (bloqueo del navegador o sin conexión), en «Buscar» puedes importar el JSON de Banner o cargar datos demo.
 
@@ -53,7 +57,7 @@ npm run e2e         # prueba de punta a punta en Chromium (Playwright)
 ```
 
 Estructura:
-- `src/core/`: lógica pura (horas y choques, magistral/complementaria, generador, score, requisitos, pénsum).
+- `src/core/`: lógica pura (horas y choques, magistral/complementaria, generador, score, requisitos, pénsum, plan de grado, calendario .ics, alertas de cupo).
 - `src/state/`: estado, guardado y migraciones. `src/storage/`: almacenamiento (localStorage hoy; listo para cambiar por un backend).
 - `src/data/`: API de Uniandes, importación de JSON y datos demo.
 - `src/ui/`: vistas (`views/`), calendario, diálogos, menús y avisos.

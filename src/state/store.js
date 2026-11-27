@@ -415,7 +415,7 @@ export function setRule(key, value) {
 }
 
 export function clearAll() {
-  S.sections = []; S.basket = []; S.selected = []; S.gen = null;
+  S.sections = []; S.basket = []; S.selected = []; S.gen = null; S.watch = [];
   S.drafts = [makeDraft('Horario 1')]; S.currentDraftId = S.drafts[0].id;
   resetHistory(); reindex();
 }

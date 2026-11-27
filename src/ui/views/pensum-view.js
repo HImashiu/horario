@@ -7,23 +7,17 @@ import { S, commit, basketItem, itemForCode, addToBasket, removeFromBasket, cour
 import { PENSUMS, PROGRAM_IDS, getPensum, routeOf, blocksOf, sortByCategory, reqText, dependentsOf, toneOf, categoryOf, courseMeta, categoryForCode, ROMAN, sourceDate } from '../../core/pensum.js';
 import { makeCtx, blockStatus, blockPassed, missing, missingCoreqs, closureForPass, closureForUnpass, progress, suggestSemester, isPassed } from '../../core/eligibility.js';
 import { listCodes, fmtCode, formatTerm } from '../../core/requirements.js';
-import { TONES } from '../tones.js';
+import { TONES, toneVars } from '../tones.js';
 import { esc, data, handle, $, $$ } from '../dom.js';
-import { ui, activePensum, pensumColorFor } from '../state.js';
+import { ui, activePensum, pensumColorFor, chosenKeys } from '../state.js';
+import { gradCardHtml, gradChipHtml } from './plan-dialog.js';
 import { openPopover, closePopover, openDialog, closeDialog, confirmDialog, toast } from '../layer.js';
 import { queueFetch } from '../fetch-queue.js';
 import { openSearch } from './search-dialog.js';
 
-const toneVars = tone => { const t = TONES[tone] || TONES.slate; return `--bg:${t.ink};--fg:${t.text};--sub:${t.text === '#FFFFFF' ? 'rgba(255,255,255,.82)' : 'rgba(35,37,47,.68)'};--rq:${t.fill}`; };
 const mode = () => (S.prefs.pensumMode === 'history' ? 'history' : 'plan');
 const routeId = p => routeOf(p, S.profile.route).id;
 
-/** Codes and block keys chosen for next semester (they satisfy corequisites). */
-function chosenKeys() {
-  const out = [];
-  S.basket.forEach(b => { if (b.code) out.push(b.code); out.push(b.key); if (b.fromBlock) out.push(b.fromBlock); });
-  return out;
-}
 const ctxNow = p => makeCtx(p, routeId(p), S.profile, chosenKeys());
 
 /** Basket item that represents a pensum block, if any. */
@@ -90,10 +84,16 @@ function controlsHtml(p, route, ctx) {
       <div class="seg" role="group" aria-label="Ruta del plan">${p.routes.map(r => `<button data-action="route:set" ${data({ route: r.id })} aria-pressed="${r.id === route.id}" title="${esc(r.hint || '')}">${esc(r.label.replace('Ruta ', ''))}</button>`).join('')}</div>
       ${!S.profile.route ? `<span class="pill pill-warn"><i class="fa-solid fa-circle-info"></i>Elige la ruta según tu examen de clasificación</span>` : ''}
     </div>` : '';
+  const chosenEmphasis = (p.emphases || []).find(e => e.id === S.profile.emphasis);
+  const emphasis = p.emphases?.length ? `<label class="flex items-center gap-2"><span class="eyebrow">Énfasis</span>
+      <select class="input !w-auto !py-1.5 !text-sm" data-change="emphasis:set" aria-label="Tu énfasis" title="Las electivas de énfasis muestran solo los cursos del que elijas">
+        <option value="">Sin elegir</option>${p.emphases.map(e => `<option value="${esc(e.id)}" ${e.id === chosenEmphasis?.id ? 'selected' : ''}>${esc(e.label)}</option>`).join('')}
+      </select></label>` : '';
   return `<div class="flex flex-wrap items-center gap-x-4 gap-y-3">
     <div class="seg" role="group" aria-label="Programa">${PROGRAM_IDS.map(id => `<button data-action="program:set" ${data({ program: id })} aria-pressed="${id === p.id}">${esc(PENSUMS[id].program)}</button>`).join('')}</div>
-    ${routes}
+    ${routes}${emphasis}
     <span class="text-xs muted ml-auto tabular">${esc(p.version)} · ${pr.done}/${p.totalCredits} créditos aprobados</span>
+    ${gradChipHtml(p)}
   </div>
   <div class="flex flex-wrap items-center gap-3">
     <div class="seg" role="group" aria-label="Qué hace un toque">
@@ -201,6 +201,7 @@ function panelHtml(p, ctx, credits) {
       <div class="flex flex-col gap-1.5">${p.categories.map(c => { const v = pr.byCat.get(c.id); return v && v.total ? `<div class="flex items-center gap-2 text-xs"><span class="legend-sw !w-2.5 !h-2.5" style="background:${TONES[c.tone].fill}"></span><span class="flex-1 min-w-0 truncate text-slate-600">${esc(c.label)}</span><span class="tabular text-slate-500">${v.done}/${v.total}</span></div>` : ''; }).join('')}</div>
       ${pr.done ? '' : `<button class="btn btn-quiet btn-sm" data-action="pensum:mode" data-mode="history"><i class="fa-solid fa-check-double"></i>Marcar lo que ya aprobé</button>`}
     </div>
+    ${gradCardHtml(p)}
     <div class="card p-4 flex flex-col gap-3">
       <div class="flex items-center gap-2"><h2 class="text-sm font-semibold">Tu próximo semestre</h2><span class="text-xs muted ml-auto tabular">${S.basket.length} · ${credits} cr</span></div>
       <div class="flex flex-col gap-2">${S.basket.length ? S.basket.map(b => trayItem(b)).join('') : `<p class="text-sm muted">Toca las materias del pénsum que vas a ver, o deja que te sugiramos un semestre.</p>`}</div>
@@ -282,7 +283,12 @@ function infoHtml(p, b, ctx) {
 }
 function slotGuideHtml(p, b, slot) {
   let html = `<div class="flex flex-col gap-2"><p class="text-sm">${esc(slot.hint || '')}</p>`;
-  if (slot.emphasis && p.emphases) html += p.emphases.map(e => `<div class="flex flex-col gap-1"><p class="eyebrow">${esc(e.label)}</p>${(slot.emphasis === 'required' ? [e.required] : e.electives).map(code => optionRow(p, b, code)).join('')}</div>`).join('');
+  if (slot.emphasis && p.emphases) {
+    // With an emphasis chosen, only its courses; otherwise all of them, by emphasis.
+    const mine = p.emphases.find(e => e.id === S.profile.emphasis);
+    html += (mine ? [mine] : p.emphases).map(e => `<div class="flex flex-col gap-1"><p class="eyebrow">${esc(e.label)}</p>${(slot.emphasis === 'required' ? [e.required] : e.electives).map(code => optionRow(p, b, code)).join('')}</div>`).join('');
+    if (!mine) html += `<p class="text-xs muted">Elige tu énfasis arriba del pénsum para ver solo sus cursos.</p>`;
+  }
   if (slot.options?.length) html += `<div class="flex flex-col gap-1 max-h-56 overflow-y-auto">${slot.options.map(code => optionRow(p, b, code)).join('')}</div>`;
   if (slot.queries?.length) html += `<div class="flex flex-wrap gap-1.5">${slot.queries.map(q => `<button class="chip" data-action="search:open" ${data({ q, slot: b.key })}><i class="fa-solid fa-magnifying-glass text-[10px]"></i>${esc(q)}</button>`).join('')}</div>`;
   return html + `</div>`;
@@ -439,6 +445,7 @@ handle({
     commit();
   },
   'route:set': ({ route }) => { S.profile.route = route; commit(); },
+  'emphasis:set': (_, el) => { S.profile.emphasis = el.value || null; commit(); },
   'pensum:mode': ({ mode: m }) => { closePopover(); S.prefs.pensumMode = m === 'history' ? 'history' : 'plan'; if (m === 'history') S.prefs.historyIntro = 'done'; commit(); },
   'pensum:intro-done': () => { S.prefs.historyIntro = 'done'; commit(); },
   'pensum:toggle': async ({ key }) => {

@@ -252,3 +252,28 @@ textarea.input { height: auto; padding: 10px 12px; }
 .week-head { display: grid; grid-template-columns: 38px repeat(6, minmax(0, 1fr)); font-size: 11px; color: #667085; border-bottom: 1px solid var(--line-2); }
 .week-head span { padding: 6px 0; text-align: center; font-weight: 600; }
 .ghost-block { position: absolute; border-radius: 8px; pointer-events: none; overflow: hidden; }
+
+/* ── "¿Cuándo me gradúo?" (plan dialog): the remaining pensum by semester, in small blocks ── */
+.plan-sems { display: flex; flex-direction: column; }
+.plan-sem { grid-template-columns: 76px minmax(0, 1fr); padding-block: 12px; }
+.plan-sem:first-child { border-top: 0; }
+.plan-term { font-size: 15px; font-weight: 700; color: #344054; letter-spacing: -.01em; }
+.plan-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(128px, 1fr)); gap: 10px; }
+.pblock.is-mini { min-height: 66px; padding: 8px 28px 10px 10px; cursor: default; }
+.pblock.is-mini:hover { transform: none; box-shadow: 0 1px 2px rgba(16,24,40,.08); }
+.pblock.is-mini .pb-name { font-size: 12px; -webkit-line-clamp: 2; }
+.pblock.is-mini .pb-code { font-size: 10.5px; }
+.pblock.is-mini .pb-cr { width: 20px; height: 20px; font-size: 11px; top: 6px; right: 6px; }
+.pblock.is-bottleneck, .pblock.is-bottleneck:hover { box-shadow: 0 0 0 2px #fff, 0 0 0 4px #F79009; }
+.pb-bolt { position: absolute; right: 6px; bottom: 6px; width: 20px; height: 20px; border-radius: 99px; background: #FFFAEB; color: #B54708; display: grid; place-items: center; font-size: 10px; box-shadow: 0 0 0 1.5px #F79009; }
+.plan-notes { margin: 0; padding: 10px 14px 10px 30px; list-style: disc; border-radius: 12px; background: #FFFAEB; color: #7A2E0E; font-size: 13px; line-height: 1.5; display: flex; flex-direction: column; gap: 4px; }
+.plan-notes b { font-weight: 600; color: #4E1D09; }
+.stepper { display: inline-flex; align-items: center; gap: 2px; border: 1px solid var(--line); border-radius: 10px; padding: 2px; background: #fff; }
+@media (max-width: 767px) {
+  .plan-sem { grid-template-columns: minmax(0, 1fr); }
+  .plan-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+/* ── Seat alerts ── */
+.icon-btn.is-watching { color: var(--navy); background: var(--brand-soft); }
+.bell-dot { position: absolute; top: 1px; right: 1px; min-width: 16px; height: 16px; padding: 0 4px; border-radius: 99px; background: #12B76A; color: #fff; font-size: 10px; font-weight: 700; line-height: 16px; text-align: center; box-shadow: 0 0 0 2px #fff; }

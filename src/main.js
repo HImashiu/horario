@@ -12,6 +12,7 @@ import { renderFriends, openShareLink } from './ui/views/friends-view.js';
 import { renderCalendar } from './ui/calendar.js';
 import { refreshAll } from './ui/fetch-queue.js';
 import { parseShareHash } from './core/share.js';
+import { watchTopbarHtml, syncWatchTimer } from './ui/watch.js';
 import './ui/views/search-dialog.js';
 
 const VIEWS = {
@@ -71,6 +72,7 @@ function renderTopbar() {
       <h1 class="ptitle truncate">${title}</h1></div>
     ${ui.view === 'horario' ? `<div id="top-metrics" class="hidden lg:flex items-center gap-1.5"></div>` : ''}
     ${ui.view === 'exportar' ? `<button class="btn btn-quiet btn-sm hidden sm:inline-flex" data-action="search:open"><i class="fa-solid fa-magnifying-glass"></i>Buscar materia</button>` : ''}
+    ${watchTopbarHtml()}
     ${PREVIEW ? `<span class="pill pill-warn" title="Esta vista previa usa datos de ejemplo">Vista previa</span>` : ''}`;
 }
 
@@ -82,6 +84,7 @@ function renderTabbar() {
 }
 
 function renderAll() {
+  syncWatchTimer();
   renderRail(); renderTopbar(); renderTabbar();
   Object.keys(VIEWS).forEach(id => { const el = document.getElementById(`view-${id}`); if (el) el.hidden = id !== ui.view; });
   VIEWS[ui.view].render();

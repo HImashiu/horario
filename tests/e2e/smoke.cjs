@@ -132,6 +132,18 @@ const step = async (name, fn) => { await fn(); steps.push(name); console.log(`�
       assert.ok(await page.locator('#view-exportar td.font-mono').count() > 0);
       await shot(page, 'e2e-05-exportar.png');
     });
+    await step('Exportar: "Agregar al calendario" downloads weekly events (.ics)', async () => {
+      await page.click('[data-action="export:ics"]');
+      await page.fill('#ics-start', '2027-01-25');
+      await page.fill('#ics-end', '2027-05-22');
+      await page.fill('#ics-recess', '2027-03-24');
+      const [dl] = await Promise.all([page.waitForEvent('download'), page.click('dialog[open] button[value="ok"]')]);
+      assert.match(dl.suggestedFilename(), /\.ics$/);
+      const text = fs.readFileSync(await dl.path(), 'utf8');
+      assert.ok((text.match(/BEGIN:VEVENT/g) || []).length >= 3, 'one event per meeting');
+      assert.match(text, /RRULE:FREQ=WEEKLY;WKST=MO;BYDAY=[A-Z,]+;UNTIL=20270523T045959Z/);
+      await page.waitForSelector('.toast >> text=clases semanales');
+    });
     await step('state survives a reload', async () => {
       await page.reload();
       await page.click('.nav [data-view="horario"]');
@@ -176,6 +188,18 @@ const step = async (name, fn) => { await fn(); steps.push(name); console.log(`�
       const total = await p2.$$eval('.side .tray-item', els => els.length);
       assert.ok(total >= 4);
       await shot(p2, 'e2e-07-plan-states.png');
+    });
+    await step('"¿Cuándo me gradúo?" lays out the rest of the pensum, starting with next semester', async () => {
+      await p2.click('[data-action="plan:open"] >> nth=0');
+      await p2.waitForSelector('dialog[open] #plan-end');
+      assert.ok(await p2.locator('dialog[open] .plan-sem').count() >= 4);
+      assert.ok(await p2.locator('dialog[open] .plan-sem >> nth=0').locator('text=tu elección').count(), 'the first semester is what was chosen');
+      const before = await p2.textContent('#plan-end');
+      for (let i = 0; i < 6; i++) await p2.click('dialog[open] [data-action="plan:credits"][data-delta="1"]');
+      const after = await p2.textContent('#plan-end');
+      assert.ok(after <= before, `24 cr per semester ends ${after}, 18 ends ${before}`);
+      await shot(p2, 'e2e-11-plan.png');
+      await p2.click('dialog[open] [data-action="dialog:close"]');
     });
 
     // ─── Sharing between two browsers (no server) ───
@@ -238,6 +262,34 @@ const step = async (name, fn) => { await fn(); steps.push(name); console.log(`�
     });
     await ctxA.close(); await ctxB.close();
 
+    // ─── Seat alerts, against a mocked Uniandes API ───
+    const ctxW = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+    const pw = await ctxW.newPage(); watch(pw);
+    let seats = 0;
+    await pw.route(/ofertadecursos\.uniandes\.edu\.co\/api\/courses/, r => r.fulfill({
+      status: 200, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' },
+      body: JSON.stringify([{ nrc: '99999', class: 'MATE', course: '1203', section: '1', title: 'CALCULO DIFERENCIAL', term: '202710', ptrm: '1', campus: 'Campus Principal', credits: '3', maxenrol: '30', enrolled: String(30 - seats), seatsavail: String(seats), instructors: [{ name: 'Profesora Demo' }], schedules: [{ l: 'L', i: 'I', time_ini: '0700', time_fin: '0820', classroom: 'ML_101' }] }]),
+    }));
+    await step('seat alerts: a full section gets a bell; when a seat opens, the page says so', async () => {
+      await pw.goto(base);
+      await pw.click('.program-card[data-program="imec"]');
+      await pw.click('[data-action="route:set"][data-route="calculo"]');
+      await pw.click('.pblock[data-key="MATE1203"]');
+      await pw.click('.nav [data-view="horario"]');
+      await pw.click('[data-action="course:focus"][data-key="MATE1203"] >> nth=0');
+      await pw.waitForSelector('#view-horario >> text=Sin cupos');
+      await pw.click('[data-action="watch:toggle"] >> nth=0');
+      await pw.waitForSelector('.toast >> text=Te avisamos si se abre cupo');
+      await pw.waitForSelector('#watch-btn');
+      seats = 2;
+      await pw.click('#watch-btn');
+      await pw.click('#watch-pop [data-action="watch:check"]');
+      await pw.waitForSelector('.toast >> text=Se abrió cupo en MATE 1203');
+      assert.ok(await pw.locator('#watch-btn .bell-dot').count(), 'the bell shows the open section');
+      await shot(pw, 'e2e-12-seat-alert.png');
+    });
+    await ctxW.close();
+
     const phone = await browser.newContext({ ...devices['iPhone 13'] });
     const pp = await phone.newPage(); watch(pp);
     await pp.goto(base);
@@ -250,6 +302,13 @@ const step = async (name, fn) => { await fn(); steps.push(name); console.log(`�
       const overflow = await pp.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
       assert.ok(overflow <= 0, `no horizontal page scroll (overflow ${overflow}px)`);
       await shot(pp, 'e2e-06-phone.png');
+    });
+    await step('Civil: choosing an emphasis narrows the emphasis electives to its courses', async () => {
+      await pp.selectOption('[data-change="emphasis:set"]', 'infra');
+      await pp.click('[data-action="pensum:info"][data-key="slot:civil:enf-o:1"]');
+      await pp.waitForSelector('#pensum-info >> text=ICYA 3801');
+      assert.equal(await pp.locator('#pensum-info >> text=ICYA 3802').count(), 0, 'not another emphasis');
+      await pp.keyboard.press('Escape');
     });
     assert.deepEqual(errors, [], 'no console errors');
     console.log(`\n${steps.length} steps passed, no console errors.`);
