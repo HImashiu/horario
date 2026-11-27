@@ -49,6 +49,11 @@ export function migrate(saved) {
     if ('auto-refresh-toggle' in raw) st.autoRefresh.on = !!raw['auto-refresh-toggle'];
     if ('auto-refresh-interval' in raw) st.autoRefresh.minutes = parseFloat(raw['auto-refresh-interval']) || 5;
   }
+  // v7's "Lunes libre" and "Martes después de 9:30" become a free day and a soft busy block,
+  // which score exactly as before (see core/score.js).
+  rules.freeDays = rules.mondayFree ? ['Lunes'] : [];
+  rules.busy = rules.tuesdayLate ? [{ id: 'v7-tuesday', day: 'Martes', start: '00:00', end: '09:30', soft: true, label: 'Martes antes de 9:30' }] : [];
+  rules.mondayFree = false; rules.tuesdayLate = false;
   if (!(rules.earlyHour >= 5)) rules.earlyHour = DEFAULT_RULES.earlyHour;
   if (!(rules.lateHour >= 10)) rules.lateHour = DEFAULT_RULES.lateHour;
   if (!(rules.creditTarget > 0)) rules.creditTarget = DEFAULT_RULES.creditTarget;

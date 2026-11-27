@@ -139,6 +139,7 @@ textarea.input { height: auto; padding: 10px 12px; }
 .pblock.is-selected { box-shadow: 0 0 0 3px #fff, 0 0 0 6px var(--navy), 0 10px 20px -10px rgba(47,75,240,.5); }
 .pb-check { position: absolute; right: 8px; bottom: 8px; width: 22px; height: 22px; border-radius: 99px; background: var(--navy); color: #fff; font-size: 10px; display: grid; place-items: center; box-shadow: 0 0 0 2px #fff; }
 .pblock.is-selected .pinfo { display: none; }
+.pcell:has(.pblock.is-selected) .pinfo, .pcell:has(.pb-state) .pinfo { right: 34px; }
 .pinfo { position: absolute; right: 6px; bottom: 6px; width: 24px; height: 24px; border-radius: 99px; display: grid; place-items: center; font-size: 11px; color: var(--fg); background: rgba(255,255,255,.0); opacity: 0; transition: opacity .12s, background .12s; }
 .pcell:hover .pinfo, .pinfo:focus-visible { opacity: .9; }
 .pblock { padding-bottom: 14px; }
@@ -153,6 +154,23 @@ textarea.input { height: auto; padding: 10px 12px; }
 .preq > span { display: block; }
 .preq b { font-weight: 700; color: var(--ink); }
 .preq.is-empty { visibility: hidden; }
+.preq.is-missing { border-style: dashed; }
+/* States: passed (muted, with a check), locked (white with a dashed border and a lock), history mode */
+.pb-state { position: absolute; right: 8px; bottom: 8px; width: 22px; height: 22px; border-radius: 99px; display: grid; place-items: center; font-size: 10px; }
+.pb-state.is-done { background: #fff; color: var(--bg); box-shadow: 0 1px 2px rgba(16,24,40,.15); }
+.pb-state.is-lock { background: #F2F4F7; color: #98A2B3; }
+.pblock.is-passed { filter: saturate(.3); opacity: .55; }
+.pblock.is-passed:hover { opacity: .8; }
+.pblock.is-locked { background: #fff !important; color: var(--ink); box-shadow: inset 0 0 0 2px var(--rq); background-image: none; }
+.pblock.is-locked .pb-code { color: #667085; }
+.pblock.is-locked .pb-cr { background: var(--rq); color: #fff; box-shadow: none; }
+.pblock.is-locked .pb-opts { color: #667085; }
+.pblock.is-locked:hover { box-shadow: inset 0 0 0 2px var(--rq), 0 12px 24px -12px rgba(16,24,40,.25); }
+.pgrid.is-history .pblock.is-unmarked { opacity: .42; filter: saturate(.35); }
+.pgrid.is-history .pblock.is-unmarked:hover { opacity: .75; filter: none; }
+.pgrid.is-history .pblock.is-marked { box-shadow: 0 0 0 3px #fff, 0 0 0 5px #12B76A; }
+.pgrid.is-history .preq { opacity: .6; }
+.pgrid.has-hover .pblock.is-locked { opacity: .35; }
 @media (max-width: 767px) {
   .psheet { padding: 4px 12px; border-radius: 16px; }
   .psem { grid-template-columns: minmax(0, 1fr); gap: 10px; }

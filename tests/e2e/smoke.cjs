@@ -50,8 +50,10 @@ const step = async (name, fn) => { await fn(); steps.push(name); console.log(`�
       assert.ok(await page.locator('.pblock[data-key="MATE1201"]').isVisible(), 'Precálculo route shows MATE 1201');
     });
     await step('tapping blocks adds them to next semester; tapping again removes', async () => {
-      for (const code of ['MATE1203', 'ISIS1221', 'IMEC1543', 'QUIM1103']) await page.click(`.pblock[data-key="${code}"]`);
+      assert.ok(await page.locator('.pblock.is-locked[data-key="IMEC1543"]').count(), 'Estática needs Precálculo in this route');
+      for (const code of ['MATE1201', 'ISIS1221', 'IMEC1505', 'QUIM1103']) await page.click(`.pblock[data-key="${code}"]`);
       assert.equal(await page.locator('.pblock.is-selected').count(), 4);
+      assert.ok(await page.locator('.side .tray-item >> text=QUIM 1104').count(), 'Química brings its corequisite QUIM 1104');
       await page.click('.pblock[data-key="QUIM1103"]');
       assert.equal(await page.locator('.pblock.is-selected').count(), 3);
       await shot(page, 'e2e-02-pensum.png');
@@ -66,10 +68,15 @@ const step = async (name, fn) => { await fn(); steps.push(name); console.log(`�
       await page.click('[data-action="demo:load"]');
       await page.waitForSelector('.toast >> text=Datos demo cargados');
     });
-    await step('generator finds conflict-free schedules and "Usar esta" keeps one', async () => {
+    await step('generator shows a gallery of conflict-free options; picking one and "Usar" keeps it', async () => {
       await page.click('.nav [data-view="horario"]');
       await page.click('#hz-toolbar [data-action="gen:run"]');
-      await page.waitForSelector('#hz-genbar >> text=Opción 1 de');
+      await page.waitForSelector('#hz-genbar >> text=horarios sin choques');
+      assert.ok(await page.locator('#gen-strip [data-action="gen:pick"]').count() >= 10);
+      await page.click('#gen-strip [data-action="gen:pick"][data-i="2"]');
+      await page.waitForSelector('#hz-genbar >> text=Usar la opción 3');
+      await page.selectOption('[data-change="gen:sort"]', 'end');
+      await page.waitForSelector('#hz-genbar >> text=Usar la opción 1');
       await shot(page, 'e2e-03-generator.png');
       await page.click('[data-action="gen:use"]');
       assert.ok(await page.locator('.cal-block').count() > 0);
@@ -81,6 +88,18 @@ const step = async (name, fn) => { await fn(); steps.push(name); console.log(`�
       await page.waitForSelector('#slot-popup');
       const opt = await page.$('#slot-popup .menu-item');
       if (opt) { await opt.hover(); await page.waitForTimeout(150); assert.ok(await page.$('#slot-popup'), 'popup still open after hover'); }
+      await page.click('#slot-popup [data-action="busy:slot"]');
+      await page.waitForSelector('.toast >> text=marcado como ocupado');
+      assert.ok(await page.locator('.cal-col[data-di="0"] >> text=Ocupado').count(), 'busy hour drawn on Monday');
+      await page.locator('.toast', { hasText: 'marcado como ocupado' }).locator('text=Deshacer').click();
+    });
+    await step('preferences: free days and busy hours are edited in one place', async () => {
+      await page.click('#hz-toolbar [data-action="rules:open"]');
+      await page.click('#rules [data-action="rule:day"][data-day="Viernes"]');
+      assert.equal(await page.getAttribute('#rules [data-day="Viernes"]', 'aria-pressed'), 'true');
+      await page.selectOption('#rules select[name="day"]', 'Jueves');
+      await page.click('#rules form[data-submit="busy:add"] button');
+      assert.ok(await page.locator('#rules >> text=Obligatorio').count());
       await page.keyboard.press('Escape');
     });
     await step('undo after "No incluir" brings the course back (v7 bug)', async () => {
@@ -118,6 +137,45 @@ const step = async (name, fn) => { await fn(); steps.push(name); console.log(`�
       await page.click('.nav [data-view="horario"]');
       await page.waitForSelector('#hz-toolbar >> text=Plan A');
       await page.waitForSelector('#view-horario:not([hidden]) .cal-block');
+    });
+
+    const p2 = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+    watch(p2);
+    await p2.goto(base);
+    await step('history: marking Física 2 also marks its prerequisite Física 1, not corequisites', async () => {
+      await p2.click('.program-card[data-program="fisica"]');
+      await p2.click('[data-action="pensum:mode"][data-mode="history"] >> nth=0');
+      await p2.click('.pblock[data-key="FISI1528"]');
+      await p2.waitForSelector('.toast >> text=FISI 1528 aprobada');
+      const marked = await p2.$$eval('.pblock.is-marked', els => els.map(e => e.dataset.key).sort());
+      assert.deepEqual(marked, ['FISI1518', 'FISI1528']);
+    });
+    await step('history: un-marking Física 1 also un-marks Física 2, and Deshacer restores both', async () => {
+      await p2.click('.pblock[data-key="FISI1518"]');
+      assert.equal(await p2.locator('.pblock.is-marked').count(), 0);
+      await p2.locator('.toast', { hasText: 'sin marcar' }).locator('text=Deshacer').click();
+      assert.equal(await p2.locator('.pblock.is-marked').count(), 2);
+      for (const k of ['MATE1214', 'CCOM1100']) await p2.click(`.pblock[data-key="${k}"]`);
+      await p2.click('.btn:has-text("Listo")');
+    });
+    await step('plan: passed courses are muted, locked ones show what is missing', async () => {
+      assert.ok(await p2.locator('.pblock.is-passed[data-key="FISI1518"]').count());
+      assert.ok(await p2.locator('.pblock.is-locked[data-key="MATE1207"]').count(), 'Cálculo Vectorial needs Álgebra Lineal');
+      await p2.click('.pblock[data-key="FISI3515"]');
+      await p2.waitForSelector('dialog[open] >> text=FISI 1548 · FISI 2507 · FISI 2605');
+      await p2.click('dialog[open] [data-value=""]');
+    });
+    await step('plan: adding Física Moderna brings its corequisite Ondas y Fluidos', async () => {
+      await p2.click('.pblock[data-key="FISI1548"]');
+      await p2.waitForSelector('.toast >> text=correquisito FISI 1538');
+      assert.ok(await p2.locator('.pblock.is-selected[data-key="FISI1538"]').count());
+    });
+    await step('"Sugerir mi semestre" fills up to the credit target in plan order', async () => {
+      await p2.click('[data-action="pensum:suggest"]');
+      await p2.waitForSelector('.toast >> text=Sugerimos');
+      const total = await p2.$$eval('.side .tray-item', els => els.length);
+      assert.ok(total >= 4);
+      await shot(p2, 'e2e-07-plan-states.png');
     });
 
     const phone = await browser.newContext({ ...devices['iPhone 13'] });

@@ -9,82 +9,454 @@
   "retrieved": "2026-11-27",
   "totalCredits": 128,
   "categories": [
-    { "id": "basico", "label": "Ciclo teórico básico", "tone": "yellow" },
-    { "id": "avanzado", "label": "Ciclo teórico avanzado", "tone": "teal" },
-    { "id": "experimental", "label": "Cursos experimentales", "tone": "magenta" },
-    { "id": "computacional", "label": "Cursos computacionales", "tone": "gray" },
-    { "id": "investigacion", "label": "Ciclo investigación y profundización", "tone": "crimson" },
-    { "id": "integral", "label": "Cursos de formación integral", "tone": "green" }
+    {
+      "id": "basico",
+      "label": "Ciclo teórico básico",
+      "tone": "yellow"
+    },
+    {
+      "id": "avanzado",
+      "label": "Ciclo teórico avanzado",
+      "tone": "teal"
+    },
+    {
+      "id": "experimental",
+      "label": "Cursos experimentales",
+      "tone": "magenta"
+    },
+    {
+      "id": "computacional",
+      "label": "Cursos computacionales",
+      "tone": "gray"
+    },
+    {
+      "id": "investigacion",
+      "label": "Ciclo investigación y profundización",
+      "tone": "crimson"
+    },
+    {
+      "id": "integral",
+      "label": "Cursos de formación integral",
+      "tone": "green"
+    }
   ],
   "courses": {
-    "FISI1518": { "name": "Física 1", "credits": 3, "cat": "basico", "coreq": ["MATE1203"] },
-    "MATE1203": { "name": "Cálculo Diferencial", "credits": 3, "cat": "basico" },
-    "ISIS1221": { "name": "Introducción a la Programación", "credits": 3, "cat": "computacional" },
-    "FISI1502": { "name": "Introducción a la Física", "credits": 3, "cat": "basico" },
-    "CCOM1100": { "name": "Pensar, Comunicar, Colaborar", "credits": 3, "cat": "integral" },
-    "FISI1528": { "name": "Física 2", "credits": 3, "cat": "basico", "req": ["FISI1518"] },
-    "MATE1214": { "name": "Cálculo Integral y Ecuaciones Diferenciales", "credits": 3, "cat": "basico", "req": ["MATE1203"] },
-    "MATE1105": { "name": "Álgebra Lineal 1", "credits": 3, "cat": "basico", "req": ["MATE1203"] },
-    "DERE1300": { "name": "Constitución y Democracia", "credits": 3, "cat": "integral" },
-    "FCIE1010": { "name": "Introducción a Ciencias", "credits": 2, "cat": "basico" },
-    "FISI1538": { "name": "Ondas y Fluidos", "credits": 3, "cat": "basico", "req": ["FISI1528", "MATE1214"] },
-    "MATE1207": { "name": "Cálculo Vectorial", "credits": 3, "cat": "basico", "req": ["MATE1214", "MATE1105"] },
-    "FISI2526": { "name": "Métodos Computacionales 1", "credits": 3, "cat": "computacional", "req": ["ISIS1221", "MATE1105"] },
-    "QUIM1103": { "name": "Química General", "credits": 3, "cat": "integral" },
-    "FISI1548": { "name": "Física Moderna", "credits": 3, "cat": "basico", "req": ["CCOM1100"], "coreq": ["FISI1538"] },
-    "MATE2301": { "name": "Ecuaciones Diferenciales", "credits": 3, "cat": "basico", "req": ["MATE1207"] },
-    "FISI1558": { "name": "Probabilidad y Estadística", "credits": 3, "cat": "basico", "req": ["MATE1214", "ISIS1221"] },
-    "FISI1549": { "name": "Laboratorio de Física Moderna", "credits": 3, "cat": "experimental", "req": ["FISI1528"], "coreq": ["FISI1548"] },
-    "FISI2605": { "name": "Mecánica", "credits": 3, "cat": "avanzado", "req": ["FISI1538", "MATE2301", "RECLEC"] },
-    "FISI2507": { "name": "Métodos Matemáticos", "credits": 3, "cat": "avanzado", "req": ["MATE2301"] },
-    "FISI2540": { "name": "Termodinámica", "credits": 3, "cat": "avanzado", "req": ["FISI1528", "MATE1207"] },
-    "FISI2528": { "name": "Métodos Computacionales 2", "credits": 3, "cat": "computacional", "req": ["FISI2526", "MATE2301"] },
-    "FISI2560": { "name": "Electrónica para Ciencias", "credits": 3, "cat": "experimental", "req": ["FISI1549"] },
-    "FISI3515": { "name": "Mecánica Cuántica 1", "credits": 3, "cat": "avanzado", "req": ["FISI1548", "FISI2507", "FISI2605"] },
-    "FISI2632": { "name": "Electromagnetismo 1", "credits": 3, "cat": "avanzado", "req": ["FISI2507", "FISI1528"] },
-    "FISI3540": { "name": "Física Estadística", "credits": 3, "cat": "avanzado", "req": ["FISI2540"], "coreq": ["FISI3515"] },
-    "FISI2551": { "name": "Laboratorio Intermedio", "credits": 3, "cat": "experimental", "req": ["FISI1548", "FISI2560"] },
-    "FISI3520": { "name": "Mecánica Cuántica 2", "credits": 3, "cat": "avanzado", "req": ["FISI3515"] },
-    "FISI3632": { "name": "Electromagnetismo 2", "credits": 3, "cat": "avanzado", "req": ["FISI2632"] },
-    "FISI3981": { "name": "Proyecto", "credits": 3, "cat": "investigacion", "req": [["FISI3515", "FISI2551", "FISI2528", "FISI2632", "FISI3540"]] },
-    "FISI3989": { "name": "Proyecto Final – Investigación o monografía", "credits": 3, "cat": "investigacion" },
-    "FISI3988": { "name": "Proyecto Final – Pasantía de investigación", "credits": 3, "cat": "investigacion" },
-    "FISI3987": { "name": "Proyecto Final – Pasantía laboral", "credits": 3, "cat": "investigacion" }
+    "FISI1518": {
+      "name": "Física 1",
+      "credits": 3,
+      "cat": "basico",
+      "coreq": [
+        "MATE1203"
+      ]
+    },
+    "MATE1203": {
+      "name": "Cálculo Diferencial",
+      "credits": 3,
+      "cat": "basico"
+    },
+    "ISIS1221": {
+      "name": "Introducción a la Programación",
+      "credits": 3,
+      "cat": "computacional"
+    },
+    "FISI1502": {
+      "name": "Introducción a la Física",
+      "credits": 3,
+      "cat": "basico"
+    },
+    "CCOM1100": {
+      "name": "Pensar, Comunicar, Colaborar",
+      "credits": 3,
+      "cat": "integral"
+    },
+    "FISI1528": {
+      "name": "Física 2",
+      "credits": 3,
+      "cat": "basico",
+      "req": [
+        "FISI1518"
+      ]
+    },
+    "MATE1214": {
+      "name": "Cálculo Integral y Ecuaciones Diferenciales",
+      "credits": 3,
+      "cat": "basico",
+      "req": [
+        "MATE1203"
+      ]
+    },
+    "MATE1105": {
+      "name": "Álgebra Lineal 1",
+      "credits": 3,
+      "cat": "basico",
+      "req": [
+        "MATE1203"
+      ]
+    },
+    "DERE1300": {
+      "name": "Constitución y Democracia",
+      "credits": 3,
+      "cat": "integral"
+    },
+    "FCIE1010": {
+      "name": "Introducción a Ciencias",
+      "credits": 2,
+      "cat": "basico"
+    },
+    "FISI1538": {
+      "name": "Ondas y Fluidos",
+      "credits": 3,
+      "cat": "basico",
+      "req": [
+        "FISI1528",
+        "MATE1214"
+      ]
+    },
+    "MATE1207": {
+      "name": "Cálculo Vectorial",
+      "credits": 3,
+      "cat": "basico",
+      "req": [
+        "MATE1214",
+        "MATE1105"
+      ]
+    },
+    "FISI2526": {
+      "name": "Métodos Computacionales 1",
+      "credits": 3,
+      "cat": "computacional",
+      "req": [
+        "ISIS1221",
+        "MATE1105"
+      ]
+    },
+    "QUIM1103": {
+      "name": "Química General",
+      "credits": 3,
+      "cat": "integral"
+    },
+    "FISI1548": {
+      "name": "Física Moderna",
+      "credits": 3,
+      "cat": "basico",
+      "req": [
+        "CCOM1100"
+      ],
+      "coreq": [
+        "FISI1538"
+      ]
+    },
+    "MATE2301": {
+      "name": "Ecuaciones Diferenciales",
+      "credits": 3,
+      "cat": "basico",
+      "req": [
+        "MATE1207"
+      ]
+    },
+    "FISI1558": {
+      "name": "Probabilidad y Estadística",
+      "credits": 3,
+      "cat": "basico",
+      "req": [
+        "MATE1214",
+        "ISIS1221"
+      ]
+    },
+    "FISI1549": {
+      "name": "Laboratorio de Física Moderna",
+      "credits": 3,
+      "cat": "experimental",
+      "req": [
+        "FISI1528"
+      ],
+      "coreq": [
+        "FISI1548"
+      ]
+    },
+    "FISI2605": {
+      "name": "Mecánica",
+      "credits": 3,
+      "cat": "avanzado",
+      "req": [
+        "FISI1538",
+        "MATE2301",
+        "RECLEC"
+      ]
+    },
+    "FISI2507": {
+      "name": "Métodos Matemáticos",
+      "credits": 3,
+      "cat": "avanzado",
+      "req": [
+        "MATE2301"
+      ]
+    },
+    "FISI2540": {
+      "name": "Termodinámica",
+      "credits": 3,
+      "cat": "avanzado",
+      "req": [
+        "FISI1528",
+        "MATE1207"
+      ]
+    },
+    "FISI2528": {
+      "name": "Métodos Computacionales 2",
+      "credits": 3,
+      "cat": "computacional",
+      "req": [
+        "FISI2526",
+        "MATE2301"
+      ]
+    },
+    "FISI2560": {
+      "name": "Electrónica para Ciencias",
+      "credits": 3,
+      "cat": "experimental",
+      "req": [
+        "FISI1549"
+      ]
+    },
+    "FISI3515": {
+      "name": "Mecánica Cuántica 1",
+      "credits": 3,
+      "cat": "avanzado",
+      "req": [
+        "FISI1548",
+        "FISI2507",
+        "FISI2605"
+      ]
+    },
+    "FISI2632": {
+      "name": "Electromagnetismo 1",
+      "credits": 3,
+      "cat": "avanzado",
+      "req": [
+        "FISI2507",
+        "FISI1528"
+      ]
+    },
+    "FISI3540": {
+      "name": "Física Estadística",
+      "credits": 3,
+      "cat": "avanzado",
+      "req": [
+        "FISI2540"
+      ],
+      "coreq": [
+        "FISI3515"
+      ]
+    },
+    "FISI2551": {
+      "name": "Laboratorio Intermedio",
+      "credits": 3,
+      "cat": "experimental",
+      "req": [
+        "FISI1548",
+        "FISI2560"
+      ]
+    },
+    "FISI3520": {
+      "name": "Mecánica Cuántica 2",
+      "credits": 3,
+      "cat": "avanzado",
+      "req": [
+        "FISI3515"
+      ]
+    },
+    "FISI3632": {
+      "name": "Electromagnetismo 2",
+      "credits": 3,
+      "cat": "avanzado",
+      "req": [
+        "FISI2632"
+      ]
+    },
+    "FISI3981": {
+      "name": "Proyecto",
+      "credits": 3,
+      "cat": "investigacion",
+      "req": [
+        [
+          "FISI3515",
+          "FISI2551",
+          "FISI2528",
+          "FISI2632",
+          "FISI3540"
+        ]
+      ]
+    },
+    "FISI3989": {
+      "name": "Proyecto Final – Investigación o monografía",
+      "credits": 3,
+      "cat": "investigacion"
+    },
+    "FISI3988": {
+      "name": "Proyecto Final – Pasantía de investigación",
+      "credits": 3,
+      "cat": "investigacion"
+    },
+    "FISI3987": {
+      "name": "Proyecto Final – Pasantía laboral",
+      "credits": 3,
+      "cat": "investigacion"
+    }
   },
   "groups": {
-    "INTEG": { "label": "Electivo de integración", "short": "Integración", "options": ["FISI3152", "FISI3760"], "hint": "Según curso elegido." },
+    "INTEG": {
+      "label": "Electivo de integración",
+      "short": "Integración",
+      "options": [
+        "FISI3152",
+        "FISI3760"
+      ],
+      "hint": "Según curso elegido."
+    },
     "PFINAL": {
-      "label": "Proyecto final", "short": "Proyecto final", "options": ["FISI3989", "FISI3988", "FISI3987"],
-      "req": [["FISI3980", "FISI3985", "FISI3981"]],
-      "coreq": ["FISI3632", "FISI3520", ["FISI3152", "FISI3760"]],
+      "label": "Proyecto final",
+      "short": "Proyecto final",
+      "options": [
+        "FISI3989",
+        "FISI3988",
+        "FISI3987"
+      ],
+      "req": [
+        [
+          "FISI3980",
+          "FISI3985",
+          "FISI3981"
+        ]
+      ],
+      "coreq": [
+        "FISI3632",
+        "FISI3520",
+        [
+          "FISI3152",
+          "FISI3760"
+        ]
+      ],
       "hint": "Para inscribir cualquier modalidad se necesita la aprobación previa del Comité de Pregrado del Departamento de Física."
     }
   },
   "external": {
-    "RECLEC": { "label": "Requisito de lectura en inglés", "kind": "requirement" },
-    "FISI3980": { "label": "FISI 3980", "kind": "course" },
-    "FISI3985": { "label": "FISI 3985", "kind": "course" },
-    "FISI3152": { "label": "Electivo de integración", "kind": "course" },
-    "FISI3760": { "label": "Electivo de integración", "kind": "course" }
+    "RECLEC": {
+      "label": "Requisito de lectura en inglés",
+      "kind": "requirement"
+    },
+    "FISI3980": {
+      "label": "FISI 3980",
+      "kind": "course"
+    },
+    "FISI3985": {
+      "label": "FISI 3985",
+      "kind": "course"
+    },
+    "FISI3152": {
+      "label": "Electivo de integración",
+      "kind": "course"
+    },
+    "FISI3760": {
+      "label": "Electivo de integración",
+      "kind": "course"
+    }
   },
   "slotKinds": {
-    "cbu": { "hint": "5 cursos CBU de 3 créditos en Culturas, artes y humanidades y Ciencia, tecnología y sociedad. El curso común de Colombia es obligatorio.", "queries": ["Colombia", "Arte", "Historia", "Filosofía", "Literatura"] },
-    "cle": { "hint": "Mínimo 6 créditos de libre elección de la oferta general. Precálculo y los cursos de deportes cuentan como CLE.", "queries": [] },
+    "cbu": {
+      "hint": "5 cursos CBU de 3 créditos en Culturas, artes y humanidades y Ciencia, tecnología y sociedad. El curso común de Colombia es obligatorio.",
+      "queries": [
+        "Colombia",
+        "Arte",
+        "Historia",
+        "Filosofía",
+        "Literatura"
+      ]
+    },
+    "cle": {
+      "hint": "Mínimo 6 créditos de libre elección de la oferta general. Precálculo y los cursos de deportes cuentan como CLE.",
+      "queries": []
+    },
     "cien-basico": {
       "hint": "El electivo en ciencias básico se elige entre estas opciones:",
-      "options": ["BIOL1327", "MBIO1100", "BIOL1300", "FISI1090", "GEOC1002", "MATE1102", "QUIM1110"],
-      "optionNames": { "BIOL1327": "Ecología: Principios y aplicaciones", "MBIO1100": "Biología Celular", "BIOL1300": "Biología de Organismos", "FISI1090": "Introducción a la astronomía", "GEOC1002": "Geociencias", "MATE1102": "Matemática estructural", "QUIM1110": "Introducción a la teoría de átomos y moléculas" }
+      "options": [
+        "BIOL1327",
+        "MBIO1100",
+        "BIOL1300",
+        "FISI1090",
+        "GEOC1002",
+        "MATE1102",
+        "QUIM1110"
+      ],
+      "optionNames": {
+        "BIOL1327": "Ecología: Principios y aplicaciones",
+        "MBIO1100": "Biología Celular",
+        "BIOL1300": "Biología de Organismos",
+        "FISI1090": "Introducción a la astronomía",
+        "GEOC1002": "Geociencias",
+        "MATE1102": "Matemática estructural",
+        "QUIM1110": "Introducción a la teoría de átomos y moléculas"
+      }
     },
     "cien-avanzado": {
       "hint": "El electivo en ciencias avanzado se elige entre estas opciones:",
-      "options": ["MATE2211", "MATE2411", "MATE2716", "MATE3410", "MATE1107", "QUIM2620", "QUIM1618", "QUIM1512", "BIOL2205", "BIOL3300", "MBIO2102"],
-      "optionNames": { "MATE2211": "Cálculo de variable compleja", "MATE2411": "Geometría de curvas y superficies", "MATE2716": "Introducción al cálculo de variaciones y al control óptimo", "MATE3410": "Geometría diferencial", "MATE1107": "Álgebra lineal", "QUIM2620": "Química analítica I", "QUIM1618": "Fundamentos análisis químico", "QUIM1512": "Físico-química II", "BIOL2205": "Inferencia e informática", "BIOL3300": "Fisiología Animal", "MBIO2102": "Biología molecular" }
+      "options": [
+        "MATE2211",
+        "MATE2411",
+        "MATE2716",
+        "MATE3410",
+        "MATE1107",
+        "QUIM2620",
+        "QUIM1618",
+        "QUIM1512",
+        "BIOL2205",
+        "BIOL3300",
+        "MBIO2102"
+      ],
+      "optionNames": {
+        "MATE2211": "Cálculo de variable compleja",
+        "MATE2411": "Geometría de curvas y superficies",
+        "MATE2716": "Introducción al cálculo de variaciones y al control óptimo",
+        "MATE3410": "Geometría diferencial",
+        "MATE1107": "Álgebra lineal",
+        "QUIM2620": "Química analítica I",
+        "QUIM1618": "Fundamentos análisis químico",
+        "QUIM1512": "Físico-química II",
+        "BIOL2205": "Inferencia e informática",
+        "BIOL3300": "Fisiología Animal",
+        "MBIO2102": "Biología molecular"
+      }
     },
     "exploracion": {
       "hint": "Mínimo 6 créditos de electivos dictados por profesores de planta del Departamento (FISI, según oferta). También valen estos cursos:",
-      "queries": ["FISI"],
-      "options": ["IELE2010", "MATE2101", "MATE3220", "MATE3302", "MATE2411", "MATE3410", "MATE4241", "IBIO2650", "QUIM4222", "IMEC1410", "MATE2727"],
-      "optionNames": { "IELE2010": "Materiales IEE", "MATE2101": "Álgebra Abstracta 1", "MATE3220": "Medida e integración", "MATE3302": "Ecuaciones de la física matemática", "MATE2411": "Geometría de curvas y superficies", "MATE3410": "Geometría diferencial", "MATE4241": "Teoría de operadores", "IBIO2650": "Biomateriales", "QUIM4222": "Introducción a la difracción de rayos X", "IMEC1410": "Ciencia de materiales", "MATE2727": "Introducción a la teoría de la computación y lenguaje de máquina" }
+      "queries": [
+        "FISI"
+      ],
+      "options": [
+        "IELE2010",
+        "MATE2101",
+        "MATE3220",
+        "MATE3302",
+        "MATE2411",
+        "MATE3410",
+        "MATE4241",
+        "IBIO2650",
+        "QUIM4222",
+        "IMEC1410",
+        "MATE2727"
+      ],
+      "optionNames": {
+        "IELE2010": "Materiales IEE",
+        "MATE2101": "Álgebra Abstracta 1",
+        "MATE3220": "Medida e integración",
+        "MATE3302": "Ecuaciones de la física matemática",
+        "MATE2411": "Geometría de curvas y superficies",
+        "MATE3410": "Geometría diferencial",
+        "MATE4241": "Teoría de operadores",
+        "IBIO2650": "Biomateriales",
+        "QUIM4222": "Introducción a la difracción de rayos X",
+        "IMEC1410": "Ciencia de materiales",
+        "MATE2727": "Introducción a la teoría de la computación y lenguaje de máquina"
+      }
     }
   },
   "routes": [
@@ -93,26 +465,179 @@
       "label": "Plan sugerido",
       "assumed": [],
       "semesters": [
-        { "credits": 15, "items": ["FISI1518", "MATE1203", "ISIS1221", "FISI1502", "CCOM1100"] },
-        { "credits": 17, "items": ["FISI1528", "MATE1214", "MATE1105", "DERE1300", "FCIE1010", { "slot": "cbu", "label": "CBU 1", "credits": 3, "cat": "integral" }] },
-        { "credits": 18, "items": ["FISI1538", "MATE1207", "FISI2526", "QUIM1103", { "slot": "cien-basico", "label": "Electivo en ciencias básico", "credits": 3, "cat": "basico" }, { "slot": "cbu", "label": "CBU 2", "credits": 3, "cat": "integral" }] },
-        { "credits": 18, "items": ["FISI1548", "MATE2301", "FISI1558", "FISI1549", { "slot": "cien-avanzado", "label": "Electivo en ciencias avanzado", "credits": 3, "cat": "basico" }, { "slot": "cbu", "label": "CBU 3", "credits": 3, "cat": "integral" }] },
-        { "credits": 15, "items": ["FISI2605", "FISI2507", "FISI2540", "FISI2528", "FISI2560"] },
-        { "credits": 15, "items": ["FISI3515", "FISI2632", "FISI3540", "FISI2551", { "slot": "cbu", "label": "CBU 4", "credits": 3, "cat": "integral" }] },
-        { "credits": 15, "items": ["FISI3520", "FISI3632", { "slot": "exploracion", "label": "Electiva de exploración en Física", "credits": 3, "cat": "investigacion" }, "FISI3981", { "slot": "cbu", "label": "CBU 5", "credits": 3, "cat": "integral" }] },
-        { "credits": 15, "items": [{ "group": "INTEG", "credits": 3, "cat": "avanzado" }, { "slot": "exploracion", "label": "Electiva de exploración en Física", "credits": 3, "cat": "investigacion" }, { "group": "PFINAL", "credits": 3, "cat": "investigacion" }, { "slot": "cle", "label": "Curso de libre elección (CLE)", "credits": 3, "cat": "integral" }, { "slot": "cle", "label": "Curso de libre elección (CLE)", "credits": 3, "cat": "integral" }] }
+        {
+          "credits": 15,
+          "items": [
+            "FISI1518",
+            "MATE1203",
+            "ISIS1221",
+            "FISI1502",
+            "CCOM1100"
+          ]
+        },
+        {
+          "credits": 17,
+          "items": [
+            "FISI1528",
+            "MATE1214",
+            "MATE1105",
+            "DERE1300",
+            "FCIE1010",
+            {
+              "slot": "cbu",
+              "label": "CBU 1",
+              "credits": 3,
+              "cat": "integral"
+            }
+          ]
+        },
+        {
+          "credits": 18,
+          "items": [
+            "FISI1538",
+            "MATE1207",
+            "FISI2526",
+            "QUIM1103",
+            {
+              "slot": "cien-basico",
+              "label": "Electivo en ciencias básico",
+              "credits": 3,
+              "cat": "basico"
+            },
+            {
+              "slot": "cbu",
+              "label": "CBU 2",
+              "credits": 3,
+              "cat": "integral"
+            }
+          ]
+        },
+        {
+          "credits": 18,
+          "items": [
+            "FISI1548",
+            "MATE2301",
+            "FISI1558",
+            "FISI1549",
+            {
+              "slot": "cien-avanzado",
+              "label": "Electivo en ciencias avanzado",
+              "credits": 3,
+              "cat": "basico"
+            },
+            {
+              "slot": "cbu",
+              "label": "CBU 3",
+              "credits": 3,
+              "cat": "integral"
+            }
+          ]
+        },
+        {
+          "credits": 15,
+          "items": [
+            "FISI2605",
+            "FISI2507",
+            "FISI2540",
+            "FISI2528",
+            "FISI2560"
+          ]
+        },
+        {
+          "credits": 15,
+          "items": [
+            "FISI3515",
+            "FISI2632",
+            "FISI3540",
+            "FISI2551",
+            {
+              "slot": "cbu",
+              "label": "CBU 4",
+              "credits": 3,
+              "cat": "integral"
+            }
+          ]
+        },
+        {
+          "credits": 15,
+          "items": [
+            "FISI3520",
+            "FISI3632",
+            {
+              "slot": "exploracion",
+              "label": "Electiva de exploración en Física",
+              "credits": 3,
+              "cat": "investigacion"
+            },
+            "FISI3981",
+            {
+              "slot": "cbu",
+              "label": "CBU 5",
+              "credits": 3,
+              "cat": "integral"
+            }
+          ]
+        },
+        {
+          "credits": 15,
+          "items": [
+            {
+              "group": "INTEG",
+              "credits": 3,
+              "cat": "avanzado"
+            },
+            {
+              "slot": "exploracion",
+              "label": "Electiva de exploración en Física",
+              "credits": 3,
+              "cat": "investigacion"
+            },
+            {
+              "group": "PFINAL",
+              "credits": 3,
+              "cat": "investigacion"
+            },
+            {
+              "slot": "cle",
+              "label": "Curso de libre elección (CLE)",
+              "credits": 3,
+              "cat": "integral"
+            },
+            {
+              "slot": "cle",
+              "label": "Curso de libre elección (CLE)",
+              "credits": 3,
+              "cat": "integral"
+            }
+          ]
+        }
       ]
     }
   ],
   "rules": [],
   "notes": [
-    { "title": "Requisito de escritura (REQE)", "text": "Lo cumple el curso Pensar, comunicar y colaborar (CCOM 1100), de 3 créditos." },
-    { "title": "Requisito de idioma extranjero (REQIE)", "text": "Incluye el requisito de lectura en inglés, necesario para inscribir FISI 2605 Mecánica, y el de dominio de una segunda lengua, necesario para el grado." },
-    { "title": "Opciones de grado", "text": "FISI 3989 Investigación o monografía, FISI 3988 Pasantía de investigación y FISI 3987 Pasantía laboral. Cualquiera requiere la aprobación previa del Comité de Pregrado." },
-    { "title": "Correquisitos y bolsas", "text": "Los códigos con * son correquisitos: se debe estar cursando o haber aprobado el curso. Los cursos con ** son bolsas de créditos." },
-    { "title": "Ciclo Básico Uniandino", "text": "5 cursos CBU de 3 créditos. El curso común de Colombia es obligatorio." }
+    {
+      "title": "Requisito de escritura (REQE)",
+      "text": "Lo cumple el curso Pensar, comunicar y colaborar (CCOM 1100), de 3 créditos."
+    },
+    {
+      "title": "Requisito de idioma extranjero (REQIE)",
+      "text": "Incluye el requisito de lectura en inglés, necesario para inscribir FISI 2605 Mecánica, y el de dominio de una segunda lengua, necesario para el grado."
+    },
+    {
+      "title": "Opciones de grado",
+      "text": "FISI 3989 Investigación o monografía, FISI 3988 Pasantía de investigación y FISI 3987 Pasantía laboral. Cualquiera requiere la aprobación previa del Comité de Pregrado."
+    },
+    {
+      "title": "Correquisitos y bolsas",
+      "text": "Los códigos con * son correquisitos: se debe estar cursando o haber aprobado el curso. Los cursos con ** son bolsas de créditos."
+    },
+    {
+      "title": "Ciclo Básico Uniandino",
+      "text": "5 cursos CBU de 3 créditos. El curso común de Colombia es obligatorio."
+    }
   ],
   "review": [
-    "Proyecto (FISI 3981) lista cinco cursos unidos por \"o\" en dos líneas. Se interpreta como cualquiera de los cinco."
+    "Decidido: Proyecto (FISI 3981) pide cualquiera de los cinco cursos que lista (FISI 3515, 2551, 2528, 2632 o 3540)."
   ]
 }
