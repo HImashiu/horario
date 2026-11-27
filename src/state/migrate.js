@@ -15,8 +15,10 @@ export function emptyState() {
   return {
     v: STATE_VERSION, sections: [], basket: [], drafts: [], currentDraftId: null,
     rules: { ...DEFAULT_RULES }, autoRefresh: { on: false, minutes: 5 }, term: '',
-    profile: { program: null, route: null, emphasis: null, passed: [], externalMet: [] },
-    prefs: { pensumMode: 'plan' },
+    profile: { program: null, route: null, emphasis: null, passed: [], externalMet: [], name: '', shareId: null },
+    prefs: { pensumMode: 'plan', overlay: [] },
+    // Friends' schedules received through share links (kept only in this browser).
+    friends: [],
   };
 }
 
