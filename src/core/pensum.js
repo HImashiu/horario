@@ -26,16 +26,18 @@ export function courseMeta(p, code) {
  */
 export function blocksOf(p, routeId) {
   const route = routeOf(p, routeId);
-  const out = [];
+  const out = [], occurrence = {};
   route.semesters.forEach((sem, si) => sem.items.forEach((it, ii) => {
     if (typeof it === 'string') {
       const c = p.courses[it];
       out.push({ key: it, kind: 'course', sem: si, code: it, name: c.name, credits: c.credits, cat: c.cat, cats: [c.cat], req: c.req || [], coreq: c.coreq || [], note: c.note });
     } else if (it.group) {
       const g = p.groups[it.group];
-      out.push({ key: `grp:${it.group}:${si}`, kind: 'group', sem: si, group: it.group, name: g.label, credits: it.credits, cat: it.cat, cats: [it.cat], options: g.options, req: g.req || [], coreq: g.coreq || [], hint: g.hint });
+      out.push({ key: `grp:${it.group}`, kind: 'group', sem: si, group: it.group, name: g.label, credits: it.credits, cat: it.cat, cats: [it.cat], options: g.options, req: g.req || [], coreq: g.coreq || [], hint: g.hint });
     } else {
-      out.push({ key: `slot:${p.id}:${si}:${ii}`, kind: 'slot', sem: si, slot: it.slot, name: it.label, credits: it.credits, cat: it.cat, cats: it.cats || [it.cat], req: [], coreq: [] });
+      // Slot keys count occurrences of each kind ("CBU 2" is cbu:2), so they stay the same across routes.
+      occurrence[it.slot] = (occurrence[it.slot] || 0) + 1;
+      out.push({ key: `slot:${p.id}:${it.slot}:${occurrence[it.slot]}`, kind: 'slot', sem: si, slot: it.slot, name: it.label, credits: it.credits, cat: it.cat, cats: it.cats || [it.cat], req: [], coreq: [] });
     }
   }));
   return out;

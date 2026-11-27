@@ -9,80 +9,449 @@
   "retrieved": "2026-11-27",
   "totalCredits": 134,
   "categories": [
-    { "id": "ciencias", "label": "Ciencias", "tone": "yellow" },
-    { "id": "fund-ing", "label": "Fundamentos de Ingeniería", "tone": "magenta" },
-    { "id": "especificas", "label": "Específicas Ing. Civil", "tone": "teal" },
-    { "id": "electivas", "label": "Electivas profundización", "tone": "amber" },
-    { "id": "ruta", "label": "Ruta formativa (énfasis)", "tone": "orange" },
-    { "id": "general", "label": "Educación general", "tone": "green" }
+    {
+      "id": "ciencias",
+      "label": "Ciencias",
+      "tone": "yellow"
+    },
+    {
+      "id": "fund-ing",
+      "label": "Fundamentos de Ingeniería",
+      "tone": "magenta"
+    },
+    {
+      "id": "especificas",
+      "label": "Específicas Ing. Civil",
+      "tone": "teal"
+    },
+    {
+      "id": "electivas",
+      "label": "Electivas profundización",
+      "tone": "amber"
+    },
+    {
+      "id": "ruta",
+      "label": "Ruta formativa (énfasis)",
+      "tone": "orange"
+    },
+    {
+      "id": "general",
+      "label": "Educación general",
+      "tone": "green"
+    }
   ],
   "courses": {
-    "CCOM1100": { "name": "Pensar, Comunicar y Colaborar", "credits": 3, "cat": "general" },
-    "MATE1201": { "name": "Precálculo", "credits": 3, "cat": "general", "note": "Válido como CLE" },
-    "QUIM1103": { "name": "Química", "credits": 3, "cat": "ciencias" },
-    "ICYA1001": { "name": "Introducción a Ingeniería Civil y Ambiental", "credits": 3, "cat": "fund-ing" },
-    "MATE1203": { "name": "Cálculo Diferencial", "credits": 3, "cat": "ciencias", "req": ["MATE1201"] },
-    "GEOC1002": { "name": "Ciencias de la Tierra", "credits": 3, "cat": "ciencias" },
-    "ISIS1221": { "name": "Introducción a la Programación", "credits": 3, "cat": "fund-ing" },
-    "FISI1518": { "name": "Física I", "credits": 3, "cat": "ciencias", "req": ["MATE1203"] },
-    "MATE1105": { "name": "Álgebra Lineal", "credits": 3, "cat": "ciencias", "req": ["MATE1203"] },
-    "MATE1214": { "name": "Cálculo Integral y Ecuaciones Diferenciales", "credits": 3, "cat": "ciencias", "req": ["MATE1203"] },
-    "MATE1207": { "name": "Cálculo Vectorial", "credits": 3, "cat": "ciencias", "req": ["MATE1214", "MATE1105"] },
-    "FISI1528": { "name": "Física II", "credits": 3, "cat": "ciencias", "req": ["FISI1518"] },
-    "ICYA1025": { "name": "Toma de Decisiones Basadas en SIG", "credits": 3, "cat": "fund-ing", "req": ["MATE1203"] },
-    "ICYA2401": { "name": "Mecánica de Fluidos", "credits": 3, "cat": "fund-ing", "req": ["FISI1518", "MATE1214"] },
-    "IIND2106": { "name": "Probabilidad y Estadística I", "credits": 3, "cat": "ciencias", "req": ["MATE1105", "MATE1214"] },
-    "ICYA1116": { "name": "Estática", "credits": 3, "cat": "especificas", "coreq": ["FISI1518"] },
-    "CCDE1101": { "name": "Constitución y Democracia", "credits": 3, "cat": "general" },
-    "ICYA2001": { "name": "Modelación y Análisis Numérico", "credits": 3, "cat": "ciencias", "req": ["ISIS1221"], "coreq": ["MATE1207"] },
-    "IIND2401": { "name": "Análisis de Decisión e Inversión", "credits": 3, "cat": "fund-ing", "req": ["ICYA1001", "MATE1203"] },
-    "ICYA2002": { "name": "Cambio Climático: Fundamentos y Retos", "credits": 3, "cat": "fund-ing", "req": ["FISI1518"] },
-    "ICYA1017": { "name": "Resistencia de Materiales", "credits": 3, "cat": "especificas", "req": ["ICYA1116"] },
-    "ICYA1122": { "name": "Materiales en Ingeniería Civil", "credits": 3, "cat": "especificas", "req": ["ICYA1116"] },
-    "ICYA3004": { "name": "Herramientas de Inteligencia Artificial", "credits": 3, "cat": "fund-ing", "req": ["ISIS1221", "MATE1214", "IIND2106"] },
-    "ICYA3003": { "name": "Gerencia de Proyectos", "credits": 3, "cat": "fund-ing", "req": ["MATE1207", "IIND2401"] },
-    "ICYA2304": { "name": "Fundamentos de Geotecnia", "credits": 3, "cat": "especificas", "req": ["ICYA1017"] },
-    "ICYA2203": { "name": "Análisis de Sistemas Estructurales", "credits": 3, "cat": "especificas", "req": ["ICYA1017"] },
-    "ICYA3016": { "name": "Fundamentos de Transporte", "credits": 3, "cat": "especificas", "req": ["IIND2106"] },
-    "ICYA2404": { "name": "Sistemas de Recursos Hídricos", "credits": 3, "cat": "especificas", "req": ["ICYA2401"] },
-    "ICYA3305": { "name": "Estructuras Geotécnicas", "credits": 3, "cat": "especificas", "req": ["ICYA2304"] },
-    "ICYA3202": { "name": "Diseño Estructural", "credits": 3, "cat": "especificas", "req": ["ICYA2203"] },
-    "ICYA3078": { "name": "Proyecto Final Diseño Civil", "credits": 3, "cat": "fund-ing", "req": ["ICYA2402", "ICYA3003", ["ICYA3202", "ICYA3305"]] },
-    "ICYA3801": { "name": "Ciclo de Vida de Proyectos de Infraestructura", "credits": 3, "cat": "ruta" },
-    "ICYA3802": { "name": "Desafíos Ambientales", "credits": 3, "cat": "ruta" },
-    "ICYA3803": { "name": "Sistemas Urbanos Sostenibles", "credits": 3, "cat": "ruta" },
-    "ICYA3017": { "name": "Infraestructura para la Movilidad", "credits": 3, "cat": "ruta" },
-    "ICYA3308": { "name": "Ingeniería de Pavimentos", "credits": 3, "cat": "ruta" },
-    "ICYA3013": { "name": "BIM", "credits": 3, "cat": "ruta" },
-    "ICYA3402": { "name": "Ingeniería de Recursos Hidráulicos", "credits": 3, "cat": "ruta" },
-    "ICYA3401": { "name": "Hidrología", "credits": 3, "cat": "ruta" },
-    "ICYA3029": { "name": "Fundamentos de Sostenibilidad", "credits": 3, "cat": "ruta" },
-    "ICYA3501": { "name": "Calidad del Aire y Salud", "credits": 3, "cat": "ruta" },
-    "ICYA3028": { "name": "Tratamiento de Aguas", "credits": 3, "cat": "ruta" },
-    "ICYA3702": { "name": "Residuos Sólidos", "credits": 3, "cat": "ruta" },
-    "ICYA3411": { "name": "Energía - Alternativas", "credits": 3, "cat": "ruta" },
-    "ICYA4139": { "name": "Energía - Alternativas", "credits": 3, "cat": "ruta" },
-    "ICYA3601": { "name": "Evaluación y Auditoría Ambiental", "credits": 3, "cat": "ruta" }
+    "CCOM1100": {
+      "name": "Pensar, Comunicar y Colaborar",
+      "credits": 3,
+      "cat": "general"
+    },
+    "MATE1201": {
+      "name": "Precálculo",
+      "credits": 3,
+      "cat": "general",
+      "note": "Válido como CLE"
+    },
+    "QUIM1103": {
+      "name": "Química",
+      "credits": 3,
+      "cat": "ciencias"
+    },
+    "ICYA1001": {
+      "name": "Introducción a Ingeniería Civil y Ambiental",
+      "credits": 3,
+      "cat": "fund-ing"
+    },
+    "MATE1203": {
+      "name": "Cálculo Diferencial",
+      "credits": 3,
+      "cat": "ciencias",
+      "req": [
+        "MATE1201"
+      ]
+    },
+    "GEOC1002": {
+      "name": "Ciencias de la Tierra",
+      "credits": 3,
+      "cat": "ciencias"
+    },
+    "ISIS1221": {
+      "name": "Introducción a la Programación",
+      "credits": 3,
+      "cat": "fund-ing"
+    },
+    "FISI1518": {
+      "name": "Física I",
+      "credits": 3,
+      "cat": "ciencias",
+      "req": [
+        "MATE1203"
+      ]
+    },
+    "MATE1105": {
+      "name": "Álgebra Lineal",
+      "credits": 3,
+      "cat": "ciencias",
+      "req": [
+        "MATE1203"
+      ]
+    },
+    "MATE1214": {
+      "name": "Cálculo Integral y Ecuaciones Diferenciales",
+      "credits": 3,
+      "cat": "ciencias",
+      "req": [
+        "MATE1203"
+      ]
+    },
+    "MATE1207": {
+      "name": "Cálculo Vectorial",
+      "credits": 3,
+      "cat": "ciencias",
+      "req": [
+        "MATE1214",
+        "MATE1105"
+      ]
+    },
+    "FISI1528": {
+      "name": "Física II",
+      "credits": 3,
+      "cat": "ciencias",
+      "req": [
+        "FISI1518"
+      ]
+    },
+    "ICYA1025": {
+      "name": "Toma de Decisiones Basadas en SIG",
+      "credits": 3,
+      "cat": "fund-ing",
+      "req": [
+        "MATE1203"
+      ]
+    },
+    "ICYA2401": {
+      "name": "Mecánica de Fluidos",
+      "credits": 3,
+      "cat": "fund-ing",
+      "req": [
+        "FISI1518",
+        "MATE1214"
+      ]
+    },
+    "IIND2106": {
+      "name": "Probabilidad y Estadística I",
+      "credits": 3,
+      "cat": "ciencias",
+      "req": [
+        "MATE1105",
+        "MATE1214"
+      ]
+    },
+    "ICYA1116": {
+      "name": "Estática",
+      "credits": 3,
+      "cat": "especificas",
+      "coreq": [
+        "FISI1518"
+      ]
+    },
+    "CCDE1101": {
+      "name": "Constitución y Democracia",
+      "credits": 3,
+      "cat": "general"
+    },
+    "ICYA2001": {
+      "name": "Modelación y Análisis Numérico",
+      "credits": 3,
+      "cat": "ciencias",
+      "req": [
+        "ISIS1221"
+      ],
+      "coreq": [
+        "MATE1207"
+      ]
+    },
+    "IIND2401": {
+      "name": "Análisis de Decisión e Inversión",
+      "credits": 3,
+      "cat": "fund-ing",
+      "req": [
+        "ICYA1001",
+        "MATE1203"
+      ]
+    },
+    "ICYA2002": {
+      "name": "Cambio Climático: Fundamentos y Retos",
+      "credits": 3,
+      "cat": "fund-ing",
+      "req": [
+        "FISI1518"
+      ]
+    },
+    "ICYA1017": {
+      "name": "Resistencia de Materiales",
+      "credits": 3,
+      "cat": "especificas",
+      "req": [
+        "ICYA1116"
+      ]
+    },
+    "ICYA1122": {
+      "name": "Materiales en Ingeniería Civil",
+      "credits": 3,
+      "cat": "especificas",
+      "req": [
+        "ICYA1116"
+      ]
+    },
+    "ICYA3004": {
+      "name": "Herramientas de Inteligencia Artificial",
+      "credits": 3,
+      "cat": "fund-ing",
+      "req": [
+        "ISIS1221",
+        "MATE1214",
+        "IIND2106"
+      ]
+    },
+    "ICYA3003": {
+      "name": "Gerencia de Proyectos",
+      "credits": 3,
+      "cat": "fund-ing",
+      "req": [
+        "MATE1207",
+        "IIND2401"
+      ]
+    },
+    "ICYA2304": {
+      "name": "Fundamentos de Geotecnia",
+      "credits": 3,
+      "cat": "especificas",
+      "req": [
+        "ICYA1017"
+      ]
+    },
+    "ICYA2203": {
+      "name": "Análisis de Sistemas Estructurales",
+      "credits": 3,
+      "cat": "especificas",
+      "req": [
+        "ICYA1017"
+      ]
+    },
+    "ICYA3016": {
+      "name": "Fundamentos de Transporte",
+      "credits": 3,
+      "cat": "especificas",
+      "req": [
+        "IIND2106"
+      ]
+    },
+    "ICYA2404": {
+      "name": "Sistemas de Recursos Hídricos",
+      "credits": 3,
+      "cat": "especificas",
+      "req": [
+        "ICYA2401"
+      ]
+    },
+    "ICYA3305": {
+      "name": "Estructuras Geotécnicas",
+      "credits": 3,
+      "cat": "especificas",
+      "req": [
+        "ICYA2304"
+      ]
+    },
+    "ICYA3202": {
+      "name": "Diseño Estructural",
+      "credits": 3,
+      "cat": "especificas",
+      "req": [
+        "ICYA2203"
+      ]
+    },
+    "ICYA3078": {
+      "name": "Proyecto Final Diseño Civil",
+      "credits": 3,
+      "cat": "fund-ing",
+      "req": [
+        "ICYA2404",
+        "ICYA3003",
+        [
+          "ICYA3202",
+          "ICYA3305"
+        ]
+      ]
+    },
+    "ICYA3801": {
+      "name": "Ciclo de Vida de Proyectos de Infraestructura",
+      "credits": 3,
+      "cat": "ruta"
+    },
+    "ICYA3802": {
+      "name": "Desafíos Ambientales",
+      "credits": 3,
+      "cat": "ruta"
+    },
+    "ICYA3803": {
+      "name": "Sistemas Urbanos Sostenibles",
+      "credits": 3,
+      "cat": "ruta"
+    },
+    "ICYA3017": {
+      "name": "Infraestructura para la Movilidad",
+      "credits": 3,
+      "cat": "ruta"
+    },
+    "ICYA3308": {
+      "name": "Ingeniería de Pavimentos",
+      "credits": 3,
+      "cat": "ruta"
+    },
+    "ICYA3013": {
+      "name": "BIM",
+      "credits": 3,
+      "cat": "ruta"
+    },
+    "ICYA3402": {
+      "name": "Ingeniería de Recursos Hidráulicos",
+      "credits": 3,
+      "cat": "ruta"
+    },
+    "ICYA3401": {
+      "name": "Hidrología",
+      "credits": 3,
+      "cat": "ruta"
+    },
+    "ICYA3029": {
+      "name": "Fundamentos de Sostenibilidad",
+      "credits": 3,
+      "cat": "ruta"
+    },
+    "ICYA3501": {
+      "name": "Calidad del Aire y Salud",
+      "credits": 3,
+      "cat": "ruta"
+    },
+    "ICYA3028": {
+      "name": "Tratamiento de Aguas",
+      "credits": 3,
+      "cat": "ruta"
+    },
+    "ICYA3702": {
+      "name": "Residuos Sólidos",
+      "credits": 3,
+      "cat": "ruta"
+    },
+    "ICYA3411": {
+      "name": "Energía - Alternativas",
+      "credits": 3,
+      "cat": "ruta"
+    },
+    "ICYA4139": {
+      "name": "Energía - Alternativas",
+      "credits": 3,
+      "cat": "ruta"
+    },
+    "ICYA3601": {
+      "name": "Evaluación y Auditoría Ambiental",
+      "credits": 3,
+      "cat": "ruta"
+    }
   },
   "groups": {
-    "S7GEO": { "label": "Estructuras Geotécnicas o Diseño Estructural", "short": "ICYA 3305 o ICYA 3202", "options": ["ICYA3305", "ICYA3202"] }
+    "S7GEO": {
+      "label": "Estructuras Geotécnicas o Diseño Estructural",
+      "short": "ICYA 3305 o ICYA 3202",
+      "options": [
+        "ICYA3305",
+        "ICYA3202"
+      ]
+    }
   },
   "emphases": [
-    { "id": "infra", "label": "Proyectos de infraestructura", "required": "ICYA3801", "electives": ["ICYA3017", "ICYA3308", "ICYA3013", "ICYA3402", "ICYA3202", "ICYA3305"] },
-    { "id": "ambiente", "label": "Gestión integral del ambiente", "required": "ICYA3802", "electives": ["ICYA3401", "ICYA3029", "ICYA3501", "ICYA3028", "ICYA3702", "ICYA3601"] },
-    { "id": "ciudades", "label": "Comunidades y ciudades sostenibles", "required": "ICYA3803", "electives": ["ICYA3017", "ICYA3501", "ICYA3702", "ICYA3411", "ICYA4139", "ICYA3601"] }
+    {
+      "id": "infra",
+      "label": "Proyectos de infraestructura",
+      "required": "ICYA3801",
+      "electives": [
+        "ICYA3017",
+        "ICYA3308",
+        "ICYA3013",
+        "ICYA3402",
+        "ICYA3202",
+        "ICYA3305"
+      ]
+    },
+    {
+      "id": "ambiente",
+      "label": "Gestión integral del ambiente",
+      "required": "ICYA3802",
+      "electives": [
+        "ICYA3401",
+        "ICYA3029",
+        "ICYA3501",
+        "ICYA3028",
+        "ICYA3702",
+        "ICYA3601"
+      ]
+    },
+    {
+      "id": "ciudades",
+      "label": "Comunidades y ciudades sostenibles",
+      "required": "ICYA3803",
+      "electives": [
+        "ICYA3017",
+        "ICYA3501",
+        "ICYA3702",
+        "ICYA3411",
+        "ICYA4139",
+        "ICYA3601"
+      ]
+    }
   ],
   "external": {
-    "ICYA2402": { "label": "ICYA 2402 (no aparece en el currículo 2026-2)", "kind": "course" },
-    "RECLEC": { "label": "Requisito de lectura en inglés", "kind": "requirement" }
+    "RECLEC": {
+      "label": "Requisito de lectura en inglés",
+      "kind": "requirement"
+    }
   },
   "slotKinds": {
-    "cbu": { "hint": "5 cursos CBU: el común sobre Colombia, uno de Culturas, artes y humanidades, uno de Ciencia, tecnología y sociedad y dos más de cualquiera de esas dos áreas.", "queries": ["Colombia", "Arte", "Historia", "Filosofía", "Ciencia"] },
-    "cle": { "hint": "Créditos de libre elección: cualquier curso de la universidad, si cumples sus prerrequisitos.", "queries": [] },
-    "fgi": { "hint": "Fundamentos Generales en Ingeniería (FGI), 2 créditos. El currículo no indica el código: consulta la oferta del semestre.", "queries": ["Fundamentos generales"] },
-    "electiva": { "hint": "12 créditos de electivas en Ingeniería Civil: materias de maestría (4 cr), proyecto de grado (3 cr), práctica profesional (6 cr) o materias de un énfasis distinto al tuyo (3 cr).", "queries": ["ICYA"] },
-    "enf-o": { "hint": "Curso obligatorio de tu énfasis.", "emphasis": "required" },
-    "enf-e": { "hint": "Curso electivo de tu énfasis.", "emphasis": "electives" }
+    "cbu": {
+      "hint": "5 cursos CBU: el común sobre Colombia, uno de Culturas, artes y humanidades, uno de Ciencia, tecnología y sociedad y dos más de cualquiera de esas dos áreas.",
+      "queries": [
+        "Colombia",
+        "Arte",
+        "Historia",
+        "Filosofía",
+        "Ciencia"
+      ]
+    },
+    "cle": {
+      "hint": "Créditos de libre elección: cualquier curso de la universidad, si cumples sus prerrequisitos.",
+      "queries": []
+    },
+    "fgi": {
+      "hint": "Fundamentos Generales en Ingeniería (FGI), 2 créditos. El currículo no indica el código: consulta la oferta del semestre.",
+      "queries": [
+        "Fundamentos generales"
+      ]
+    },
+    "electiva": {
+      "hint": "12 créditos de electivas en Ingeniería Civil: materias de maestría (4 cr), proyecto de grado (3 cr), práctica profesional (6 cr) o materias de un énfasis distinto al tuyo (3 cr).",
+      "queries": [
+        "ICYA"
+      ]
+    },
+    "enf-o": {
+      "hint": "Curso obligatorio de tu énfasis.",
+      "emphasis": "required"
+    },
+    "enf-e": {
+      "hint": "Curso electivo de tu énfasis.",
+      "emphasis": "electives"
+    }
   },
   "routes": [
     {
@@ -90,30 +459,206 @@
       "label": "Currículo sugerido",
       "assumed": [],
       "semesters": [
-        { "credits": 15, "items": [{ "slot": "cbu", "label": "CBU · Cultura, arte y humanidades", "credits": 3, "cat": "general" }, "CCOM1100", "MATE1201", "QUIM1103", "ICYA1001"] },
-        { "credits": 15, "items": [{ "slot": "cbu", "label": "CBU · Común Colombia", "credits": 3, "cat": "general" }, { "slot": "cle", "label": "CLE · Créditos de libre elección", "credits": 3, "cat": "general" }, "MATE1203", "GEOC1002", "ISIS1221"] },
-        { "credits": 17, "items": [{ "slot": "cbu", "label": "CBU · Ciencia, tecnología y sociedad", "credits": 3, "cat": "general" }, { "slot": "cbu", "label": "CBU", "credits": 3, "cat": "general" }, "FISI1518", "MATE1105", "MATE1214", { "slot": "fgi", "label": "Fundamentos Generales en Ingeniería (FGI)", "credits": 2, "cat": "fund-ing" }] },
-        { "credits": 18, "items": ["MATE1207", "FISI1528", "ICYA1025", "ICYA2401", "IIND2106", "ICYA1116"] },
-        { "credits": 18, "items": ["CCDE1101", "ICYA2001", "IIND2401", "ICYA2002", "ICYA1017", "ICYA1122"] },
-        { "credits": 18, "items": ["ICYA3004", "ICYA3003", "ICYA2304", "ICYA2203", "ICYA3016", "ICYA2404"] },
-        { "credits": 18, "items": [{ "slot": "cbu", "label": "CBU", "credits": 3, "cat": "general" }, { "group": "S7GEO", "credits": 3, "cat": "especificas" }, { "slot": "electiva", "label": "Electiva", "credits": 6, "cat": "electivas" }, { "slot": "enf-o", "label": "Énfasis · curso O1", "credits": 3, "cat": "ruta" }, { "slot": "enf-e", "label": "Énfasis · curso E1", "credits": 3, "cat": "ruta" }] },
-        { "credits": 15, "items": ["ICYA3078", { "slot": "electiva", "label": "Electiva", "credits": 6, "cat": "electivas" }, { "slot": "enf-e", "label": "Énfasis · curso E2", "credits": 3, "cat": "ruta" }, { "slot": "enf-e", "label": "Énfasis · curso E3", "credits": 3, "cat": "ruta" }] }
+        {
+          "credits": 15,
+          "items": [
+            {
+              "slot": "cbu",
+              "label": "CBU · Cultura, arte y humanidades",
+              "credits": 3,
+              "cat": "general"
+            },
+            "CCOM1100",
+            "MATE1201",
+            "QUIM1103",
+            "ICYA1001"
+          ]
+        },
+        {
+          "credits": 15,
+          "items": [
+            {
+              "slot": "cbu",
+              "label": "CBU · Común Colombia",
+              "credits": 3,
+              "cat": "general"
+            },
+            {
+              "slot": "cle",
+              "label": "CLE · Créditos de libre elección",
+              "credits": 3,
+              "cat": "general"
+            },
+            "MATE1203",
+            "GEOC1002",
+            "ISIS1221"
+          ]
+        },
+        {
+          "credits": 17,
+          "items": [
+            {
+              "slot": "cbu",
+              "label": "CBU · Ciencia, tecnología y sociedad",
+              "credits": 3,
+              "cat": "general"
+            },
+            {
+              "slot": "cbu",
+              "label": "CBU",
+              "credits": 3,
+              "cat": "general"
+            },
+            "FISI1518",
+            "MATE1105",
+            "MATE1214",
+            {
+              "slot": "fgi",
+              "label": "Fundamentos Generales en Ingeniería (FGI)",
+              "credits": 2,
+              "cat": "fund-ing"
+            }
+          ]
+        },
+        {
+          "credits": 18,
+          "items": [
+            "MATE1207",
+            "FISI1528",
+            "ICYA1025",
+            "ICYA2401",
+            "IIND2106",
+            "ICYA1116"
+          ]
+        },
+        {
+          "credits": 18,
+          "items": [
+            "CCDE1101",
+            "ICYA2001",
+            "IIND2401",
+            "ICYA2002",
+            "ICYA1017",
+            "ICYA1122"
+          ]
+        },
+        {
+          "credits": 18,
+          "items": [
+            "ICYA3004",
+            "ICYA3003",
+            "ICYA2304",
+            "ICYA2203",
+            "ICYA3016",
+            "ICYA2404"
+          ]
+        },
+        {
+          "credits": 18,
+          "items": [
+            {
+              "slot": "cbu",
+              "label": "CBU",
+              "credits": 3,
+              "cat": "general"
+            },
+            {
+              "group": "S7GEO",
+              "credits": 3,
+              "cat": "especificas"
+            },
+            {
+              "slot": "electiva",
+              "label": "Electiva",
+              "credits": 6,
+              "cat": "electivas"
+            },
+            {
+              "slot": "enf-o",
+              "label": "Énfasis · curso O1",
+              "credits": 3,
+              "cat": "ruta"
+            },
+            {
+              "slot": "enf-e",
+              "label": "Énfasis · curso E1",
+              "credits": 3,
+              "cat": "ruta"
+            }
+          ]
+        },
+        {
+          "credits": 15,
+          "items": [
+            "ICYA3078",
+            {
+              "slot": "electiva",
+              "label": "Electiva",
+              "credits": 6,
+              "cat": "electivas"
+            },
+            {
+              "slot": "enf-e",
+              "label": "Énfasis · curso E2",
+              "credits": 3,
+              "cat": "ruta"
+            },
+            {
+              "slot": "enf-e",
+              "label": "Énfasis · curso E3",
+              "credits": 3,
+              "cat": "ruta"
+            }
+          ]
+        }
       ]
     }
   ],
   "rules": [
-    { "type": "gate", "fromSemester": 3, "requires": ["CCOM1100"], "text": "Para inscribir materias de tercer semestre, es necesario haber cursado y aprobado con anterioridad el requisito de Español." },
-    { "type": "gate", "fromSemester": 5, "also": ["ICYA2401"], "requires": ["RECLEC"], "text": "El requisito de lectura en inglés debe ser aprobado antes de cursar las materias de quinto semestre." }
+    {
+      "type": "gate",
+      "fromSemester": 3,
+      "requires": [
+        "CCOM1100"
+      ],
+      "text": "Para inscribir materias de tercer semestre, es necesario haber cursado y aprobado con anterioridad el requisito de Español."
+    },
+    {
+      "type": "gate",
+      "fromSemester": 5,
+      "also": [
+        "ICYA2401"
+      ],
+      "requires": [
+        "RECLEC"
+      ],
+      "text": "El requisito de lectura en inglés debe ser aprobado antes de cursar las materias de quinto semestre."
+    }
   ],
   "notes": [
-    { "title": "Electiva", "text": "12 créditos de electivas en Ingeniería Civil: materias de maestría (4 cr), proyecto de grado (3 cr), práctica profesional (6 cr) o materias de algún énfasis distinto al elegido (3 cr)." },
-    { "title": "Énfasis", "text": "Cada estudiante elige un énfasis certificable: una materia obligatoria y tres electivas de una lista corta. Proyectos de infraestructura, Gestión integral del ambiente o Comunidades y ciudades sostenibles." },
-    { "title": "Ciclo Básico Uniandino", "text": "5 cursos CBU: el común sobre Colombia, uno de Culturas, artes y humanidades, uno de Ciencia, tecnología y sociedad y dos más de cualquiera de esas dos áreas." },
-    { "title": "Precálculo", "text": "Los 3 créditos de Precálculo (MATE 1201) valen como créditos de libre elección." },
-    { "title": "Requisitos adicionales de grado", "text": "Módulo virtual de prerrequisito, Saber Pro, requisito de dominio en lengua extranjera y requisito de internacionalización." }
+    {
+      "title": "Electiva",
+      "text": "12 créditos de electivas en Ingeniería Civil: materias de maestría (4 cr), proyecto de grado (3 cr), práctica profesional (6 cr) o materias de algún énfasis distinto al elegido (3 cr)."
+    },
+    {
+      "title": "Énfasis",
+      "text": "Cada estudiante elige un énfasis certificable: una materia obligatoria y tres electivas de una lista corta. Proyectos de infraestructura, Gestión integral del ambiente o Comunidades y ciudades sostenibles."
+    },
+    {
+      "title": "Ciclo Básico Uniandino",
+      "text": "5 cursos CBU: el común sobre Colombia, uno de Culturas, artes y humanidades, uno de Ciencia, tecnología y sociedad y dos más de cualquiera de esas dos áreas."
+    },
+    {
+      "title": "Precálculo",
+      "text": "Los 3 créditos de Precálculo (MATE 1201) valen como créditos de libre elección."
+    },
+    {
+      "title": "Requisitos adicionales de grado",
+      "text": "Módulo virtual de prerrequisito, Saber Pro, requisito de dominio en lengua extranjera y requisito de internacionalización."
+    }
   ],
   "review": [
-    "Proyecto Final (ICYA 3078) pide ICYA 2402, que no aparece en el currículo 2026-2 (sí está ICYA 2404 Sistemas de Recursos Hídricos). Se deja como está impreso.",
+    "Decidido: el PDF pide ICYA 2402 para ICYA 3078, que no aparece en el currículo 2026-2; se toma ICYA 2404 (error de digitación).",
     "La caja del semestre 7 dice \"ICYA 2304 O ICYA 2203\". Se lee como: ICYA 3305 pide ICYA 2304 e ICYA 3202 pide ICYA 2203.",
     "\"Fundamentos Generales en Ingeniería (FGI)\" (2 cr) no tiene código en el currículo.",
     "El ícono del requisito de lectura en inglés está sobre ICYA 2401 (semestre 4), aunque la nota dice quinto semestre. Se aplica a ambos.",
