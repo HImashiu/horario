@@ -5,10 +5,10 @@ import {
   S, commit, findSec, courseInfo, basketItem, itemForCode, currentDraft, courseState, isPending, courseTitle, creditsOf, evaluate,
   chooseCombo, chooseSection, unchooseSection, clearCourse, removeFromBasket, courseInUse, toggleLock, toggleSkip,
   switchDraft, createDraft, duplicateDraft, renameDraft, deleteDraft, nextDraftName, undo, redo, canUndo, canRedo,
-  runGenerator, applyGen, useGen, cancelGen, saveGenAsNew, setRule, resultIdsFor, draftSections,
+  runGenerator, applyGen, useGen, cancelGen, saveGenAsNew, setRule, resultIdsFor, draftSections, sortGen, toggleOptional,
 } from '../../state/store.js';
 import { kindOf, kindLabel, structureLabel, hasSeats, seatText, countConflicts } from '../../core/sections.js';
-import { DAYS, schedText, hasTimeConflict, weeklyHours, fmtHours, fmtTimeAP, timeToMinutes, daysUsed } from '../../core/time.js';
+import { DAYS, schedText, hasTimeConflict, weeklyHours, fmtHours, fmtTimeAP, fmtTime, fmtHourFull, timeToMinutes, daysUsed } from '../../core/time.js';
 import { totalCredits } from '../../core/score.js';
 import { fmtCode } from '../../core/requirements.js';
 import { esc, data, handle, isMobile, $ } from '../dom.js';
@@ -62,7 +62,7 @@ function renderToolbar() {
     </div>
     <button class="icon-btn is-bordered" data-action="undo" title="Deshacer (Ctrl+Z)" aria-label="Deshacer" ${canUndo() ? '' : 'disabled'}><i class="fa-solid fa-rotate-left text-xs"></i></button>
     <button class="icon-btn is-bordered" data-action="redo" title="Rehacer (Ctrl+Shift+Z)" aria-label="Rehacer" ${canRedo() ? '' : 'disabled'}><i class="fa-solid fa-rotate-right text-xs"></i></button>
-    <button class="btn btn-quiet" data-action="rules:open" data-anchor="rules" aria-label="Restricciones"><i class="fa-solid fa-sliders text-xs"></i><span class="hidden sm:inline">Restricciones</span></button>
+    <button class="btn btn-quiet" data-action="rules:open" data-anchor="rules" aria-label="Preferencias"><i class="fa-solid fa-sliders text-xs"></i><span class="hidden sm:inline">Preferencias</span></button>
     <button class="btn btn-quiet" data-action="export:menu" data-anchor="export-menu" aria-label="Exportar"><i class="fa-solid fa-arrow-up-from-bracket text-xs"></i><span class="hidden sm:inline">Exportar</span></button>
     <button class="btn btn-primary" data-action="gen:run"><i class="fa-solid fa-wand-magic-sparkles text-xs"></i>Generar<span class="hidden sm:inline"> horarios</span></button>
     <div class="lg:hidden w-full flex items-center gap-1.5 overflow-x-auto">${metricsHtml(true)}</div>`;
@@ -85,24 +85,42 @@ function metricsHtml(compact) {
 
 const ctx = () => ({ draft: currentDraft(), selected: S.selected, loading: ui.loadingCodes });
 
-// ─── Generator bar (Phase 2 replaces it with a gallery) ──────
+// ─── Generator options gallery (replaces v7's bar and "Ver todas" popup) ──
+const SORTS = [['score', 'Mejor score'], ['days', 'Menos días'], ['end', 'Terminan antes'], ['gaps', 'Menos huecos']];
 function renderGenBar() {
   const el = $('#hz-genbar');
   if (!S.gen) { el.className = ''; el.innerHTML = ''; return; }
-  const g = S.gen, r = g.results[g.index];
+  const g = S.gen;
+  const shown = g.results.slice(0, 40);
+  const cardOf = (o, i) => {
+    const secs = o.ids.map(findSec).filter(Boolean);
+    const on = i === g.index;
+    return `<button class="flex-shrink-0 w-[132px] text-left p-2 rounded-xl border ${on ? 'border-brand-500 bg-white ring-4 ring-brand-100' : 'border-slate-200 bg-white hover:border-slate-300'} flex flex-col gap-1.5" data-action="gen:pick" ${data({ i })} aria-pressed="${on}" aria-label="Opción ${i + 1}, score ${o.score} de 10">
+      ${miniWeek(secs, [], 114, 56)}
+      <span class="flex items-center justify-between text-xs"><b class="font-semibold">Opción ${i + 1}</b><span class="font-semibold ${on ? 'text-brand-700' : 'text-slate-700'}">${o.score}/10</span></span>
+      <span class="text-[11px] text-slate-600 leading-tight">${o.days} días · hasta ${fmtTimeAP(o.end)}${o.gaps >= 60 ? ` · ${Math.round(o.gaps / 60)} h huecos` : ''}</span>
+    </button>`;
+  };
   const ev = evaluate(S.selected);
   el.className = 'gutter pb-3';
-  el.innerHTML = `<div class="flex flex-wrap items-center gap-x-3 gap-y-2 px-3 sm:px-4 py-2.5 rounded-xl bg-brand-50 border border-brand-200">
-    <span class="text-sm font-semibold text-brand-700">Opción ${g.index + 1} de ${g.results.length}${g.truncated ? '+' : ''}</span>
-    <span class="text-sm text-slate-700">sin choques · ${ev.days} días · termina ${fmtTimeAP(ev.lastEnd)} · Score ${r.score}/10</span>
-    ${g.skipped.length ? `<span class="text-xs text-amber-800">No incluye: ${esc(g.skipped.join(', '))} (sin secciones)</span>` : ''}
-    <div class="flex items-center gap-1.5 ml-auto">
-      <button class="icon-btn !w-8 !h-8 border border-brand-200 bg-white text-brand-700" data-action="gen:step" data-dir="-1" aria-label="Opción anterior"><i class="fa-solid fa-chevron-left text-[10px]"></i></button>
-      <button class="icon-btn !w-8 !h-8 border border-brand-200 bg-white text-brand-700" data-action="gen:step" data-dir="1" aria-label="Opción siguiente"><i class="fa-solid fa-chevron-right text-[10px]"></i></button>
-      <button class="btn btn-sm btn-quiet hidden sm:inline-flex" data-action="gen:save">Guardar como nuevo</button>
-      <button class="btn btn-sm btn-primary" data-action="gen:use">Usar esta</button>
-      <button class="btn btn-sm text-slate-600 hover:text-slate-900" data-action="gen:cancel">Cancelar</button>
-    </div></div>`;
+  el.innerHTML = `<div class="rounded-2xl border border-brand-200 bg-brand-50/70 p-3 flex flex-col gap-2.5">
+    <div class="flex flex-wrap items-center gap-x-3 gap-y-2">
+      <span class="text-sm font-semibold text-brand-700">${g.results.length}${g.truncated ? '+' : ''} horarios sin choques</span>
+      <label class="flex items-center gap-1.5 text-xs text-slate-600">Ordenar por
+        <select class="input !h-8 !w-auto !py-0 text-xs" data-change="gen:sort" aria-label="Ordenar opciones">${SORTS.map(([v, l]) => `<option value="${v}" ${g.sort === v ? 'selected' : ''}>${l}</option>`).join('')}</select></label>
+      ${g.dropped.length ? `<span class="pill pill-warn">No cabe todo: deja por fuera ${esc(g.dropped.join(', '))}</span>` : ''}
+      ${g.skipped.length ? `<span class="pill pill-neutral">Sin secciones: ${esc(g.skipped.join(', '))}</span>` : ''}
+      <div class="flex items-center gap-1.5 ml-auto">
+        <button class="btn btn-sm btn-quiet hidden sm:inline-flex" data-action="gen:save">Guardar como nuevo horario</button>
+        <button class="btn btn-sm btn-primary" data-action="gen:use"><i class="fa-solid fa-check text-[11px]"></i>Usar la opción ${g.index + 1}</button>
+        <button class="btn btn-sm text-slate-600 hover:text-slate-900" data-action="gen:cancel">Cancelar</button>
+      </div>
+    </div>
+    <div class="flex gap-2 overflow-x-auto pb-1" id="gen-strip">${shown.map(cardOf).join('')}${g.results.length > shown.length ? `<span class="flex-shrink-0 self-center text-xs muted px-2">y ${g.results.length - shown.length} más</span>` : ''}</div>
+    ${ev.flags.length ? `<p class="text-xs text-slate-600">${ev.flags.map(f => `<span class="${f.type === 'warn' ? 'text-amber-800' : f.type === 'ok' ? 'text-emerald-700' : ''}">${f.type === 'warn' ? '⚠ ' : f.type === 'ok' ? '✓ ' : ''}${esc(f.text)}</span>`).join(' · ')}</p>` : ''}
+  </div>`;
+  const cur = el.querySelector(`[data-i="${g.index}"]`);
+  cur?.scrollIntoView?.({ block: 'nearest', inline: 'nearest' });
 }
 
 // ─── Left panel ──────────────────────────────────────────────
@@ -173,9 +191,10 @@ function courseListHtml() {
         <button class="flex-1 min-w-0 text-left flex items-start gap-2.5" data-action="course:focus" data-hover="course:hover" ${data({ key: it.key, hkey: it.key })}>
           <span class="w-2.5 h-2.5 mt-1.5 rounded-full flex-shrink-0 ${st.skipped ? 'opacity-40' : ''}" style="background:${c.dot}"></span>
           <span class="min-w-0 flex-1"><span class="block text-sm font-semibold truncate ${st.skipped ? 'muted' : ''}">${esc(it.title)}</span>
-          <span class="block text-xs muted truncate">${esc(meta)}</span></span>
+          <span class="block text-xs muted truncate">${esc(meta)}${it.optional ? ' · opcional' : ''}</span></span>
         </button>
         <span class="flex items-center gap-0.5 flex-shrink-0">
+          ${it.code ? `<button class="icon-btn !w-7 !h-7 ${it.optional ? 'text-amber-600' : 'md:opacity-0 group-hover:opacity-100 focus:opacity-100'}" data-action="course:optional" ${data({ key: it.key })} aria-pressed="${!!it.optional}" title="${it.optional ? 'Opcional: el generador puede dejarla por fuera' : 'Marcar como opcional'}" aria-label="${it.optional ? 'Quitar opcional' : 'Marcar como opcional'}"><i class="fa-${it.optional ? 'solid' : 'regular'} fa-star-half-stroke text-[11px]"></i></button>` : ''}
           ${it.code ? `<button class="icon-btn !w-7 !h-7 ${st.locked ? 'text-navy' : 'md:opacity-0 group-hover:opacity-100 focus:opacity-100'}" data-action="course:lock" ${data({ key: it.key })} aria-pressed="${st.locked}" title="${st.locked ? 'Con candado: el generador no la cambia' : 'Poner candado'}" aria-label="${st.locked ? 'Quitar candado' : 'Poner candado'}"><i class="fa-solid ${st.locked ? 'fa-lock' : 'fa-lock-open'} text-[11px]"></i></button>` : ''}
           <button class="icon-btn !w-7 !h-7 ${st.skipped ? '' : 'md:opacity-0 group-hover:opacity-100 focus:opacity-100'}" data-action="course:skip" ${data({ key: it.key })} aria-pressed="${st.skipped}" title="${st.skipped ? 'Incluir en este horario' : 'No incluir en este horario'}" aria-label="${st.skipped ? 'Incluir en este horario' : 'No incluir en este horario'}"><i class="fa-regular ${st.skipped ? 'fa-eye-slash' : 'fa-eye'} text-[11px]"></i></button>
           ${statusChip(st)}
@@ -348,22 +367,39 @@ function renderMobileLayout() {
   seg.innerHTML = focused ? '' : `<div class="seg w-full"><button class="flex-1" data-action="mobile:pane" data-pane="list" aria-pressed="${pane === 'list'}">Materias (${S.basket.length})</button><button class="flex-1" data-action="mobile:pane" data-pane="cal" aria-pressed="${pane === 'cal'}">Horario</button></div>`;
 }
 
-// ─── Restrictions popover ────────────────────────────────────
+// ─── Preferences popover (was "Restricciones") ──────────────
+const HOURS = h => Array.from({ length: 17 }, (_, i) => i + 6).map(x => [x, fmtHourFull(x)]);
 function rulesHtml() {
   const r = S.rules;
-  const cb = (key, label, extra = '') => `<label class="flex items-center gap-2.5 cursor-pointer text-sm"><input type="checkbox" class="w-4 h-4 accent-[var(--navy)]" data-change="rule:set" ${data({ rule: key })} ${r[key] ? 'checked' : ''}>${label}${extra}</label>`;
+  const cb = (key, label) => `<label class="flex items-center gap-2.5 cursor-pointer text-sm"><input type="checkbox" class="w-4 h-4 accent-[var(--navy)]" data-change="rule:set" ${data({ rule: key })} ${r[key] ? 'checked' : ''}>${label}</label>`;
   const sel = (key, opts) => `<select class="input !h-8 !w-auto !py-0" data-change="rule:set" ${data({ rule: key })} aria-label="Hora">${opts.map(([v, l]) => `<option value="${v}" ${Number(r[key]) === v ? 'selected' : ''}>${l}</option>`).join('')}</select>`;
-  return `<div class="w-80 max-w-full p-3 flex flex-col gap-3">
-    <p class="eyebrow">Preferencias del score</p>
-    ${cb('mondayFree', 'Lunes libre')}
-    ${cb('tuesdayLate', 'Martes después de 9:30 AM')}
+  const days = DAYS.map(d => `<button class="chip !h-7 !px-2.5" data-action="rule:day" ${data({ day: d })} aria-pressed="${(r.freeDays || []).includes(d)}">${d.slice(0, 3)}</button>`).join('');
+  const busy = (r.busy || []).map(b => `<div class="flex items-center gap-2 text-sm"><span class="w-3 h-3 rounded-sm flex-shrink-0" style="background:repeating-linear-gradient(135deg,#98a2b3 0 2px,#fff 2px 5px)"></span>
+      <span class="flex-1 min-w-0 truncate">${esc(b.label || `${b.day} ${fmtTime(b.start)}–${fmtTime(b.end)}`)}</span>
+      <span class="pill ${b.soft ? 'pill-neutral' : 'pill-warn'}">${b.soft ? 'Preferible' : 'Obligatorio'}</span>
+      <button class="tray-x !w-6 !h-6" data-action="busy:remove" ${data({ id: b.id })} aria-label="Quitar"><i class="fa-solid fa-xmark text-[11px]"></i></button></div>`).join('');
+  return `<div class="w-[22rem] max-w-full p-3 flex flex-col gap-3">
+    <p class="eyebrow">Días libres que prefieres</p>
+    <div class="flex flex-wrap gap-1.5">${days}</div>
     <div class="flex items-center gap-2">${cb('noEarly', 'Sin clases antes de')}${sel('earlyHour', [[7, '7 AM'], [8, '8 AM'], [9, '9 AM'], [10, '10 AM']])}</div>
-    <div class="flex items-center gap-2">${cb('noLate', 'Terminar antes de')}${sel('lateHour', [[13, '1 PM'], [14, '2 PM'], [15, '3 PM'], [16, '4 PM'], [17, '5 PM'], [18, '6 PM'], [19, '7 PM']])}</div>
+    <div class="flex items-center gap-2">${cb('noLate', 'Terminar antes de')}${sel('lateHour', [[12, '12 PM'], [13, '1 PM'], [14, '2 PM'], [15, '3 PM'], [16, '4 PM'], [17, '5 PM'], [18, '6 PM'], [19, '7 PM']])}</div>
+    ${cb('fewerGaps', 'Menos huecos entre clases')}
+    ${cb('lunch', 'Una hora libre para almorzar (11:30–2 PM)')}
     <label class="flex items-center gap-2 text-sm">Meta de créditos <input type="number" min="1" max="30" class="input !h-8 !w-16" data-change="rule:set" data-rule="creditTarget" value="${esc(r.creditTarget)}"></label>
-    <p class="eyebrow pt-2 border-t border-line-2">Secciones</p>
+    <p class="eyebrow pt-2 border-t border-slate-100">Horas ocupadas</p>
+    <p class="text-xs muted -mt-1.5">Trabajo, deporte, transporte… «Obligatorio»: el generador nunca pone clases ahí. «Preferible»: solo baja el score. También puedes hacer clic en un espacio vacío del calendario.</p>
+    <div class="flex flex-col gap-1.5">${busy || '<p class="text-xs muted">Ninguna.</p>'}</div>
+    <form class="flex flex-wrap items-center gap-1.5" data-submit="busy:add">
+      <select name="day" class="input !h-8 !w-auto !py-0" aria-label="Día">${DAYS.map(d => `<option>${d}</option>`).join('')}</select>
+      <select name="start" class="input !h-8 !w-auto !py-0" aria-label="Desde">${HOURS().map(([h, l]) => `<option value="${String(h).padStart(2, '0')}:00" ${h === 7 ? 'selected' : ''}>${l}</option>`).join('')}</select>
+      <span class="text-xs muted">a</span>
+      <select name="end" class="input !h-8 !w-auto !py-0" aria-label="Hasta">${HOURS().map(([h, l]) => `<option value="${String(h).padStart(2, '0')}:00" ${h === 9 ? 'selected' : ''}>${l}</option>`).join('')}</select>
+      <label class="flex items-center gap-1.5 text-xs"><input type="checkbox" name="hard" class="w-3.5 h-3.5 accent-[var(--navy)]" checked>Obligatorio</label>
+      <button class="btn btn-sm btn-quiet">Agregar</button>
+    </form>
+    <p class="eyebrow pt-2 border-t border-slate-100">Secciones</p>
     <label class="flex items-start gap-2.5 cursor-pointer text-sm"><input type="checkbox" class="w-4 h-4 mt-0.5 accent-[var(--navy)]" data-change="rule:set" data-rule="strictPairing" ${r.strictPairing ? 'checked' : ''}><span>Exigir que la complementaria sea de su magistral<span class="block text-xs muted">S4 → S41, S42. Desactívalo si tus datos no siguen ese patrón.</span></span></label>
     ${cb('genOnlySeats', 'El generador solo usa secciones con cupo')}
-    <p class="eyebrow pt-2 border-t border-line-2">Cupos</p>
     <button class="btn btn-sm btn-quiet self-start" data-action="seats:refresh"><i class="fa-solid fa-rotate"></i>Actualizar cupos ahora</button>
   </div>`;
 }
@@ -431,7 +467,23 @@ handle({
   'draft:delete': async ({ id }) => { closePopover(); const d = S.drafts.find(x => x.id === id); if (!d) return; if (await confirmDialog({ title: `¿Eliminar «${d.name}»?`, body: 'Esta acción no se puede deshacer.', confirm: 'Eliminar', danger: true })) { deleteDraft(id); commit(); toast('Horario eliminado.', 'info'); } },
   'undo': () => { const r = undo(); if (!r) { toast('Nada que deshacer.', 'info'); return; } ui.pinned = null; commit(); toast(r === 'gen' ? 'Volviste a tu horario anterior.' : 'Acción deshecha.', 'info'); },
   'redo': () => { if (!redo()) { toast('Nada que rehacer.', 'info'); return; } ui.pinned = null; commit(); toast('Acción rehecha.', 'info'); },
-  'rules:open': (_, el) => togglePopover(el, rulesHtml(), { id: 'rules', anchorSelector: '[data-anchor="rules"]', label: 'Restricciones' }),
+  'rules:open': (_, el) => togglePopover(el, rulesHtml(), { id: 'rules', anchorSelector: '[data-anchor="rules"]', label: 'Preferencias' }),
+  'rule:day': ({ day }) => { const set = new Set(S.rules.freeDays || []); set.has(day) ? set.delete(day) : set.add(day); setRule('freeDays', DAYS.filter(d => set.has(d))); commit(); refreshPopover('rules', rulesHtml()); },
+  'busy:add': (_, form) => {
+    const start = form.start.value, end = form.end.value;
+    if (timeToMinutes(end) <= timeToMinutes(start)) { toast('La hora final debe ser después de la inicial.', 'warning'); return; }
+    setRule('busy', [...(S.rules.busy || []), { id: 'busy-' + Date.now(), day: form.day.value, start, end, soft: !form.hard.checked }]);
+    commit(); refreshPopover('rules', rulesHtml());
+  },
+  'busy:remove': ({ id }) => { setRule('busy', (S.rules.busy || []).filter(b => b.id !== id)); commit(); if (popoverOpen('rules')) refreshPopover('rules', rulesHtml()); },
+  'busy:slot': ({ day, start }) => {
+    closePopover();
+    const s0 = timeToMinutes(start), end = `${String(Math.floor((s0 + 60) / 60)).padStart(2, '0')}:${String((s0 + 60) % 60).padStart(2, '0')}`;
+    setRule('busy', [...(S.rules.busy || []), { id: 'busy-' + Date.now(), day, start, end, soft: false }]);
+    toast(`${day} ${fmtTime(start)}–${fmtTime(end)} marcado como ocupado. Ajústalo en Preferencias.`, 'success', { label: 'Deshacer', fn: () => { setRule('busy', S.rules.busy.slice(0, -1)); commit(); } });
+    commit();
+  },
+  'course:optional': ({ key }) => { const on = toggleOptional(key); toast(on ? 'Opcional: si no cabe todo, el generador puede dejarla por fuera.' : 'Obligatoria para el generador.', 'info'); commit(); },
   'rule:set': ({ rule }, el) => {
     const v = el.type === 'checkbox' ? el.checked : el.type === 'number' ? Math.max(1, Math.min(30, parseFloat(el.value) || 18)) : parseInt(el.value, 10);
     setRule(rule, v); commit(); refreshPopover('rules', rulesHtml());
@@ -445,12 +497,15 @@ handle({
   'gen:run': () => {
     const r = runGenerator();
     if (!r.ok) { toast(r.error, r.kind === 'nocourses' ? 'warning' : 'error'); return; }
+    if (r.dropped?.length) toast(`No caben todas: estas opciones dejan por fuera ${r.dropped.join(', ')} (marcada${r.dropped.length > 1 ? 's' : ''} como opcional).`, 'warning');
     ui.focusKey = null; ui.pinned = null; ui.preview = null;
     if (isMobile()) ui.mobilePane = 'cal';
     if (ui.view !== 'horario') window.__nav?.('horario'); else commit();
   },
   'gen:step': ({ dir }) => { if (!S.gen) return; applyGen(S.gen.index + Number(dir)); commit(); },
-  'gen:use': () => { useGen(); commit(); toast('Listo: este es tu horario. Puedes ajustarlo materia por materia.', 'success', { label: 'Deshacer', fn: () => { undo(); commit(); } }); },
+  'gen:pick': ({ i }) => { if (!S.gen) return; applyGen(Number(i)); commit(); },
+  'gen:sort': (_, el) => { sortGen(el.value); commit(); },
+  'gen:use': () => { const n = S.gen ? S.gen.index + 1 : 0; useGen(); commit(); toast(`Listo: la opción ${n} es tu horario. Puedes ajustarlo materia por materia.`, 'success', { label: 'Deshacer', fn: () => { undo(); commit(); } }); },
   'gen:save': () => { const d = saveGenAsNew(); if (d) { commit(); toast(`Guardado como «${d.name}».`, 'success'); } },
   'gen:cancel': () => { cancelGen(); commit(); toast('Volviste a tu horario anterior.', 'info'); },
   'course:focus': ({ key }) => focusCourse(key),

@@ -7,7 +7,7 @@
 import { buildCourseInfo, kindOf, kindLabel, resolvePick, usableCombos } from '../core/sections.js';
 import { hasTimeConflict } from '../core/time.js';
 import { generateSchedules, rankResults } from '../core/generator.js';
-import { evaluateSchedule } from '../core/score.js';
+import { evaluateSchedule, hardBusy, overlapsBusy } from '../core/score.js';
 import { migrate, emptyState } from './migrate.js';
 import { createLocalStore } from '../storage/local-store.js';
 
@@ -302,29 +302,60 @@ export const isPending = st => !st.skipped && (!!st.conflictWith || ['needcomp',
 export const evaluate = secs => evaluateSchedule(secs, S.rules, creditsOf);
 
 // ─── Generator session ───────────────────────────────────────
-/** Starts a generator session. Returns { ok } or { ok:false, error, kind }. */
+/**
+ * Starts a generator session. Returns { ok, count, dropped } or { ok:false, error, kind }.
+ * Hard busy blocks exclude sections. When nothing fits and some courses are optional, it tries
+ * again leaving out as few optional courses as possible.
+ */
 export function runGenerator() {
   if (S.gen) cancelGen(true);
   const draft = currentDraft();
   const onlySeats = !!S.rules.genOnlySeats;
+  const busy = hardBusy(S.rules);
   const skippedNoSec = [], courses = [];
   S.basket.forEach(b => {
     if (draft.skipped.includes(b.key)) return;
     if (!b.code || !courseInfo(b.code).secs.length) { skippedNoSec.push(b); return; }
     const info = courseInfo(b.code);
     const chosen = S.selected.filter(s => s.code === b.code);
-    const combos = draft.locked.includes(b.key) && chosen.length ? [chosen] : usableCombos(info, onlySeats);
-    courses.push({ key: b.key, title: b.title, combos });
+    let combos = draft.locked.includes(b.key) && chosen.length ? [chosen] : usableCombos(info, onlySeats);
+    if (busy.length) combos = combos.filter(c => !c.some(s => busy.some(blk => overlapsBusy(s, blk))));
+    courses.push({ key: b.key, title: b.title, combos, optional: !!b.optional });
   });
   if (!courses.length) return { ok: false, kind: 'nocourses', error: 'Agrega materias con secciones cargadas para generar horarios.' };
-  const { results, truncated, empty, clash } = generateSchedules(courses);
-  if (empty.length) return { ok: false, kind: 'empty', error: `${empty.join(', ')} no tiene${empty.length > 1 ? 'n' : ''} opciones${onlySeats ? ' con cupo' : ''}.` };
-  if (!results.length) return { ok: false, kind: 'clash', error: `No hay combinación sin choques con todas tus materias.${clash ? ` ${clash[0]} y ${clash[1]} siempre se cruzan.` : ''} Quita una materia de este horario o un candado.` };
+  let run = generateSchedules(courses), dropped = [];
+  if (!run.results.length) {
+    const optional = courses.filter(c => c.optional);
+    outer: for (let k = 1; k <= optional.length; k++) {
+      for (const drop of subsets(optional, k)) {
+        const r = generateSchedules(courses.filter(c => !drop.includes(c)));
+        if (r.results.length) { run = r; dropped = drop.map(c => c.title); break outer; }
+      }
+    }
+  }
+  const { results, truncated, empty, clash } = run;
+  if (empty.length) return { ok: false, kind: 'empty', error: `${empty.join(', ')} no tiene${empty.length > 1 ? 'n' : ''} opciones${onlySeats ? ' con cupo' : ''}${busy.length ? ' fuera de tus horas ocupadas' : ''}.` };
+  if (!results.length) return { ok: false, kind: 'clash', error: `No hay combinación sin choques con todas tus materias.${clash ? ` ${clash[0]} y ${clash[1]} siempre se cruzan.` : ''} Marca alguna como opcional, quita un candado o una hora ocupada.` };
   pushUndo();
-  S.gen = { results: rankResults(results, evaluate), index: 0, snapshot: S.selected.map(s => s.id), skipped: skippedNoSec.map(b => b.title), locked: draft.locked.length, truncated };
+  S.gen = { results: rankResults(results, evaluate), index: 0, snapshot: S.selected.map(s => s.id), skipped: skippedNoSec.map(b => b.title), dropped, locked: draft.locked.length, truncated, sort: 'score' };
   applyGen(0);
-  return { ok: true, count: S.gen.results.length };
+  return { ok: true, count: S.gen.results.length, dropped };
 }
+function subsets(list, k, start = 0, acc = [], out = []) {
+  if (acc.length === k) { out.push(acc.slice()); return out; }
+  for (let i = start; i < list.length && out.length < 200; i++) { acc.push(list[i]); subsets(list, k, i + 1, acc, out); acc.pop(); }
+  return out;
+}
+/** Re-sort generator results: 'score' | 'days' | 'end' | 'gaps', and show the first of the new order. */
+export function sortGen(by) {
+  if (!S.gen) return;
+  const keys = { score: (a, b) => b.score - a.score || a.days - b.days || a.end - b.end, days: (a, b) => a.days - b.days || b.score - a.score, end: (a, b) => a.end - b.end || b.score - a.score, gaps: (a, b) => a.gaps - b.gaps || b.score - a.score };
+  S.gen.results.sort(keys[by] || keys.score);
+  S.gen.sort = by;
+  applyGen(0);
+}
+export function toggleOptional(key) { const it = basketItem(key); if (!it) return null; it.optional = !it.optional; return it.optional; }
+
 export function applyGen(i) {
   if (!S.gen) return;
   const n = S.gen.results.length;

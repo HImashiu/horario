@@ -5,6 +5,7 @@
 import { S, findSec, courseInfo, basketItem, currentDraft, courseTitle, resultIdsFor } from '../state/store.js';
 import { DAYS, DAY_HEAD, timeToMinutes, fmtTime, fmtTimeAP, fmtHour, hasTimeConflict } from '../core/time.js';
 import { kindOf, kindLabel, hasSeats } from '../core/sections.js';
+import { normalizeRules, hardBusy, overlapsBusy } from '../core/score.js';
 import { esc, data, isMobile, $ } from './dom.js';
 import { ui, colorsFor } from './state.js';
 import { openPopover, closePopover } from './layer.js';
@@ -47,12 +48,13 @@ export function renderCalendar() {
     courseInfo(focusCode).secs.forEach(s => {
       if (used.has(s.id)) return;
       if (ui.onlySeats && !hasSeats(s)) return;
-      const clash = S.selected.some(o => o.code !== focusCode && hasTimeConflict(o, s));
+      const clash = S.selected.some(o => o.code !== focusCode && hasTimeConflict(o, s)) || hardBusy(S.rules).some(b => overlapsBusy(s, b));
       if (clash && !ui.showClashing) return;
       options.push({ sec: s, type: clash ? 'option-clash' : 'option' });
     });
   }
   const { startHour, endHour } = calRange([...prevSecs, ...options.map(o => o.sec)]);
+  const busyBlocks = normalizeRules(S.rules).busy;
   const PX = mobile ? 64 : 56;
   const totalH = (endHour - startHour) * PX;
   lastCal = { startHour, PX };
@@ -82,6 +84,12 @@ export function renderCalendar() {
     const day = DAYS[di];
     html += `<div class="cal-col ${di === 5 ? 'is-sat' : ''}" data-action="cal:slot" ${data({ day, di })}>`;
     if (di === todayIdx && nowTop > 0 && nowTop < totalH) html += `<div class="absolute left-0 right-0 z-[45] pointer-events-none flex items-center" style="top:${nowTop}px"><span class="w-2.5 h-2.5 rounded-full bg-navy -ml-1 ring-2 ring-white"></span><span class="flex-1 h-0.5 bg-navy"></span></div>`;
+    for (const b of busyBlocks) {
+      if (b.day !== day) continue;
+      const s0 = Math.max(timeToMinutes(b.start), startHour * 60), e0 = Math.min(timeToMinutes(b.end), endHour * 60);
+      if (e0 <= s0) continue;
+      html += `<div class="absolute left-0 right-0 pointer-events-none z-[5] flex items-start justify-end p-1" style="top:${(s0 - startHour * 60) * PX / 60}px;height:${(e0 - s0) * PX / 60}px;background:repeating-linear-gradient(135deg,rgba(152,162,179,${b.soft ? '.12' : '.22'}) 0 2px,transparent 2px 8px);${b.soft ? '' : 'box-shadow:inset 3px 0 0 #98a2b3;'}"><span class="text-[10px] font-medium text-slate-500 bg-white/80 rounded px-1">${b.soft ? 'Prefieres libre' : 'Ocupado'}</span></div>`;
+    }
     const mainSlots = layoutLanes(slotsOf(main, day));
     const optSlots = slotsOf(options, day);
     optSlots.forEach(x => { x.narrow = mainSlots.some(m => Math.max(m.s, x.s) < Math.min(m.e, x.e)); });
@@ -103,9 +111,10 @@ function blockHtml(x, startHour, PX) {
   const s = x.sec, c = colorsFor(s.code);
   const top = (x.s - startHour * 60) * PX / 60 + 1, h = Math.max(20, (x.e - x.s) * PX / 60 - 3);
   let left = '3px', width = 'calc(100% - 6px)';
-  if (x.type.startsWith('option')) { if (x.narrow) { left = '60%'; width = 'calc(40% - 3px)'; } }
+  // Options of the open course are slim outlines on the right, so the week stays readable.
+  if (x.type.startsWith('option')) { left = x.narrow ? '64%' : '50%'; width = x.narrow ? 'calc(36% - 3px)' : 'calc(50% - 3px)'; }
   else if (x.lanes > 1) { left = `calc(${x.lane * 100 / x.lanes}% + 2px)`; width = `calc(${100 / x.lanes}% - 4px)`; }
-  const tight = x.narrow || (x.lanes || 1) > 2;
+  const tight = x.narrow || (x.lanes || 1) > 2 || x.type.startsWith('option');
   let look, kindColor = c.sub, titleColor = c.tx, label = `${kindLabel(s)} S${s.section}`, z = 20, action = '', title = `${s.title} · ${kindOf(s) === 'mag' ? 'Magistral' : 'Complementaria'} S${s.section}`;
   switch (x.type) {
     case 'mag': look = `background:${c.bg};border:1px solid ${c.bd};`; action = `data-action="cal:block" ${data({ code: s.code })}`; title += ' · clic para abrir la materia'; break;
@@ -159,6 +168,7 @@ export function openSlotPopup(colEl, clientY) {
     .filter(sec => codes.has(sec.code) && !sec.stale && !S.selected.some(s => s.id === sec.id))
     .filter(sec => (sec.schedules || []).some(sch => sch.days.includes(day)))
     .filter(sec => !S.selected.some(s => s.code !== sec.code && hasTimeConflict(s, sec)))
+    .filter(sec => !hardBusy(S.rules).some(b => overlapsBusy(sec, b)))
     .map(sec => { const sch = sec.schedules.find(s => s.days.includes(day)); return { sec, sch, dist: Math.abs(timeToMinutes(sch.start_time) - clickedMin) }; })
     .filter(c => c.dist <= 180)
     .sort((a, b) => a.dist - b.dist).slice(0, 6);
@@ -179,7 +189,10 @@ export function openSlotPopup(colEl, clientY) {
         <span class="min-w-0 flex-1"><span class="block text-xs font-bold truncate">${esc(c.sec.title)}</span><span class="block text-[11px] muted">${kindLabel(c.sec)} S${esc(c.sec.section)} · ${fmtTimeAP(c.sch.start_time)}</span></span>
         <i class="fa-solid fa-plus text-[10px]"></i></button>`).join('') + `</div>`
     : `<p class="w-64 max-w-full text-center text-xs muted py-4 px-2">Ninguna de tus materias cabe en este espacio.</p>`;
-  openPopover(anchor, html, { id: 'slot-popup', placement: 'right-start', label: '¿Qué cabe aquí?' });
+  const slotStart = Math.floor(clickedMin / 30) * 30;
+  const hhmm = m => `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
+  const busyBtn = `<div class="border-t border-slate-100 mt-1 pt-1"><button class="menu-item" data-action="busy:slot" ${data({ day, start: hhmm(slotStart) })}><i class="fa-solid fa-ban"></i><span class="text-xs">Marcar ${esc(day.toLowerCase())} ${fmtTimeAP(slotStart)} como ocupado</span></button></div>`;
+  openPopover(anchor, html.replace(/<\/div>$/, '') + busyBtn + (html.endsWith('</div>') ? '</div>' : ''), { id: 'slot-popup', placement: 'right-start', label: '¿Qué cabe aquí?' });
 }
 export const slotPreviewIds = id => resultIdsFor(id);
 export { closePopover as closeSlotPopup };

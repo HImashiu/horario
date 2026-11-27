@@ -68,10 +68,15 @@ const step = async (name, fn) => { await fn(); steps.push(name); console.log(`âœ
       await page.click('[data-action="demo:load"]');
       await page.waitForSelector('.toast >> text=Datos demo cargados');
     });
-    await step('generator finds conflict-free schedules and "Usar esta" keeps one', async () => {
+    await step('generator shows a gallery of conflict-free options; picking one and "Usar" keeps it', async () => {
       await page.click('.nav [data-view="horario"]');
       await page.click('#hz-toolbar [data-action="gen:run"]');
-      await page.waitForSelector('#hz-genbar >> text=OpciÃ³n 1 de');
+      await page.waitForSelector('#hz-genbar >> text=horarios sin choques');
+      assert.ok(await page.locator('#gen-strip [data-action="gen:pick"]').count() >= 10);
+      await page.click('#gen-strip [data-action="gen:pick"][data-i="2"]');
+      await page.waitForSelector('#hz-genbar >> text=Usar la opciÃ³n 3');
+      await page.selectOption('[data-change="gen:sort"]', 'end');
+      await page.waitForSelector('#hz-genbar >> text=Usar la opciÃ³n 1');
       await shot(page, 'e2e-03-generator.png');
       await page.click('[data-action="gen:use"]');
       assert.ok(await page.locator('.cal-block').count() > 0);
@@ -83,6 +88,18 @@ const step = async (name, fn) => { await fn(); steps.push(name); console.log(`âœ
       await page.waitForSelector('#slot-popup');
       const opt = await page.$('#slot-popup .menu-item');
       if (opt) { await opt.hover(); await page.waitForTimeout(150); assert.ok(await page.$('#slot-popup'), 'popup still open after hover'); }
+      await page.click('#slot-popup [data-action="busy:slot"]');
+      await page.waitForSelector('.toast >> text=marcado como ocupado');
+      assert.ok(await page.locator('.cal-col[data-di="0"] >> text=Ocupado').count(), 'busy hour drawn on Monday');
+      await page.locator('.toast', { hasText: 'marcado como ocupado' }).locator('text=Deshacer').click();
+    });
+    await step('preferences: free days and busy hours are edited in one place', async () => {
+      await page.click('#hz-toolbar [data-action="rules:open"]');
+      await page.click('#rules [data-action="rule:day"][data-day="Viernes"]');
+      assert.equal(await page.getAttribute('#rules [data-day="Viernes"]', 'aria-pressed'), 'true');
+      await page.selectOption('#rules select[name="day"]', 'Jueves');
+      await page.click('#rules form[data-submit="busy:add"] button');
+      assert.ok(await page.locator('#rules >> text=Obligatorio').count());
       await page.keyboard.press('Escape');
     });
     await step('undo after "No incluir" brings the course back (v7 bug)', async () => {

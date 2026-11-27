@@ -32,8 +32,8 @@ test('v7 state migrates to v8 keeping sections, courses, drafts and choices', ()
 
 test('v7 rules keep their effective values, including v7 defaults the user never changed', () => {
   store.load();
-  assert.equal(S.rules.mondayFree, v7.rules['rule-monday-free']);
-  assert.equal(S.rules.tuesdayLate, v7.rules['rule-tuesday-late']);
+  assert.deepEqual(S.rules.freeDays, v7.rules['rule-monday-free'] ? ['Lunes'] : []);
+  assert.equal(S.rules.busy.some(b => b.day === 'Martes' && b.soft), !!v7.rules['rule-tuesday-late']);
   assert.equal(S.rules.lateHour, 16);
   assert.equal(S.rules.earlyHour, Number(v7.rules['rule-no-early-hour']));
   assert.equal(S.rules.creditTarget, Number(v7.rules['credit-target']));
@@ -56,8 +56,8 @@ test('a fresh start has one empty draft and neutral rules', () => {
   const { restored } = store.load();
   assert.ok(!restored);
   assert.equal(S.drafts.length, 1);
-  assert.equal(S.rules.mondayFree, false);
-  assert.equal(S.rules.tuesdayLate, false);
+  assert.deepEqual(S.rules.freeDays, []);
+  assert.deepEqual(S.rules.busy, []);
 });
 
 test('undo after "No incluir" restores both the sections and the course (v7 bug)', () => {
