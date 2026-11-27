@@ -14,6 +14,15 @@ export function fmtMilitaryTime(t) {
   return `${s.slice(0, 2)}:${s.slice(2, 4)}`;
 }
 
+/** Meeting dates, if the API sends them ("2027-01-25", "2027-01-25T00:00:00" or "25/01/2027"). */
+function apiDate(v) {
+  const s = String(v || '').trim();
+  let m = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (m) return `${m[1]}-${m[2]}-${m[3]}`;
+  m = s.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+  return m ? `${m[3]}-${m[2]}-${m[1]}` : null;
+}
+
 /** Magistral = 4-character course number; anything else (e.g. "1221C") is a complementaria of the base code. */
 export function mapUniandesSection(item) {
   const courseRaw = String(item.course || '');
@@ -27,7 +36,8 @@ export function mapUniandesSection(item) {
   (item.schedules || []).forEach(sch => {
     const days = []; Object.keys(DAY_MAP).forEach(k => { if (sch[k]) days.push(DAY_MAP[k]); });
     const start = fmtMilitaryTime(sch.time_ini), end = fmtMilitaryTime(sch.time_fin);
-    if (days.length && start && end) schedules.push({ days, start_time: start, end_time: end, location: sch.classroom || 'TBA' });
+    const dateStart = apiDate(sch.date_ini), dateEnd = apiDate(sch.date_fin);
+    if (days.length && start && end) schedules.push({ days, start_time: start, end_time: end, location: sch.classroom || 'TBA', ...(dateStart && dateEnd ? { date_start: dateStart, date_end: dateEnd } : {}) });
   });
   const cap = num(item.maxenrol), enrolled = num(item.enrolled), avail = num(item.seatsavail);
   return {

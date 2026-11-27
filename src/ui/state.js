@@ -38,3 +38,10 @@ export function pensumColorFor(codeOrKey) {
   const item = itemForCode(codeOrKey) || basketItem(codeOrKey);
   return courseColors(toneForItem(item || { code: codeOrKey }), 0);
 }
+
+/** Codes and block keys chosen for next semester (they satisfy corequisites, and start the plan). */
+export function chosenKeys() {
+  const out = [];
+  S.basket.forEach(b => { if (b.code) out.push(b.code); out.push(b.key); if (b.fromBlock) out.push(b.fromBlock); });
+  return out;
+}

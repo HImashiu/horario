@@ -6,6 +6,9 @@ import { toast } from './layer.js';
 
 const queue = [];
 let running = false, previewWarned = false, lastFailToast = 0;
+const ingestHooks = [];
+/** Runs `fn` each time sections arrive from Uniandes (before the change is saved and drawn). */
+export const onIngest = fn => { ingestHooks.push(fn); };
 export const LARGE_RESULT = 150;
 
 export function previewNotice() {
@@ -29,7 +32,7 @@ async function run() {
     try {
       const raw = await fetchRaw(code, S.term);
       if (!raw.length) empty++;
-      else ingestSections(raw.map(mapUniandesSection), { exactCodes: [code] });
+      else { ingestSections(raw.map(mapUniandesSection), { exactCodes: [code] }); ingestHooks.forEach(fn => fn(code)); }
     } catch { failed++; }
     ui.loadingCodes.delete(code);
     afterDataChange();

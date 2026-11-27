@@ -8,6 +8,7 @@ import {
   runGenerator, applyGen, useGen, cancelGen, saveGenAsNew, setRule, resultIdsFor, draftSections, sortGen, toggleOptional,
 } from '../../state/store.js';
 import { kindOf, kindLabel, structureLabel, hasSeats, seatText, countConflicts } from '../../core/sections.js';
+import { watchButtonHtml } from '../watch.js';
 import { DAYS, schedText, hasTimeConflict, weeklyHours, fmtHours, fmtTimeAP, fmtTime, fmtHourFull, timeToMinutes, daysUsed } from '../../core/time.js';
 import { totalCredits } from '../../core/score.js';
 import { fmtCode } from '../../core/requirements.js';
@@ -249,6 +250,7 @@ function comboRowHtml(combo, st, others) {
           <span class="block text-[11px] ${clash || self ? 'text-danger' : 'muted'} truncate">${detail}</span>
         </span>
       </button>
+      ${full ? watchButtonHtml(combo) : ''}
       ${chosenNow ? '' : `<button class="btn btn-sm ${clash || self ? 'btn-quiet' : 'btn-primary'}" data-action="combo:choose" ${data({ ids })}>Elegir</button>`}
     </div></div>`;
 }
@@ -266,7 +268,7 @@ function sectionRowHtml(s, st, others, opts = {}) {
       <span class="kind ${kindOf(s) === 'mag' ? 'kind-mag' : 'kind-comp'}">${kindLabel(s)}</span>
       <span class="min-w-0 flex-1"><span class="block text-xs font-semibold truncate tabular">S${esc(s.section)} · ${esc(schedText(s))} <span class="font-normal muted">NRC ${esc(s.nrc)}</span></span>
       <span class="block text-[11px] ${noteCls} truncate">${note}</span></span>
-    </button>${action}</div>`;
+    </button>${hasSeats(s) ? '' : watchButtonHtml([s])}${action}</div>`;
 }
 
 function coursePanelHtml(st) {

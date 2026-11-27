@@ -19,6 +19,8 @@ export function emptyState() {
     prefs: { pensumMode: 'plan', overlay: [] },
     // Friends' schedules received through share links (kept only in this browser).
     friends: [],
+    // Seat alerts: full sections to check while the page is open.
+    watch: [],
   };
 }
 

@@ -5,6 +5,7 @@ import { S, currentDraft, draftSections, courseState, isPending, courseTitle, cr
 import { kindOf, kindLabel, kindName, seatText, countConflicts } from '../../core/sections.js';
 import { DAYS, schedText, weeklyHours, fmtHours } from '../../core/time.js';
 import { fmtCode } from '../../core/requirements.js';
+import { buildIcs, isIsoDate } from '../../core/ics.js';
 import { esc, data, handle, $ } from '../dom.js';
 import { ui, colorsFor, PREVIEW } from '../state.js';
 import { toast, openDialog } from '../layer.js';
@@ -40,6 +41,7 @@ export function renderExport() {
         <h2 class="text-base font-semibold mr-auto">NRC de «${esc(d.name)}»</h2>
         <button class="btn btn-primary btn-sm" data-action="export:nrc"><i class="fa-solid fa-hashtag"></i>Copiar NRCs</button>
         <button class="btn btn-quiet btn-sm" data-action="export:summary">Copiar resumen</button>
+        <button class="btn btn-quiet btn-sm" data-action="export:ics"><i class="fa-regular fa-calendar-plus"></i>Agregar al calendario</button>
         ${PREVIEW ? '' : `<button class="btn btn-quiet btn-sm" data-action="export:txt">Descargar .txt</button><button class="btn btn-quiet btn-sm" data-action="export:print">Imprimir</button>`}
       </div>
       ${secs.length ? `<div class="overflow-x-auto rounded border border-line"><table class="w-full text-sm min-w-[640px]">
@@ -129,6 +131,41 @@ export function printSchedule() {
   win.document.write(html); win.document.close(); win.focus(); setTimeout(() => win.print(), 350);
 }
 
+// ─── Calendar file (.ics) ────────────────────────────────────
+const slug = t => String(t || 'horario').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'horario';
+export async function exportIcs() {
+  if (!S.selected.length) { toast('Este horario aún no tiene secciones.', 'warning'); return; }
+  const name = currentDraft()?.name || 'Horario';
+  const sem = S.prefs.semester || {};
+  // Dates the API sent for the meetings (if any) fill in what the student has not typed yet.
+  const from = S.selected.flatMap(s => s.schedules.map(x => x.date_start)).filter(isIsoDate).sort();
+  const to = S.selected.flatMap(s => s.schedules.map(x => x.date_end)).filter(isIsoDate).sort();
+  const start = sem.start || from[0] || '', end = sem.end || to[to.length - 1] || '';
+  const v = await openDialog({
+    title: 'Agregar a tu calendario',
+    html: `<p class="dlg-text">Descarga un archivo .ics y ábrelo o impórtalo en Google Calendar, Outlook o el calendario de tu celular. Cada clase queda como un evento que se repite cada semana.</p>
+      <div class="grid gap-3 sm:grid-cols-2">
+        <label class="field"><span class="field-label">Primer día de clases</span><input type="date" class="input" id="ics-start" value="${esc(start)}" required data-change="ics:start"></label>
+        <label class="field"><span class="field-label">Último día de clases</span><input type="date" class="input" id="ics-end" value="${esc(end)}" ${start ? `min="${esc(start)}"` : ''} required></label>
+      </div>
+      <label class="field"><span class="field-label">Semana de receso (opcional): cualquier día de esa semana</span><input type="date" class="input" id="ics-recess" value="${esc(sem.recess || '')}"></label>
+      <label class="flex items-center gap-2 text-sm cursor-pointer"><input type="checkbox" class="w-4 h-4 accent-[var(--navy)]" id="ics-holidays" ${sem.holidays === false ? '' : 'checked'}>Quitar los festivos de Colombia</label>
+      <p class="text-xs muted">Las fechas están en el calendario académico de la Universidad. Se exportan las ${S.selected.length} secciones de «${esc(name)}».</p>`,
+    buttons: [{ label: 'Cancelar', value: '' }, { label: 'Descargar .ics', value: 'ok', kind: 'primary', submit: true }],
+  });
+  if (v !== 'ok') return;
+  const val = id => document.getElementById(id);
+  const opts = { start: val('ics-start').value, end: val('ics-end').value, recess: val('ics-recess').value || null, holidays: val('ics-holidays').checked };
+  S.prefs.semester = opts; commit();
+  let r;
+  try { r = buildIcs(S.selected, { ...opts, name }); } catch (e) { toast(e.message, 'error'); return; }
+  if (PREVIEW) { toast(`La vista previa no descarga archivos. En himashiu.github.io/horario saldrían ${r.events} clases semanales.`, 'info'); return; }
+  const file = `${slug(name)}.ics`;
+  downloadText(r.text, file, 'text/calendar;charset=utf-8');
+  toast(`Descargado ${file}: ${r.events} clases semanales. Ábrelo o impórtalo en tu calendario.`, 'success');
+  if (r.skipped.length) toast(`${r.skipped.length === 1 ? 'Una sección sin horario no se incluyó' : `${r.skipped.length} secciones sin horario no se incluyeron`}.`, 'info');
+}
+
 // ─── All loaded sections ("Datos") ───────────────────────────
 function dataTableHtml(q = '') {
   const ql = q.toLowerCase().trim();
@@ -144,6 +181,8 @@ function dataTableHtml(q = '') {
 
 handle({
   'export:open': ({ id }) => { switchDraft(id); window.__nav?.('horario'); },
+  'export:ics': () => exportIcs(),
+  'ics:start': (_, el) => { const end = document.getElementById('ics-end'); if (end) end.min = el.value; },
   'data:open': () => openDialog({
     title: 'Secciones cargadas', wide: true,
     html: `<input class="input" placeholder="Filtrar por código, NRC o profesor…" data-input="data:filter" aria-label="Filtrar secciones" autofocus>

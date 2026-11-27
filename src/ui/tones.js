@@ -57,3 +57,6 @@ export function courseColors(tone = 'slate', shade = 0) {
     soft: mix(t.fill, 0.86), line: t.text === '#FFFFFF' ? bg : shift(t.ink, -0.22),
   };
 }
+
+/** CSS variables for a pensum block of a tone (block colour, text, secondary text, requirement tint). */
+export const toneVars = tone => { const t = TONES[tone] || TONES.slate; return `--bg:${t.ink};--fg:${t.text};--sub:${t.text === '#FFFFFF' ? 'rgba(255,255,255,.82)' : 'rgba(35,37,47,.68)'};--rq:${t.fill}`; };
