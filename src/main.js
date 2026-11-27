@@ -8,15 +8,28 @@ import { installDialog, closePopover, popoverOpen, dialogOpen, closeDialog, conf
 import { renderPensumView } from './ui/views/pensum-view.js';
 import { renderHorario, renderPanel } from './ui/views/horario-view.js';
 import { renderExport } from './ui/views/export-view.js';
+import { renderFriends, openShareLink } from './ui/views/friends-view.js';
 import { renderCalendar } from './ui/calendar.js';
 import { refreshAll } from './ui/fetch-queue.js';
+import { parseShareHash } from './core/share.js';
 import './ui/views/search-dialog.js';
 
 const VIEWS = {
   pensum: { label: 'Mi pénsum', icon: 'fa-table-cells', render: renderPensumView },
   horario: { label: 'Horario', icon: 'fa-calendar-week', render: renderHorario },
+  amigos: { label: 'Amigos', icon: 'fa-user-group', render: renderFriends },
   exportar: { label: 'Exportar', icon: 'fa-arrow-up-from-bracket', render: renderExport },
 };
+
+/** A share link ("#ver=…" / "#grupo=…") in the address: open it, then leave a clean "#amigos". */
+function handleShareHash() {
+  const parsed = parseShareHash(location.hash);
+  if (!parsed) return false;
+  try { history.replaceState(null, '', '#amigos'); } catch { /* ignore */ }
+  setView('amigos', { push: false });
+  openShareLink(parsed.kind, parsed.data);
+  return true;
+}
 
 function pendingCount() {
   const ctx = { draft: currentDraft(), selected: S.selected, loading: ui.loadingCodes };
@@ -34,6 +47,7 @@ function renderRail() {
         <i class="fa-solid ${v.icon} w-4 text-center"></i>${v.label}
         ${id === 'pensum' && S.basket.length ? `<span class="nav-badge">${S.basket.length}</span>` : ''}
         ${id === 'horario' && pending ? `<span class="nav-badge is-warn" title="Materias pendientes">${pending}</span>` : ''}
+        ${id === 'amigos' && S.friends.length ? `<span class="nav-badge">${S.friends.length}</span>` : ''}
       </button>`).join('')}</nav>
     <div class="rail-h"><span>Mis horarios</span><button class="icon-btn !w-7 !h-7" data-action="draft:new" aria-label="Nuevo horario" title="Nuevo horario"><i class="fa-solid fa-plus text-[11px]"></i></button></div>
     <div class="px-3 flex flex-col gap-0.5 overflow-y-auto flex-1 min-h-0">${S.drafts.map((d, i) => {
@@ -50,7 +64,7 @@ function renderRail() {
 function renderTopbar() {
   const p = getPensum(S.profile.program);
   const title = ui.view === 'pensum' ? (p ? `Mi pénsum <span class="sub">· ${esc(p.program)}</span>` : `Elige tu programa`)
-    : ui.view === 'horario' ? `Horario` : `Comparar y exportar`;
+    : ui.view === 'horario' ? `Horario` : ui.view === 'amigos' ? `Amigos` : `Comparar y exportar`;
   $('#topbar').className = 'topbar gutter';
   $('#topbar').innerHTML = `<div class="flex items-center gap-3 min-w-0 flex-1">
       <span class="lg:hidden brand-logo !w-8 !h-8"><i class="fa-solid fa-calendar-check text-xs"></i></span>
@@ -116,7 +130,10 @@ document.addEventListener('keydown', e => {
 
 let lastMobile = null, resizeT = null;
 window.addEventListener('resize', () => { clearTimeout(resizeT); resizeT = setTimeout(() => { if (isMobile() !== lastMobile) { lastMobile = isMobile(); renderAll(); } }, 120); });
-window.addEventListener('hashchange', () => { const v = location.hash.slice(1); if (VIEWS[v] && v !== ui.view) setView(v, { push: false }); });
+window.addEventListener('hashchange', () => {
+  if (handleShareHash()) return;
+  const v = location.hash.slice(1); if (VIEWS[v] && v !== ui.view) setView(v, { push: false });
+});
 
 let refreshTimer = null;
 function syncAutoRefresh() {
@@ -131,7 +148,9 @@ function syncAutoRefresh() {
   const { restored, migratedFrom } = load();
   subscribe(renderAll);
   const fromHash = location.hash.slice(1);
-  setView(VIEWS[fromHash] ? fromHash : (restored && S.profile.program ? 'horario' : 'pensum'));
+  const shared = parseShareHash(location.hash);
+  if (shared) handleShareHash();
+  else setView(VIEWS[fromHash] ? fromHash : (restored && S.profile.program ? 'horario' : 'pensum'));
   syncAutoRefresh();
   if (migratedFrom) toast('Tu información pasó a la nueva versión: tus materias y horarios siguen aquí.', 'info');
   else if (restored) toast(`Bienvenido de vuelta: ${S.basket.length} materias y ${S.drafts.length} horario${S.drafts.length > 1 ? 's' : ''}.`, 'info');

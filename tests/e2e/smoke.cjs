@@ -178,6 +178,66 @@ const step = async (name, fn) => { await fn(); steps.push(name); console.log(`�
       await shot(p2, 'e2e-07-plan-states.png');
     });
 
+    // ─── Sharing between two browsers (no server) ───
+    const ctxA = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+    await ctxA.grantPermissions(['clipboard-read', 'clipboard-write'], { origin: base.replace('/index.html', '') });
+    const ana = await ctxA.newPage(); watch(ana);
+    let link = '';
+    await step('sharing: Ana copies a link to her schedule', async () => {
+      await ana.goto(base);
+      await ana.click('.program-card[data-program="imec"]');
+      await ana.click('.tray-bar [data-action="search:open"]');
+      await ana.click('[data-action="demo:load"]');
+      await ana.click('.nav [data-view="horario"]');
+      await ana.click('#hz-toolbar [data-action="gen:run"]');
+      await ana.click('[data-action="gen:use"]');
+      await ana.click('.nav [data-view="amigos"]');
+      await ana.waitForSelector('#view-amigos:not([hidden]) #share-name');
+      await ana.fill('#share-name', 'Ana');
+      await ana.press('#share-name', 'Tab');
+      await ana.click('[data-action="share:copy"]');
+      await ana.waitForSelector('.toast >> text=Link copiado');
+      link = await ana.evaluate(() => navigator.clipboard.readText());
+      assert.match(link, /#ver=z[A-Za-z0-9_-]+$/);
+      assert.ok(link.length < 2000, `link length ${link.length}`);
+    });
+    const ctxB = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+    const juan = await ctxB.newPage(); watch(juan);
+    await step('sharing: a friend opens the link, sees Ana\'s week and overlays it', async () => {
+      await juan.goto(base);
+      await juan.click('.program-card[data-program="imec"]');
+      await juan.click('.tray-bar [data-action="search:open"]');
+      await juan.click('[data-action="demo:load"]');
+      await juan.click('.nav [data-view="horario"]');
+      await juan.click('#hz-toolbar [data-action="gen:run"]');
+      await juan.click('#gen-strip [data-action="gen:pick"][data-i="4"]');
+      await juan.click('[data-action="gen:use"]');
+      await juan.goto(link);
+      await juan.waitForSelector('dialog[open] >> text=Horario de Ana');
+      await shot(juan, 'e2e-08-share-dialog.png');
+      await juan.click('dialog[open] button[value="overlay"]');
+      await juan.waitForSelector('#view-horario:not([hidden]) .ghost-block');
+      assert.ok(await juan.locator('#cal-hint >> text=En gris: Ana').count());
+      await shot(juan, 'e2e-09-overlay.png');
+    });
+    await step('sharing: Amigos shows Ana, free time in common and classes in common', async () => {
+      await juan.click('.nav [data-view="amigos"]');
+      await juan.waitForSelector('#view-amigos:not([hidden]) >> text=Huecos en común');
+      assert.ok(await juan.locator('#view-amigos .card >> text=Ana').count());
+      assert.ok(await juan.locator('#view-amigos .bg-emerald-100').count() > 0, 'free windows drawn');
+      assert.ok(await juan.locator('#view-amigos >> text=Con Ana').count());
+      await shot(juan, 'e2e-10-amigos.png');
+    });
+    await step('sharing: "Armar juntos" finds sections for both and applies them', async () => {
+      await juan.click('[data-action="together:friend"]');
+      await juan.click('[data-action="together:course"][data-code="MATE1203"]');
+      await juan.click('[data-action="together:run"]');
+      await juan.waitForSelector('[data-action="together:apply"]');
+      await juan.click('[data-action="together:apply"] >> nth=0');
+      await juan.waitForSelector('.toast >> text=Secciones aplicadas');
+    });
+    await ctxA.close(); await ctxB.close();
+
     const phone = await browser.newContext({ ...devices['iPhone 13'] });
     const pp = await phone.newPage(); watch(pp);
     await pp.goto(base);

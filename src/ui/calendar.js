@@ -60,8 +60,11 @@ export function renderCalendar() {
   lastCal = { startHour, PX };
   const now = new Date(), todayIdx = now.getDay() - 1;
   const nowTop = (now.getHours() * 60 + now.getMinutes() - startHour * 60) * PX / 60;
+  // Friends shown on top of my week (from "Amigos" → "Superponer en mi horario")
+  const overlayFriends = (S.friends || []).filter(f => (S.prefs.overlay || []).includes(f.id));
   const hint = $('#cal-hint');
-  if (hint) hint.textContent = focusCode && ui.showOptions && !S.gen ? 'Clic en un contorno punteado para elegir esa opción' : (S.gen ? 'Vista de la opción generada' : 'Clic en un bloque para abrir su materia · clic en un espacio libre para ver qué cabe');
+  if (hint) hint.textContent = overlayFriends.length ? `En gris: ${overlayFriends.map(f => f.name).join(', ')}`
+    : focusCode && ui.showOptions && !S.gen ? 'Clic en un contorno punteado para elegir esa opción' : (S.gen ? 'Vista de la opción generada' : 'Clic en un bloque para abrir su materia · clic en un espacio libre para ver qué cabe');
 
   const slotsOf = (list, day) => { const out = []; list.forEach(x => (x.sec.schedules || []).forEach(sch => { if (sch.days.includes(day)) out.push({ ...x, sch, s: timeToMinutes(sch.start_time), e: timeToMinutes(sch.end_time) }); })); return out; };
   let html = '';
@@ -89,6 +92,13 @@ export function renderCalendar() {
       const s0 = Math.max(timeToMinutes(b.start), startHour * 60), e0 = Math.min(timeToMinutes(b.end), endHour * 60);
       if (e0 <= s0) continue;
       html += `<div class="absolute left-0 right-0 pointer-events-none z-[5] flex items-start justify-end p-1" style="top:${(s0 - startHour * 60) * PX / 60}px;height:${(e0 - s0) * PX / 60}px;background:repeating-linear-gradient(135deg,rgba(152,162,179,${b.soft ? '.12' : '.22'}) 0 2px,transparent 2px 8px);${b.soft ? '' : 'box-shadow:inset 3px 0 0 #98a2b3;'}"><span class="text-[10px] font-medium text-slate-500 bg-white/80 rounded px-1">${b.soft ? 'Prefieres libre' : 'Ocupado'}</span></div>`;
+    }
+    for (const f of overlayFriends) for (const s of f.sections) for (const sch of s.schedules || []) {
+      if (!sch.days.includes(day)) continue;
+      const s0 = timeToMinutes(sch.start_time), e0 = timeToMinutes(sch.end_time);
+      if (e0 <= startHour * 60 || s0 >= endHour * 60) continue;
+      const same = S.selected.some(m => m.nrc === s.nrc);
+      html += `<div class="ghost-block z-[4] flex items-end p-1.5" style="left:2px;right:2px;top:${(s0 - startHour * 60) * PX / 60 + 1}px;height:${Math.max(18, (e0 - s0) * PX / 60 - 3)}px;background:repeating-linear-gradient(135deg,rgba(102,112,133,.10) 0 3px,rgba(255,255,255,.4) 3px 8px);border:1.5px dashed ${same ? '#12B76A' : '#98A2B3'}"><span class="text-[10px] font-semibold ${same ? 'text-emerald-800' : 'text-slate-600'} bg-white/85 rounded px-1 truncate max-w-full">${esc(f.name)} · ${esc(s.title)}${same ? ' · juntos' : ''}</span></div>`;
     }
     const mainSlots = layoutLanes(slotsOf(main, day));
     const optSlots = slotsOf(options, day);

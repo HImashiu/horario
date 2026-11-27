@@ -244,3 +244,11 @@ textarea.input { height: auto; padding: 10px 12px; }
 .toast-action:hover { text-decoration: underline; }
 .skeleton { background: linear-gradient(90deg, var(--line-2), #F9FAFB, var(--line-2)); background-size: 200% 100%; animation: sk 1.2s infinite linear; border-radius: 10px; }
 @keyframes sk { to { background-position: -200% 0; } }
+
+/* ─── Amigos ────────────────────────────────────────── */
+.avatar { width: 34px; height: 34px; border-radius: 99px; display: grid; place-items: center; font-weight: 700; font-size: 12px; flex-shrink: 0; letter-spacing: .02em; }
+.avatar-sm { width: 24px; height: 24px; font-size: 10px; }
+.week { position: relative; display: block; border-radius: 12px; background: #fff; border: 1px solid var(--line); overflow: hidden; }
+.week-head { display: grid; grid-template-columns: 38px repeat(6, minmax(0, 1fr)); font-size: 11px; color: #667085; border-bottom: 1px solid var(--line-2); }
+.week-head span { padding: 6px 0; text-align: center; font-weight: 600; }
+.ghost-block { position: absolute; border-radius: 8px; pointer-events: none; overflow: hidden; }

@@ -5,9 +5,21 @@ Arma tu horario semestral desde el **pénsum visual** de Ingeniería Mecánica, 
 Proyecto estudiantil: no es un sitio oficial de la Universidad de los Andes.
 
 ## Cómo se usa
-1. **Mi pénsum**: elige tu programa (y en Mecánica, la ruta Cálculo o Precálculo). Toca las materias que vas a ver: quedan en *Tu próximo semestre* y sus secciones se buscan solas en `ofertadecursos.uniandes.edu.co`. Pasa el mouse sobre una materia para ver qué pide y qué desbloquea; el botón «⋯» muestra sus detalles y, en las electivas, las opciones.
-2. **Horario**: «Mis materias» muestra el estado de cada una (Completa, Falta complementaria, Sin elegir, Choque…). Abre una materia para elegir su combinación magistral + complementaria, o usa **Generar horarios** para ver todas las combinaciones sin choques, ordenadas según tus restricciones. Clic en un espacio vacío del calendario: «¿Qué cabe aquí?».
-3. **Exportar**: compara tus horarios y copia los NRC para inscribirte.
+1. **Mi pénsum**: elige tu programa (y en Mecánica, la ruta Cálculo o Precálculo).
+   - En **«Ya aprobé»** marca lo que aprobaste: sus prerrequisitos se marcan solos y lo bloqueado se ve con candado.
+   - En **«Próximo semestre»** toca las materias que vas a ver: sus correquisitos se agregan solos y sus secciones se buscan en `ofertadecursos.uniandes.edu.co`.
+   - «Sugerir mi semestre» propone materias hasta tu meta de créditos.
+2. **Horario**: «Mis materias» muestra el estado de cada una (Completa, Falta complementaria, Sin elegir, Choque…).
+   - Abre una materia para elegir su combinación magistral + complementaria.
+   - O usa **Generar horarios** y elige en la galería de opciones sin choques.
+   - En **Preferencias** van tus días libres, tu rango de horas y tus horas ocupadas.
+3. **Amigos**: comparte tu horario con un link (o como imagen) y guarda el de tus amigos. Desde ahí puedes:
+   - Ver sus horarios superpuestos en el tuyo.
+   - Encontrar huecos y clases en común.
+   - Buscar secciones para ver materias juntos (**Armar juntos**).
+
+   No hay cuentas ni servidor: el horario viaja dentro del link y todo queda en tu navegador.
+4. **Exportar**: compara tus horarios y copia los NRC para inscribirte.
 
 Si la búsqueda falla (bloqueo del navegador o sin conexión), en «Buscar» puedes importar el JSON de Banner o cargar datos demo.
 
