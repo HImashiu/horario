@@ -1,0 +1,131 @@
+{
+  "schema": 1,
+  "id": "imec",
+  "program": "Ingeniería Mecánica",
+  "short": "IMEC",
+  "version": "Plan de estudios 2026-20",
+  "sourceTitle": "Reformado - Pensum PREIMEC 2026 (versión abril 2026)",
+  "source": "https://mecanica.uniandes.edu.co/sites/default/files/IMEC/Pensum/Reformado%20-%20Pensum%20PREIMEC%202026%20(Vabril)pdf",
+  "retrieved": "2026-11-27",
+  "totalCredits": 134,
+  "categories": [
+    { "id": "basicas", "label": "Ciencias Básicas y Matemáticas", "tone": "yellow" },
+    { "id": "fund-ing", "label": "Fundamentos de Ingeniería", "tone": "magenta" },
+    { "id": "fund-imec", "label": "Fundamentos de Ingeniería Mecánica", "tone": "teal" },
+    { "id": "prof-electivo", "label": "Ciclo Profesional electivo", "tone": "amber" },
+    { "id": "profesional", "label": "Ciclo profesional", "tone": "orange" },
+    { "id": "proyectos", "label": "Ciclo de proyectos", "tone": "crimson" },
+    { "id": "taller", "label": "Cursos Taller", "tone": "gray" },
+    { "id": "general", "label": "Educación general", "tone": "green" }
+  ],
+  "courses": {
+    "IMEC1505": { "name": "Diseño Gráfico en Ingeniería", "credits": 3, "cat": "fund-imec" },
+    "IMEC1000": { "name": "Introducción a la Ingeniería Mecánica", "credits": 3, "cat": "proyectos" },
+    "MATE1201": { "name": "Precálculo", "credits": 3, "cat": "basicas" },
+    "MATE1203": { "name": "Cálculo Diferencial", "credits": 3, "cat": "basicas" },
+    "CCOM1100": { "name": "Pensar, Comunicar y Colaborar", "credits": 3, "cat": "general" },
+    "IMEC1543": { "name": "Estática", "credits": 3, "cat": "fund-imec", "req": ["MATE1201"] },
+    "ISIS1221": { "name": "Introducción a la Programación", "credits": 3, "cat": "fund-ing" },
+    "MATE1214": { "name": "Cálculo Integral", "credits": 3, "cat": "basicas", "req": ["MATE1203"] },
+    "FISI1518": { "name": "Física I", "credits": 3, "cat": "basicas", "req": ["MATE1203"] },
+    "QUIM1103": { "name": "Química", "credits": 3, "cat": "basicas", "coreq": ["QUIM1104"] },
+    "IMEC2522": { "name": "Mecánica de Materiales", "credits": 3, "cat": "fund-imec", "req": ["MATE1203", "IMEC1543"], "coreq": ["MATE1214"] },
+    "IMEC1201": { "name": "Termofluidos I", "credits": 3, "cat": "fund-imec", "req": ["IMEC1000", "MATE1203"] },
+    "MATE1105": { "name": "Álgebra Lineal I", "credits": 3, "cat": "basicas", "req": ["MATE1203"] },
+    "FISI1528": { "name": "Física II", "credits": 3, "cat": "basicas", "req": ["FISI1518"] },
+    "IMEC2700": { "name": "P2 Proyecto Intermedio", "credits": 3, "cat": "proyectos", "req": ["IMEC1000", "ESCR1102", "IMEC1543", "FISI1518"] },
+    "IMEC1410": { "name": "Ciencia de Materiales", "credits": 3, "cat": "fund-imec" },
+    "MATE1207": { "name": "Cálculo Vectorial", "credits": 3, "cat": "basicas", "req": ["MATE1214", "MATE1105"] },
+    "IELE1002": { "name": "Fundamentos de Circuitos", "credits": 3, "cat": "fund-ing", "req": ["MATE1203"] },
+    "IMEC2202": { "name": "Termofluidos II", "credits": 3, "cat": "fund-imec", "req": ["MATE1214", "FISI1518", "IMEC1201"] },
+    "IMEC2540": { "name": "Dinámica de Sistemas Mecánicos", "credits": 3, "cat": "fund-imec", "req": ["MATE1214", "IMEC1543", "FISI1518"] },
+    "MATE2301": { "name": "Ecuaciones Diferenciales", "credits": 3, "cat": "basicas", "req": ["MATE1207"] },
+    "DERE1300": { "name": "Constitución y Democracia", "credits": 3, "cat": "general" },
+    "IMEC3709": { "name": "P3 Proyecto 3", "credits": 3, "cat": "proyectos", "req": ["IMEC2700", "RLEC1", "IMEC1410", "IMEC1201", "IMEC1505", ["IMEC2540", "IMEC2522"]] },
+    "IELE2300": { "name": "Análisis de Sistemas de Control", "credits": 3, "cat": "fund-ing", "req": ["FISI1528", "MATE1207"] },
+    "IIND2106": { "name": "Probabilidad y Estadística I", "credits": 3, "cat": "fund-ing", "req": ["MATE1214", "MATE1105"] },
+    "IIND2401": { "name": "Análisis de Decisión de Inversión", "credits": 3, "cat": "fund-ing", "req": ["MATE1203", "IMEC1000"] },
+    "IMEC2203": { "name": "Termofluidos III", "credits": 3, "cat": "profesional", "req": ["IMEC2700", "IMEC2202"] },
+    "IMEC2543": { "name": "Dinámica de Maquinaria", "credits": 3, "cat": "profesional", "req": ["IMEC2700", "IMEC2540"] },
+    "IMEC2411": { "name": "Ingeniería de Materiales", "credits": 3, "cat": "profesional", "req": ["IMEC2700", "IMEC1410"] },
+    "IMEC3700": { "name": "Seminario de Grado", "credits": 1, "cat": "taller", "coreq": ["IMEC3709"] },
+    "IMEC3345": { "name": "Conversión de Energía", "credits": 3, "cat": "profesional", "req": ["IMEC2700", "IMEC1410", "IMEC1201", "IMEC1543", "IMEC1505", "IMEC2202"] },
+    "IMEC3532": { "name": "Diseño de Máquinas", "credits": 3, "cat": "profesional", "req": ["IMEC2700", "IMEC1410", "IMEC1201", "IMEC1543", "IMEC1505", "IMEC2522"] },
+    "IMEC3461": { "name": "Procesos de Manufactura Industrial", "credits": 3, "cat": "profesional", "req": ["IMEC2700", "IMEC1410", "IMEC1201", "IMEC1543", "IMEC1505"] },
+    "IMEC3714": {
+      "name": "Proyecto de Desarrollo Profesional IMEC", "credits": 3, "cat": "proyectos",
+      "req": ["IMEC2202", "IMEC2700", "IMEC2522", "IMEC2540", "IMEC1410", "IIND2106", "MATE2301", "IMEC1505", { "count": 1, "from": ["CPO1", "CPO2"] }],
+      "coreq": ["IIND2401", "IELE2300", { "count": 2, "from": ["CPO1", "CPO2"] }]
+    },
+    "IMEC3710": {
+      "name": "P4 Proyecto 4", "credits": 3, "cat": "proyectos",
+      "req": ["IMEC2202", "IMEC2700", "IMEC2522", "IMEC1505", "IMEC2540", "IMEC1410", "IIND2106", "IELE2300", "MATE2301", { "count": 2, "from": ["CPO1", "CPO2"] }],
+      "coreq": ["IIND2401"]
+    }
+  },
+  "groups": {
+    "CPO1": { "label": "Ofrecidos el 1er semestre del año", "short": "CPO1", "options": ["IMEC2203", "IMEC2543", "IMEC2411"] },
+    "CPO2": { "label": "Ofrecidos el 2do semestre del año", "short": "CPO2", "options": ["IMEC3345", "IMEC3532", "IMEC3461"] }
+  },
+  "external": {
+    "ESCR1102": { "label": "Escritura Universitaria II", "kind": "course" },
+    "QUIM1104": { "label": "Laboratorio de Química", "kind": "course" },
+    "RLEC1": { "label": "Requisito de lectura en inglés", "kind": "requirement" }
+  },
+  "slotKinds": {
+    "cbu": { "hint": "Ciclo Básico Uniandino: cursos de formación general. Busca por tema y verifica en Banner que la sección sea CBU.", "queries": ["Arte", "Historia", "Filosofía", "Literatura", "Música", "Colombia"] },
+    "cle": { "hint": "Créditos de libre elección: cualquier curso de la universidad, si cumples sus prerrequisitos.", "queries": [] },
+    "taller": { "hint": "Cursos Taller de 2 créditos. Busca los cursos cuyo nombre empieza por \"Taller\".", "queries": ["Taller"] },
+    "elec-fund-ing": { "hint": "Curso de fundamentos de otras ingenierías.", "queries": ["IIND", "IELE", "ISIS", "IBIO"] },
+    "elec-mixta": { "hint": "Puede ser de Matemáticas, de Fundamentos de Ingeniería en IMEC o de Ciencias.", "queries": ["MATE", "IMEC", "FISI", "QUIM"] },
+    "elec-imec": { "hint": "Electiva del ciclo profesional de Ingeniería Mecánica.", "queries": ["IMEC"] },
+    "elec-cien": { "hint": "Electiva de Ciencias o Matemáticas.", "queries": ["MATE", "FISI", "QUIM", "BIOL"] }
+  },
+  "routes": [
+    {
+      "id": "calculo",
+      "label": "Ruta Cálculo",
+      "hint": "Si en el examen de clasificación quedaste directo en Cálculo Diferencial.",
+      "assumed": ["MATE1201"],
+      "semesters": [
+        { "credits": 15, "items": ["IMEC1505", "IMEC1000", "MATE1203", "CCOM1100", { "slot": "cbu", "label": "CBU 1", "credits": 3, "cat": "general" }] },
+        { "credits": 15, "items": ["IMEC1543", "ISIS1221", "MATE1214", "FISI1518", { "slot": "cbu", "label": "CBU 2", "credits": 3, "cat": "general" }] },
+        { "credits": 17, "items": [{ "slot": "taller", "label": "Electiva Taller 1", "credits": 2, "cat": "taller" }, "IMEC2522", "IMEC1201", "MATE1105", "FISI1528", { "slot": "cbu", "label": "CBU 3", "credits": 3, "cat": "general" }] },
+        { "credits": 18, "items": ["IMEC2700", "IMEC1410", "MATE1207", "QUIM1103", { "slot": "cle", "label": "CLE 1 · Créditos de Libre Elección", "credits": 3, "cat": "general" }, { "slot": "cbu", "label": "CBU 4", "credits": 3, "cat": "general" }] },
+        { "credits": 17, "items": [{ "slot": "taller", "label": "Electiva Taller 2", "credits": 2, "cat": "taller" }, "IELE1002", "IMEC2202", "IMEC2540", "MATE2301", "DERE1300"] },
+        { "credits": 18, "items": ["IMEC3709", "IELE2300", "IIND2106", "IIND2401", { "slot": "elec-imec", "label": "Electiva en Ingeniería Mecánica 1", "credits": 3, "cat": "prof-electivo" }, { "group": "CPO1", "credits": 3, "cat": "profesional" }] },
+        { "credits": 16, "items": ["IMEC3700", { "slot": "elec-fund-ing", "label": "Electiva en Fundamentos de Ingeniería", "credits": 3, "cat": "fund-ing" }, { "slot": "elec-mixta", "label": "Electiva en Matemáticas / IMEC Fundamentos de Ingeniería / Ciencias", "credits": 3, "cat": "basicas", "cats": ["basicas", "fund-ing", "prof-electivo"] }, { "slot": "elec-imec", "label": "Electiva en Ingeniería Mecánica 2", "credits": 3, "cat": "prof-electivo" }, { "slot": "elec-imec", "label": "Electiva en Ingeniería Mecánica 3", "credits": 3, "cat": "prof-electivo" }, { "group": "CPO2", "credits": 3, "cat": "profesional" }] },
+        { "credits": 18, "items": ["IMEC3714", "IMEC3710", { "slot": "elec-cien", "label": "Electiva en Ciencias/Matemáticas", "credits": 3, "cat": "basicas" }, { "slot": "elec-imec", "label": "Electiva en Ingeniería Mecánica 4", "credits": 3, "cat": "prof-electivo" }, { "slot": "cle", "label": "CLE 2 · Créditos de Libre Elección", "credits": 3, "cat": "general" }, { "slot": "cbu", "label": "CBU 5", "credits": 3, "cat": "general" }] }
+      ]
+    },
+    {
+      "id": "precalculo",
+      "label": "Ruta Precálculo",
+      "hint": "Si en el examen de clasificación quedaste en Precálculo.",
+      "assumed": [],
+      "semesters": [
+        { "credits": 15, "items": ["IMEC1505", "IMEC1000", "MATE1201", "CCOM1100", { "slot": "cbu", "label": "CBU 1", "credits": 3, "cat": "general" }] },
+        { "credits": 15, "items": ["IMEC1543", "ISIS1221", "MATE1203", "QUIM1103", { "slot": "cbu", "label": "CBU 2", "credits": 3, "cat": "general" }] },
+        { "credits": 17, "items": [{ "slot": "taller", "label": "Electiva Taller 1", "credits": 2, "cat": "taller" }, "IMEC2522", "MATE1214", "MATE1105", "FISI1518", { "slot": "cbu", "label": "CBU 3", "credits": 3, "cat": "general" }] },
+        { "credits": 18, "items": ["IMEC2700", "IMEC1410", "IMEC1201", "MATE1207", "FISI1528", { "slot": "cbu", "label": "CBU 4", "credits": 3, "cat": "general" }] },
+        { "credits": 17, "items": [{ "slot": "taller", "label": "Electiva Taller 2", "credits": 2, "cat": "taller" }, "IELE1002", "IMEC2202", "IMEC2540", "MATE2301", "DERE1300"] },
+        { "credits": 18, "items": ["IMEC3709", "IELE2300", "IIND2106", "IIND2401", { "slot": "elec-imec", "label": "Electiva en Ingeniería Mecánica 1", "credits": 3, "cat": "prof-electivo" }, { "group": "CPO1", "credits": 3, "cat": "profesional" }] },
+        { "credits": 16, "items": ["IMEC3700", { "slot": "elec-fund-ing", "label": "Electiva en Fundamentos de Ingeniería", "credits": 3, "cat": "fund-ing" }, { "slot": "elec-mixta", "label": "Electiva en Matemáticas / IMEC Fundamentos de Ingeniería / Ciencias", "credits": 3, "cat": "basicas", "cats": ["basicas", "fund-ing", "prof-electivo"] }, { "slot": "elec-imec", "label": "Electiva en Ingeniería Mecánica 2", "credits": 3, "cat": "prof-electivo" }, { "slot": "elec-imec", "label": "Electiva en Ingeniería Mecánica 3", "credits": 3, "cat": "prof-electivo" }, { "group": "CPO2", "credits": 3, "cat": "profesional" }] },
+        { "credits": 18, "items": ["IMEC3714", "IMEC3710", { "slot": "elec-cien", "label": "Electiva en Ciencias/Matemáticas", "credits": 3, "cat": "basicas" }, { "slot": "elec-imec", "label": "Electiva en Ingeniería Mecánica 4", "credits": 3, "cat": "prof-electivo" }, { "slot": "cle", "label": "CLE · Créditos de Libre Elección", "credits": 3, "cat": "general" }, { "slot": "cbu", "label": "CBU 5", "credits": 3, "cat": "general" }] }
+      ]
+    }
+  ],
+  "rules": [],
+  "notes": [
+    { "title": "Dos rutas", "text": "El plan tiene una ruta Cálculo y una ruta Precálculo, según el resultado del examen de clasificación en matemáticas." },
+    { "title": "Ciclo profesional", "text": "En VI y VII se toma un curso del grupo ofrecido ese semestre: CPO1 (1er semestre del año: IMEC 2203, IMEC 2543, IMEC 2411) y CPO2 (2do semestre: IMEC 3345, IMEC 3532, IMEC 3461)." },
+    { "title": "Requisitos", "text": "Los códigos con * son correquisitos: se pueden ver al mismo tiempo o haberse aprobado antes." }
+  ],
+  "review": [
+    "IMEC 3714 marca IIND 2401*** e IELE 2300*** con tres asteriscos, que la leyenda no define. Se tratan como correquisitos.",
+    "IMEC 2700 pide ESCR 1102, que ya no aparece en el plan 2026 (el curso de escritura ahora es CCOM 1100). Se trata como requisito externo que el estudiante marca como cumplido.",
+    "IMEC 3709 pide \"RLEC1\", que el PDF no define. Se interpreta como el requisito de lectura en inglés.",
+    "El PDF rotula IMEC 3709 como \"P2 Proyecto 3\"; se muestra como \"P3 Proyecto 3\".",
+    "Estática (IMEC 1543) pide MATE 1201 en ambas rutas; en la ruta Cálculo se da por cumplido por clasificación."
+  ]
+}
