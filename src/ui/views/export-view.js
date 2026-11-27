@@ -22,7 +22,7 @@ export function renderExport() {
   const d = currentDraft();
   const secs = S.selected.slice().sort((a, b) => a.code.localeCompare(b.code) || (kindOf(a) === 'mag' ? -1 : 1));
   el.innerHTML = `<div class="gutter" style="padding-block:20px 32px"><div class="max-w-5xl mx-auto flex flex-col gap-6">
-    <div><h2 class="text-xl sm:text-2xl font-semibold">Comparar y exportar</h2><p class="text-sm text-slate-600 mt-1">Compara tus horarios y copia los NRC para inscribirte en Banner.</p></div>
+    <p class="text-sm text-slate-600">Compara tus horarios y copia los NRC para inscribirte en Banner.</p>
     <div class="card overflow-hidden"><div class="overflow-x-auto"><table class="w-full text-sm min-w-[720px]">
       <thead class="bg-wash text-xs muted text-left"><tr>${['Horario', 'Semana', 'Materias', 'Créditos', 'Días · horas', 'Pendientes', 'Choques', 'Score'].map(h => `<th class="px-4 py-3 font-medium">${h}</th>`).join('')}</tr></thead>
       <tbody class="divide-y divide-line-2">${rows.map(r => `<tr class="${r.on ? 'bg-brand-50/60' : 'hover:bg-slate-50'} cursor-pointer" data-action="export:open" ${data({ id: r.d.id })}>

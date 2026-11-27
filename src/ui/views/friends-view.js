@@ -47,8 +47,7 @@ export function renderFriends() {
   // Compare with everybody until the user picks.
   if (!v.compareInit && S.friends.length) { S.friends.forEach(f => v.compare.add(f.id)); v.compareInit = true; }
   el.innerHTML = `<div class="gutter" style="padding-block:20px 40px"><div class="max-w-5xl mx-auto flex flex-col gap-6">
-    <div><h2 class="text-xl sm:text-2xl font-semibold">Amigos</h2>
-      <p class="text-sm text-slate-600 mt-1">Comparte tu horario por link o como imagen, guarda los de tus amigos y encuentren huecos y clases en común. Todo queda en tu navegador: no hay cuentas ni servidor.</p></div>
+    <p class="text-sm text-slate-600">Comparte tu horario por link o como imagen, guarda los de tus amigos y encuentren huecos y clases en común. Todo queda en tu navegador: no hay cuentas ni servidor.</p>
     ${shareCardHtml()}
     ${friendsListHtml()}
     ${S.friends.length ? compareHtml() : ''}
