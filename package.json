@@ -6,7 +6,8 @@
   "scripts": {
     "build": "./build.sh",
     "test": "node --test \"tests/unit/*.test.js\"",
-    "validate": "node scripts/validate-pensum.mjs"
+    "validate": "node scripts/validate-pensum.mjs",
+    "e2e": "./build.sh && node tests/e2e/smoke.cjs"
   },
   "devDependencies": {
     "esbuild": "0.24.0",

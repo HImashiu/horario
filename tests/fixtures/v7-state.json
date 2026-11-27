@@ -1,0 +1,845 @@
+{
+ "v": 7,
+ "cleanedCourses": [
+  {
+   "id": "sec-70001",
+   "nrc": "70001",
+   "code": "IMEC1543",
+   "title": "Estática",
+   "section": "1",
+   "schedule_type": "Magistral",
+   "instructional_method": "Presencial",
+   "campus": "Campus Principal",
+   "seats_available": 15,
+   "capacity": 30,
+   "credits": 3,
+   "instructors": [
+    "Juan Casas Rodríguez"
+   ],
+   "schedules": [
+    {
+     "days": [
+      "Martes",
+      "Jueves"
+     ],
+     "start_time": "11:00",
+     "end_time": "12:20",
+     "location": "ML 201"
+    }
+   ],
+   "enabled": true
+  },
+  {
+   "id": "sec-70002",
+   "nrc": "70002",
+   "code": "IMEC1543",
+   "title": "Estática",
+   "section": "2",
+   "schedule_type": "Magistral",
+   "instructional_method": "Presencial",
+   "campus": "Campus Principal",
+   "seats_available": 8,
+   "capacity": 30,
+   "credits": 3,
+   "instructors": [
+    "Daniel Serrano Ruiz"
+   ],
+   "schedules": [
+    {
+     "days": [
+      "Martes",
+      "Jueves"
+     ],
+     "start_time": "14:00",
+     "end_time": "15:20",
+     "location": "ML 202"
+    }
+   ],
+   "enabled": true
+  },
+  {
+   "id": "sec-70003",
+   "nrc": "70003",
+   "code": "ISIS1221",
+   "title": "Introducción a la Programación",
+   "section": "1",
+   "schedule_type": "Magistral",
+   "instructional_method": "Presencial",
+   "campus": "Campus Principal",
+   "seats_available": 5,
+   "capacity": 25,
+   "credits": 3,
+   "instructors": [
+    "Juan Oyuela Matiz"
+   ],
+   "schedules": [
+    {
+     "days": [
+      "Lunes",
+      "Miércoles"
+     ],
+     "start_time": "06:30",
+     "end_time": "07:50",
+     "location": "W 101"
+    }
+   ],
+   "enabled": true
+  },
+  {
+   "id": "sec-70004",
+   "nrc": "70004",
+   "code": "ISIS1221",
+   "title": "Introducción a la Programación",
+   "section": "10",
+   "schedule_type": "Magistral",
+   "instructional_method": "Presencial",
+   "campus": "Campus Principal",
+   "seats_available": 12,
+   "capacity": 25,
+   "credits": 3,
+   "instructors": [
+    "Fernando Calvo Silva"
+   ],
+   "schedules": [
+    {
+     "days": [
+      "Martes",
+      "Viernes"
+     ],
+     "start_time": "08:00",
+     "end_time": "09:20",
+     "location": "W 102"
+    }
+   ],
+   "enabled": true
+  },
+  {
+   "id": "sec-70005",
+   "nrc": "70005",
+   "code": "ISIS1221",
+   "title": "Introducción a la Programación",
+   "section": "11",
+   "schedule_type": "Magistral",
+   "instructional_method": "Presencial",
+   "campus": "Campus Principal",
+   "seats_available": 20,
+   "capacity": 25,
+   "credits": 3,
+   "instructors": [
+    "Por asignar"
+   ],
+   "schedules": [
+    {
+     "days": [
+      "Miércoles",
+      "Viernes"
+     ],
+     "start_time": "09:30",
+     "end_time": "10:50",
+     "location": "W 103"
+    }
+   ],
+   "enabled": true
+  },
+  {
+   "id": "sec-70006",
+   "nrc": "70006",
+   "code": "MATE1203",
+   "title": "Cálculo Diferencial",
+   "section": "3",
+   "schedule_type": "Magistral",
+   "instructional_method": "Presencial",
+   "campus": "Campus Principal",
+   "seats_available": 0,
+   "capacity": 40,
+   "credits": 3,
+   "instructors": [
+    "Claudia Ríos Martínez"
+   ],
+   "schedules": [
+    {
+     "days": [
+      "Lunes",
+      "Miércoles",
+      "Viernes"
+     ],
+     "start_time": "09:00",
+     "end_time": "10:20",
+     "location": "SD 301"
+    }
+   ],
+   "enabled": true
+  },
+  {
+   "id": "sec-70007",
+   "nrc": "70007",
+   "code": "MATE1203",
+   "title": "Cálculo Diferencial",
+   "section": "31",
+   "schedule_type": "Complementaria",
+   "instructional_method": "Presencial",
+   "campus": "Campus Principal",
+   "seats_available": 6,
+   "capacity": 20,
+   "credits": 3,
+   "instructors": [
+    "Monitor MATE"
+   ],
+   "schedules": [
+    {
+     "days": [
+      "Martes"
+     ],
+     "start_time": "07:00",
+     "end_time": "08:20",
+     "location": "SD 305"
+    }
+   ],
+   "enabled": true
+  },
+  {
+   "id": "sec-70008",
+   "nrc": "70008",
+   "code": "MATE1203",
+   "title": "Cálculo Diferencial",
+   "section": "32",
+   "schedule_type": "Complementaria",
+   "instructional_method": "Presencial",
+   "campus": "Campus Principal",
+   "seats_available": 9,
+   "capacity": 20,
+   "credits": 3,
+   "instructors": [
+    "Monitor MATE"
+   ],
+   "schedules": [
+    {
+     "days": [
+      "Jueves"
+     ],
+     "start_time": "14:00",
+     "end_time": "15:20",
+     "location": "SD 305"
+    }
+   ],
+   "enabled": true
+  },
+  {
+   "id": "sec-70009",
+   "nrc": "70009",
+   "code": "MATE1203",
+   "title": "Cálculo Diferencial",
+   "section": "4",
+   "schedule_type": "Magistral",
+   "instructional_method": "Presencial",
+   "campus": "Campus Principal",
+   "seats_available": 11,
+   "capacity": 40,
+   "credits": 3,
+   "instructors": [
+    "Andrés Gómez Pardo"
+   ],
+   "schedules": [
+    {
+     "days": [
+      "Martes",
+      "Jueves"
+     ],
+     "start_time": "09:30",
+     "end_time": "10:50",
+     "location": "SD 302"
+    }
+   ],
+   "enabled": true
+  },
+  {
+   "id": "sec-70010",
+   "nrc": "70010",
+   "code": "MATE1203",
+   "title": "Cálculo Diferencial",
+   "section": "41",
+   "schedule_type": "Complementaria",
+   "instructional_method": "Presencial",
+   "campus": "Campus Principal",
+   "seats_available": 8,
+   "capacity": 20,
+   "credits": 3,
+   "instructors": [
+    "Monitor MATE"
+   ],
+   "schedules": [
+    {
+     "days": [
+      "Viernes"
+     ],
+     "start_time": "09:30",
+     "end_time": "10:50",
+     "location": "SD 306"
+    }
+   ],
+   "enabled": true
+  },
+  {
+   "id": "sec-70011",
+   "nrc": "70011",
+   "code": "MATE1203",
+   "title": "Cálculo Diferencial",
+   "section": "42",
+   "schedule_type": "Complementaria",
+   "instructional_method": "Presencial",
+   "campus": "Campus Principal",
+   "seats_available": 12,
+   "capacity": 20,
+   "credits": 3,
+   "instructors": [
+    "Monitor MATE"
+   ],
+   "schedules": [
+    {
+     "days": [
+      "Lunes"
+     ],
+     "start_time": "14:00",
+     "end_time": "15:20",
+     "location": "SD 306"
+    }
+   ],
+   "enabled": true
+  },
+  {
+   "id": "sec-70012",
+   "nrc": "70012",
+   "code": "MATE1203",
+   "title": "Cálculo Diferencial",
+   "section": "5",
+   "schedule_type": "Magistral",
+   "instructional_method": "Presencial",
+   "campus": "Campus Principal",
+   "seats_available": 20,
+   "capacity": 40,
+   "credits": 3,
+   "instructors": [
+    "Laura Pinzón"
+   ],
+   "schedules": [
+    {
+     "days": [
+      "Martes",
+      "Jueves"
+     ],
+     "start_time": "16:00",
+     "end_time": "17:20",
+     "location": "SD 303"
+    }
+   ],
+   "enabled": true
+  },
+  {
+   "id": "sec-70013",
+   "nrc": "70013",
+   "code": "MATE1203",
+   "title": "Cálculo Diferencial",
+   "section": "51",
+   "schedule_type": "Complementaria",
+   "instructional_method": "Presencial",
+   "campus": "Campus Principal",
+   "seats_available": 15,
+   "capacity": 20,
+   "credits": 3,
+   "instructors": [
+    "Monitor MATE"
+   ],
+   "schedules": [
+    {
+     "days": [
+      "Miércoles"
+     ],
+     "start_time": "16:00",
+     "end_time": "17:20",
+     "location": "SD 307"
+    }
+   ],
+   "enabled": true
+  },
+  {
+   "id": "sec-70014",
+   "nrc": "70014",
+   "code": "MATE1203",
+   "title": "Cálculo Diferencial",
+   "section": "52",
+   "schedule_type": "Complementaria",
+   "instructional_method": "Presencial",
+   "campus": "Campus Principal",
+   "seats_available": 4,
+   "capacity": 20,
+   "credits": 3,
+   "instructors": [
+    "Monitor MATE"
+   ],
+   "schedules": [
+    {
+     "days": [
+      "Sábado"
+     ],
+     "start_time": "09:00",
+     "end_time": "10:20",
+     "location": "SD 307"
+    }
+   ],
+   "enabled": true
+  },
+  {
+   "id": "sec-70015",
+   "nrc": "70015",
+   "code": "QUIM1103",
+   "title": "Química",
+   "section": "1",
+   "schedule_type": "Magistral",
+   "instructional_method": "Presencial",
+   "campus": "Campus Principal",
+   "seats_available": 18,
+   "capacity": 35,
+   "credits": 3,
+   "instructors": [
+    "Laura Méndez"
+   ],
+   "schedules": [
+    {
+     "days": [
+      "Miércoles",
+      "Viernes"
+     ],
+     "start_time": "11:00",
+     "end_time": "12:20",
+     "location": "Q 305"
+    }
+   ],
+   "enabled": true
+  },
+  {
+   "id": "sec-70016",
+   "nrc": "70016",
+   "code": "QUIM1103",
+   "title": "Química",
+   "section": "11",
+   "schedule_type": "Laboratorio",
+   "instructional_method": "Presencial",
+   "campus": "Campus Principal",
+   "seats_available": 6,
+   "capacity": 18,
+   "credits": 3,
+   "instructors": [
+    "Lab. Química"
+   ],
+   "schedules": [
+    {
+     "days": [
+      "Miércoles"
+     ],
+     "start_time": "14:00",
+     "end_time": "15:50",
+     "location": "Q LAB1"
+    }
+   ],
+   "enabled": true
+  },
+  {
+   "id": "sec-70017",
+   "nrc": "70017",
+   "code": "QUIM1103",
+   "title": "Química",
+   "section": "12",
+   "schedule_type": "Laboratorio",
+   "instructional_method": "Presencial",
+   "campus": "Campus Principal",
+   "seats_available": 4,
+   "capacity": 18,
+   "credits": 3,
+   "instructors": [
+    "Lab. Química"
+   ],
+   "schedules": [
+    {
+     "days": [
+      "Jueves"
+     ],
+     "start_time": "11:00",
+     "end_time": "12:50",
+     "location": "Q LAB1"
+    }
+   ],
+   "enabled": true
+  },
+  {
+   "id": "sec-70018",
+   "nrc": "70018",
+   "code": "QUIM1103",
+   "title": "Química",
+   "section": "13",
+   "schedule_type": "Laboratorio",
+   "instructional_method": "Presencial",
+   "campus": "Campus Principal",
+   "seats_available": 2,
+   "capacity": 18,
+   "credits": 3,
+   "instructors": [
+    "Lab. Química"
+   ],
+   "schedules": [
+    {
+     "days": [
+      "Viernes"
+     ],
+     "start_time": "14:00",
+     "end_time": "15:50",
+     "location": "Q LAB2"
+    }
+   ],
+   "enabled": true
+  },
+  {
+   "id": "sec-70019",
+   "nrc": "70019",
+   "code": "QUIM1103",
+   "title": "Química",
+   "section": "2",
+   "schedule_type": "Magistral",
+   "instructional_method": "Presencial",
+   "campus": "Campus Principal",
+   "seats_available": 9,
+   "capacity": 35,
+   "credits": 3,
+   "instructors": [
+    "Jorge Patiño"
+   ],
+   "schedules": [
+    {
+     "days": [
+      "Lunes",
+      "Miércoles"
+     ],
+     "start_time": "16:00",
+     "end_time": "17:20",
+     "location": "Q 306"
+    }
+   ],
+   "enabled": true
+  },
+  {
+   "id": "sec-70020",
+   "nrc": "70020",
+   "code": "QUIM1103",
+   "title": "Química",
+   "section": "21",
+   "schedule_type": "Laboratorio",
+   "instructional_method": "Presencial",
+   "campus": "Campus Principal",
+   "seats_available": 10,
+   "capacity": 18,
+   "credits": 3,
+   "instructors": [
+    "Lab. Química"
+   ],
+   "schedules": [
+    {
+     "days": [
+      "Martes"
+     ],
+     "start_time": "14:00",
+     "end_time": "15:50",
+     "location": "Q LAB1"
+    }
+   ],
+   "enabled": true
+  },
+  {
+   "id": "sec-70021",
+   "nrc": "70021",
+   "code": "QUIM1103",
+   "title": "Química",
+   "section": "22",
+   "schedule_type": "Laboratorio",
+   "instructional_method": "Presencial",
+   "campus": "Campus Principal",
+   "seats_available": 7,
+   "capacity": 18,
+   "credits": 3,
+   "instructors": [
+    "Lab. Química"
+   ],
+   "schedules": [
+    {
+     "days": [
+      "Sábado"
+     ],
+     "start_time": "08:00",
+     "end_time": "09:50",
+     "location": "Q LAB2"
+    }
+   ],
+   "enabled": true
+  },
+  {
+   "id": "sec-70022",
+   "nrc": "70022",
+   "code": "FISI1518",
+   "title": "Física 1",
+   "section": "2",
+   "schedule_type": "Magistral",
+   "instructional_method": "Presencial",
+   "campus": "Campus Principal",
+   "seats_available": 22,
+   "capacity": 45,
+   "credits": 3,
+   "instructors": [
+    "Carlos Ávila"
+   ],
+   "schedules": [
+    {
+     "days": [
+      "Lunes",
+      "Miércoles"
+     ],
+     "start_time": "12:30",
+     "end_time": "13:50",
+     "location": "O 105"
+    }
+   ],
+   "enabled": true
+  },
+  {
+   "id": "sec-70023",
+   "nrc": "70023",
+   "code": "FISI1518",
+   "title": "Física 1",
+   "section": "21",
+   "schedule_type": "Complementaria",
+   "instructional_method": "Presencial",
+   "campus": "Campus Principal",
+   "seats_available": 10,
+   "capacity": 25,
+   "credits": 3,
+   "instructors": [
+    "Monitor FISI"
+   ],
+   "schedules": [
+    {
+     "days": [
+      "Viernes"
+     ],
+     "start_time": "12:30",
+     "end_time": "13:50",
+     "location": "O 201"
+    }
+   ],
+   "enabled": true
+  },
+  {
+   "id": "sec-70024",
+   "nrc": "70024",
+   "code": "FISI1518",
+   "title": "Física 1",
+   "section": "3",
+   "schedule_type": "Magistral",
+   "instructional_method": "Presencial",
+   "campus": "Campus Principal",
+   "seats_available": 14,
+   "capacity": 45,
+   "credits": 3,
+   "instructors": [
+    "Paula Ruiz"
+   ],
+   "schedules": [
+    {
+     "days": [
+      "Miércoles",
+      "Viernes"
+     ],
+     "start_time": "12:30",
+     "end_time": "13:50",
+     "location": "O 106"
+    }
+   ],
+   "enabled": true
+  },
+  {
+   "id": "sec-70025",
+   "nrc": "70025",
+   "code": "FISI1518",
+   "title": "Física 1",
+   "section": "31",
+   "schedule_type": "Complementaria",
+   "instructional_method": "Presencial",
+   "campus": "Campus Principal",
+   "seats_available": 9,
+   "capacity": 20,
+   "credits": 3,
+   "instructors": [
+    "Monitor FISI"
+   ],
+   "schedules": [
+    {
+     "days": [
+      "Jueves"
+     ],
+     "start_time": "14:00",
+     "end_time": "15:20",
+     "location": "O 202"
+    }
+   ],
+   "enabled": true
+  },
+  {
+   "id": "sec-70026",
+   "nrc": "70026",
+   "code": "FISI1518",
+   "title": "Física 1",
+   "section": "32",
+   "schedule_type": "Complementaria",
+   "instructional_method": "Presencial",
+   "campus": "Campus Principal",
+   "seats_available": 11,
+   "capacity": 20,
+   "credits": 3,
+   "instructors": [
+    "Monitor FISI"
+   ],
+   "schedules": [
+    {
+     "days": [
+      "Lunes"
+     ],
+     "start_time": "07:00",
+     "end_time": "08:20",
+     "location": "O 202"
+    }
+   ],
+   "enabled": true
+  },
+  {
+   "id": "sec-70027",
+   "nrc": "70027",
+   "code": "FISI1518",
+   "title": "Física 1",
+   "section": "33",
+   "schedule_type": "Complementaria",
+   "instructional_method": "Presencial",
+   "campus": "Campus Principal",
+   "seats_available": 0,
+   "capacity": 20,
+   "credits": 3,
+   "instructors": [
+    "Monitor FISI"
+   ],
+   "schedules": [
+    {
+     "days": [
+      "Martes"
+     ],
+     "start_time": "09:30",
+     "end_time": "10:50",
+     "location": "O 203"
+    }
+   ],
+   "enabled": true
+  }
+ ],
+ "basket": [
+  {
+   "key": "IMEC1543",
+   "code": "IMEC1543",
+   "title": "Estática",
+   "credits": 3,
+   "elective": false,
+   "color": 0
+  },
+  {
+   "key": "ISIS1221",
+   "code": "ISIS1221",
+   "title": "Introducción a la Programación",
+   "credits": 3,
+   "elective": false,
+   "color": 1
+  },
+  {
+   "key": "MATE1203",
+   "code": "MATE1203",
+   "title": "Cálculo Diferencial",
+   "credits": 3,
+   "elective": false,
+   "color": 2
+  },
+  {
+   "key": "QUIM1103",
+   "code": "QUIM1103",
+   "title": "Química",
+   "credits": 3,
+   "elective": false,
+   "color": 3
+  },
+  {
+   "key": "FISI1518",
+   "code": "FISI1518",
+   "title": "Física 1",
+   "credits": 3,
+   "elective": false,
+   "color": 4
+  }
+ ],
+ "drafts": [
+  {
+   "id": "draft-1795753255905-478753",
+   "name": "Horario 1",
+   "sectionIds": [
+    "sec-70001",
+    "sec-70005",
+    "sec-70024",
+    "sec-70025",
+    "sec-70015",
+    "sec-70016",
+    "sec-70012",
+    "sec-70013"
+   ],
+   "locked": [
+    "MATE1203"
+   ],
+   "skipped": []
+  },
+  {
+   "id": "draft-1795753255956-487550",
+   "name": "Horario 1 (copia)",
+   "sectionIds": [
+    "sec-70001",
+    "sec-70005",
+    "sec-70024",
+    "sec-70025",
+    "sec-70012",
+    "sec-70013"
+   ],
+   "locked": [
+    "MATE1203"
+   ],
+   "skipped": [
+    "QUIM1103"
+   ]
+  }
+ ],
+ "currentDraftId": "draft-1795753255956-487550",
+ "rules": {
+  "rule-monday-free": true,
+  "rule-tuesday-late": true,
+  "rule-no-early": true,
+  "rule-no-early-hour": "8",
+  "rule-no-late": true,
+  "rule-no-late-hour": "16",
+  "credit-target": "18",
+  "auto-refresh-toggle": false,
+  "auto-refresh-interval": "5",
+  "rule-strict-pairing": true,
+  "rule-gen-seats": false
+ },
+ "prefs": {
+  "pensumMajor": "imec",
+  "pensumSem": 0
+ }
+}

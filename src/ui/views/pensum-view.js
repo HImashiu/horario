@@ -118,7 +118,7 @@ function blockHtml(p, b) {
   const name = b.kind === 'course' ? b.name : b.name;
   const tag = selected ? `<span class="pb-check" title="${loading ? 'Buscando secciones…' : 'En tu próximo semestre'}"><i class="fa-solid ${loading ? 'fa-spinner fa-spin' : 'fa-check'}"></i></span>` : '';
   const label = `${b.kind === 'course' ? fmtCode(b.code) + ' ' : ''}${name}, ${b.credits} créditos${selected ? ', en tu próximo semestre' : ''}`;
-  return `<div class="pcell">
+  return `<div class="pcell"><div class="relative">
     <button class="pblock ${selected ? 'is-selected' : ''}" style="${toneVars(tone)}${bg}" data-action="pensum:toggle" data-hover="pensum:hover" ${data({ key: b.key, hkey: b.key })} aria-pressed="${selected}" aria-label="${esc(label)}">
       <span class="pb-code">${esc(codeLine)}</span>
       <span class="pb-name">${esc(name)}</span>
@@ -126,14 +126,14 @@ function blockHtml(p, b) {
       <span class="pb-cr ${TONES[tone].text === '#FFFFFF' ? '' : 'is-dark'}" aria-hidden="true">${b.credits}</span>
       ${tag}
     </button>
-    <button class="pinfo" style="color:${TONES[tone].text}" data-action="pensum:info" ${data({ key: b.key })} aria-label="Detalles de ${esc(name)}"><i class="fa-solid fa-ellipsis"></i></button>
+    <button class="pinfo" style="color:${TONES[tone].text}" data-action="pensum:info" ${data({ key: b.key })} aria-label="Detalles de ${esc(name)}"><i class="fa-solid fa-ellipsis"></i></button></div>
     <div class="preq ${reqHtml ? '' : 'is-empty'}" style="--rq:${TONES[tone].fill}"><span>${reqHtml || '—'}</span></div>
   </div>`;
 }
 
 function trayBarHtml(n, credits) {
   return `<div class="tray-bar">
-    <span class="flex-1 min-w-0 text-sm"><b class="font-semibold">${n} ${n === 1 ? 'materia' : 'materias'}</b> <span class="muted">· ${credits} créditos</span></span>
+    <span class="flex-1 min-w-0 text-sm whitespace-nowrap overflow-hidden text-ellipsis"><b class="font-semibold">${n} ${n === 1 ? 'materia' : 'materias'}</b> <span class="muted">· ${credits} cr</span></span>
     <button class="btn btn-quiet btn-sm" data-action="search:open"><i class="fa-solid fa-magnifying-glass"></i><span class="hidden sm:inline">Buscar otra</span></button>
     <button class="btn btn-primary btn-sm" data-action="nav" data-view="horario" ${n ? '' : 'disabled'}>Armar horario <i class="fa-solid fa-arrow-right"></i></button>
   </div>`;
@@ -244,6 +244,7 @@ handle({
       toast(`Ahora ves el pénsum de ${getPensum(program).program}. Tus materias se mantienen.`, 'info');
     }
     S.profile.program = program;
+    document.getElementById('view-pensum')?.scrollTo?.(0, 0);
     if (getPensum(program).routes.length < 2) S.profile.route = getPensum(program).routes[0].id;
     else if (!getPensum(program).routes.some(r => r.id === S.profile.route)) S.profile.route = null;
     commit();

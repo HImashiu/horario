@@ -5,7 +5,7 @@ import { ui, PREVIEW } from './state.js';
 import { toast } from './layer.js';
 
 const queue = [];
-let running = false, previewWarned = false;
+let running = false, previewWarned = false, lastFailToast = 0;
 export const LARGE_RESULT = 150;
 
 export function previewNotice() {
@@ -36,7 +36,7 @@ async function run() {
     if (queue.length) await new Promise(r => setTimeout(r, 300));
   }
   running = false;
-  if (failed) toast(`No se pudo conectar con Uniandes para ${failed} materia${failed > 1 ? 's' : ''}. Puedes importar el JSON desde «Buscar».`, 'warning');
+  if (failed && Date.now() - lastFailToast > 15000) { lastFailToast = Date.now(); toast('No se pudo conectar con Uniandes para cargar secciones. Puedes importar el JSON desde «Buscar».', 'warning'); }
   else if (empty) toast(`${empty} materia${empty > 1 ? 's' : ''} sin secciones en el periodo consultado.`, 'info');
 }
 
